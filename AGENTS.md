@@ -1,86 +1,82 @@
-\# Visual AI Dungeon Project
-
-
-
-\## Project Vision
-
-
-
-The final project is a Pokemon Mystery Dungeon-inspired 2.5D
-
-dungeon crawler built in Godot 4 using GDScript.
-
-
-
-The game preserves grid-based dungeon gameplay while presenting
-
-the dungeon using 3D environments and 2D character sprites.
-
-
-
-\## Core Architecture
-
-
-
-\[long-term architectural rules]
-
-
-
 \## Current Development Phase
 
 
 
-\### Assignment 3
+\### Assignment 3 MVP
 
 
 
-Current goal:
-
-Build the narrow technical MVP.
+The shared starter architecture is implemented.
 
 
 
-Current scope:
+Currently working:
 
-\- Swordsman player
+\- Hard-coded DungeonData test floor
 
-\- Skeleton enemies
+\- 2D grid to 3D rendering
 
-\- Procedural dungeon
+\- Grid player movement
 
-\- Room elevations
+\- Elevation metadata
 
-\- Ramps
+\- Ramp traversal
 
-\- Fog of war
+\- Sprite3D player architecture
 
-\- Basic pathfinding
+\- Staircase transition signal
 
-\- Basic combat
-
-
-
-Pokemon-specific gameplay is NOT currently being implemented.
+\- Static enemy spawn
 
 
 
-\## Future Direction
+Parallel work now focuses on:
+
+\- Procedural dungeon generation and fog of war
+
+\- Skeleton pathfinding and combat
+
+\- Environment graphics/assets
 
 
 
-After the technical MVP is stable:
+\## Important Architecture Rules
 
-\- Replace prototype presentation with Pokemon sprites
 
-\- Add Pokemon-style attacks
 
-\- Add partner functionality
+DungeonData is authoritative for dungeon topology.
 
-\- Improve environments
 
-\- Add final boss
 
-\- Add audio/VFX
+Gameplay positions use Vector2i grid coordinates.
 
-\- Polish lighting and presentation
+
+
+Do not make raw Vector3 world positions authoritative for gameplay.
+
+
+
+DungeonRenderer is responsible for translating logical positions into
+
+3D presentation.
+
+
+
+Use `get\_entity\_world\_position()` when positioning gameplay entities.
+
+
+
+Player and enemy visuals should ultimately use Sprite3D rather than 3D
+
+character models.
+
+
+
+TestDungeonFactory is temporary reference/demo code.
+
+
+
+Do not expand Assignment 3 into Pokemon-specific functionality unless
+
+explicitly requested.
 
