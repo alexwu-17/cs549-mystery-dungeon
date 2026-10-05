@@ -108,7 +108,7 @@ D - Move right
 
 
 
-1\. Install Godot 4.4.1.
+1\. Install Godot 4.7.2. (The latest complete one currently on Godot front page)
 
 2\. Clone this repository.
 
@@ -116,7 +116,7 @@ D - Move right
 
 4\. Open `scenes/main/main.tscn`.
 
-5\. Run the scene/project.
+5\. Run the scene/project (press F6).
 
 
 
