@@ -1,4 +1,4 @@
-\# CS549 Mystery Dungeon
+# CS549 Mystery Dungeon
 
 
 
@@ -217,4 +217,3 @@ replaced by procedural dungeon generation.
 \- Team integration/debugging
 
 \- Final polish
-
