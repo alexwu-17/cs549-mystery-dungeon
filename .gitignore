@@ -17,3 +17,6 @@ Thumbs.db
 # Temporary/log files
 *.tmp
 *.log
+
+# Andrew personal file
+notes.txt
