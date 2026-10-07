@@ -15,29 +15,24 @@ static func create_2D_array(rows: int, cols: int, value) -> Array[Array]:
 	return grid
 
 static func create_test_dungeon() -> DungeonData:
-	var rng = RandomNumberGenerator.new();
+	# var rng = RandomNumberGenerator.new();
 	
-	var grid = create_2D_array(ROWS, COLS, TileType.WALL);
-	var room_id_grid = create_2D_array(ROWS, COLS, -2);
-	var discovered = create_2D_array(ROWS, COLS, false);
-	var rooms = [];
+	#var grid = create_2D_array(ROWS, COLS, TileType.WALL);
+	#var room_id_grid = create_2D_array(ROWS, COLS, -2);
+	#var discovered = create_2D_array(ROWS, COLS, false);
+	var rooms: Array[Rectangle] = [];
 	
-	var desired_rooms := rng.randi_range(5, 7);
-	for attempts in range(250):
-		var w := rng.randi_range(4, 7);
-		var h := rng.randi_range(4, 6);
-		var x := rng.randi_range(1, COLS - w - 2);
-		var y := rng.randi_range(1, ROWS - h - 2);
-		var candidate := Rectangle.new(x, y, w, h);
-		
+	var candidates: Array[Rectangle] = [
+		Rectangle.new(1, 11, 7, 6),
+		Rectangle.new(6, 8, 5, 6)
+	];
+	
+	# var desired_rooms := rng.randi_range(5, 7);
+	for candidate in candidates:
 		if not rooms.any(func(r): Rectangle.overlaps(r, candidate, 1)):
 			rooms.append(candidate);
-		
-		if len(rooms) >= desired_rooms:
-			break;
-	print(rooms)	
-	
-	 
+			
+	print(rooms)
 	
 	var dungeon := DungeonData.new()
 	return dungeon
