@@ -18,5 +18,5 @@ Thumbs.db
 *.tmp
 *.log
 
-# Andrew personal file
-notes.txt
+# Andrew personal file(s) and folder(s)
+notes-to-self/
