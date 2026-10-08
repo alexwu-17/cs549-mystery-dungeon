@@ -23,7 +23,7 @@ static func carve_room(room: Rectangle, id: int, grid: Array[Array], room_id_gri
 
 static func create_test_dungeon() -> DungeonData:
 	var rng = RandomNumberGenerator.new();
-	var grid := create_2D_array(ROWS, COLS, TileType.WALL);
+	var grid := create_2D_array(ROWS, COLS, TileType.VOID);
 	var room_id_grid := create_2D_array(ROWS, COLS, -2);
 	var discovered := create_2D_array(ROWS, COLS, false);
 	
@@ -44,12 +44,20 @@ static func create_test_dungeon() -> DungeonData:
 		if len(rooms) >= desired_rooms:
 			break;
 	
+	var dungeon := DungeonData.new();
 	
-	var dungeon := DungeonData.new()
+	for row in range(ROWS):
+		for col in range(COLS):
+			dungeon.set_tile(Vector2i(col, row), grid[row][col], 0);
+	
+	dungeon.player_spawn = Vector2i(2, 2);
+	dungeon.set_tile(Vector2i(2, 2), TileType.FLOOR, 0);
 	return dungeon
 
-	# Temporary code for now...
+
+	## Temporary code for now...
 	## Room 1
+	#var dungeon := DungeonData.new();
 	#for x in range(0, 5):
 		#for y in range(0, 5):
 			#dungeon.set_tile(Vector2i(x, y), DungeonData.TileType.FLOOR, 0)
