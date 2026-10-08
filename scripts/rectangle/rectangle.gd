@@ -18,7 +18,9 @@ func _to_string():
 
 
 static func overlaps(a: Rectangle, b: Rectangle, padding: int = 1) -> bool:
-	var isToLeftOrAbove := (
-			a.x + a.w + padding <= b.x or b.x + b.w + padding <= a.x or a.y + a.h + padding <= b.y or b.y + b.h + padding <= a.y
+	return not(
+			a.x + a.w + padding <= b.x 
+			or b.x + b.w + padding <= a.x 
+			or a.y + a.h + padding <= b.y 
+			or b.y + b.h + padding <= a.y
 	);
-	return not isToLeftOrAbove;

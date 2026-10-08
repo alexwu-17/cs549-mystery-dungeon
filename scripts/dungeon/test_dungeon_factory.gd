@@ -29,10 +29,10 @@ static func create_test_dungeon() -> DungeonData:
 	
 	# var desired_rooms := rng.randi_range(5, 7);
 	for candidate in candidates:
-		if not rooms.any(func(r): Rectangle.overlaps(r, candidate, 1)):
+		if not rooms.any(func(r): return Rectangle.overlaps(r, candidate, 1)):
 			rooms.append(candidate);
-			
-	print(rooms)
+	
+	print(rooms);
 	
 	var dungeon := DungeonData.new()
 	return dungeon
