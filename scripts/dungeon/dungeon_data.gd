@@ -11,6 +11,8 @@ enum TileType {
 	STAIRS
 }
 
+const CORRIDOR_VAL = -1;
+
 
 var tiles: Dictionary = {}
 var elevations: Dictionary = {}
