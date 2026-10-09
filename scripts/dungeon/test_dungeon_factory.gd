@@ -10,6 +10,7 @@ const COLS = 30;
 static var grid: Array[Array] = [];
 static var room_id_grid: Array[Array] = [];
 static var discovered: Array[Array] = [];
+static var rng = RandomNumberGenerator.new();
 
 static func create_2D_array(rows: int, cols: int, value) -> Array[Array]:
 	var arr_2D: Array[Array] = []
@@ -27,11 +28,13 @@ static func carve_room(room: Rectangle, id: int) -> void:
 			TestDungeonFactory.grid[y][x] = TileType.FLOOR;
 			TestDungeonFactory.room_id_grid[y][x] = id;
 
+
 static func center(room: Rectangle) -> Point:
-	# Yes, integer division is intentional here, not sure why it triggers a warning!
-	#warning-ignore:integer_division
+	# Yes, integer division is intentional here...
+	@warning_ignore("integer_division")
 	return Point.new(room.x + room.w / 2, room.y + room.h / 2);
-	
+
+
 static func carve(cx: int, cy: int) -> void:
 	TestDungeonFactory.grid[cy][cx] = TileType.FLOOR;
 	# Preserve RoomID if corridor passes through
@@ -50,9 +53,8 @@ static func carve_corridor(x1: int, y1: int, x2: int, y2: int) -> void:
 		y += signi(y2 - y);
 	carve(x, y);
 
+
 static func create_test_dungeon() -> DungeonData:
-	var rng = RandomNumberGenerator.new();
-	
 	TestDungeonFactory.grid = create_2D_array(ROWS, COLS, TileType.VOID);
 	TestDungeonFactory.room_id_grid = create_2D_array(ROWS, COLS, -2);
 	TestDungeonFactory.discovered = create_2D_array(ROWS, COLS, false);
@@ -78,8 +80,12 @@ static func create_test_dungeon() -> DungeonData:
 	for i in range(1, len(rooms)):
 		var a := center(rooms[i - 1]);
 		var b := center(rooms[1]);
-		carve_corridor(a.x, a.y, b.x, a.y);
-		carve_corridor(b.x, a.y, b.x, b.y);
+		if (rng.randi() % 2 == 0):
+			carve_corridor(a.x, a.y, b.x, a.y);
+			carve_corridor(b.x, a.y, b.x, b.y);
+		else:
+			carve_corridor(a.x, a.y, a.x, b.y);
+			carve_corridor(a.x, b.y, b.x, b.y);
 	
 	# Convert to dictionary representation
 	var dungeon := DungeonData.new();
@@ -87,8 +93,8 @@ static func create_test_dungeon() -> DungeonData:
 		for col in range(COLS):
 			dungeon.set_tile(Vector2i(col, row), grid[row][col], 0);
 	
-	dungeon.player_spawn = Vector2i(2, 2);
-	dungeon.set_tile(Vector2i(2, 2), TileType.FLOOR, 0);
+	var spawn_point = center(rooms[0]);
+	dungeon.player_spawn = Vector2i(spawn_point.x, spawn_point.y);
 	return dungeon
 
 
