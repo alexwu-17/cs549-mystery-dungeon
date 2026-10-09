@@ -43,15 +43,21 @@ static func carve(cx: int, cy: int) -> void:
 
 
 static func carve_corridor(x1: int, y1: int, x2: int, y2: int) -> void:
+	var carve_func := func(cx: int, cy: int) -> void:
+		TestDungeonFactory.grid[cy][cx] = TileType.FLOOR;
+		# Preserve RoomID if corridor passes through
+		if TestDungeonFactory.room_id_grid[cy][cx] < 0:
+			room_id_grid[cy][cx] = CORRIDOR_VAL;
+	
 	var x = x1;
 	var y = y1;
 	while x != x2:
-		TestDungeonFactory.carve(x, y);
+		carve_func.call(x, y);
 		x += signi(x2 - x);
 	while y != y2:
-		carve(x, y);
+		carve_func.call(x, y);
 		y += signi(y2 - y);
-	carve(x, y);
+	carve_func.call(x, y);
 
 
 static func create_test_dungeon() -> DungeonData:
