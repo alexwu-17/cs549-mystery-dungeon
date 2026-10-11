@@ -2,10 +2,12 @@ class_name Player
 extends Node3D
 
 signal stairs_reached
+signal moved
 
 var grid_position: Vector2i = Vector2i.ZERO ## The player's real position on a 2D grid
 var dungeon_data: DungeonData
 var dungeon_renderer: DungeonRenderer
+var is_tile_occupied: Callable
 
 
 func setup(
@@ -43,6 +45,8 @@ func _unhandled_input(event: InputEvent) -> void:
 ## Movement functions below
 
 func try_move(direction: Vector2i) -> void:
+	if dungeon_data == null or absi(direction.x) + absi(direction.y) != 1:
+		return
 	var target_position := grid_position + direction
 	var walkable := dungeon_data.is_walkable(target_position)
 
@@ -57,6 +61,9 @@ func try_move(direction: Vector2i) -> void:
 
 	if not walkable:
 		return
+	if is_tile_occupied.is_valid() and is_tile_occupied.call(target_position):
+		print("MOVE BLOCKED: skeleton at ", target_position)
+		return
 
 	grid_position = target_position
 	update_world_position()
@@ -66,3 +73,5 @@ func try_move(direction: Vector2i) -> void:
 	if dungeon_data.get_tile(grid_position) == DungeonData.TileType.STAIRS:
 		print("STAIRS REACHED at ", grid_position)
 		stairs_reached.emit()
+		return
+	moved.emit()
