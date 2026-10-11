@@ -34,6 +34,8 @@ func validate() -> void:
 	assert(moves == 2 and first.grid_position == Vector2i(3, 1))
 	main.player.try_move(Vector2i.RIGHT)
 	assert(moves == 2 and main.player.grid_position == Vector2i(2, 1))
+	assert(first.health.current == 6 and main.player.health.current == 20)
+	assert(first.grid_position == Vector2i(3, 1) and second.grid_position == Vector2i(4, 1))
 	main.player.try_move(Vector2i.DOWN)
 	assert(moves == 3)
 	assert(main.enemy_occupancy.size() == 2)

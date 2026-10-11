@@ -1,0 +1,136 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/player_hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="2_map"]
+
+[sub_resource type="StyleBoxFlat" id="Style_red"]
+bg_color = Color(0.7, 0.12, 0.16, 1)
+
+[sub_resource type="StyleBoxFlat" id="Style_green"]
+bg_color = Color(0.16, 0.78, 0.34, 1)
+
+[sub_resource type="StyleBoxFlat" id="Style_panel"]
+bg_color = Color(0.035, 0.05, 0.075, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="Screen" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopBar" type="MarginContainer" parent="Screen"]
+layout_mode = 1
+anchor_right = 1.0
+offset_bottom = 54.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 8
+
+[node name="Row" type="HBoxContainer" parent="Screen/TopBar"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="HPBar" type="ProgressBar" parent="Screen/TopBar/Row"]
+custom_minimum_size = Vector2(180, 20)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_styles/background = SubResource("Style_red")
+theme_override_styles/fill = SubResource("Style_green")
+max_value = 20.0
+value = 20.0
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="Screen/TopBar/Row"]
+custom_minimum_size = Vector2(112, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 20
+text = "20 / 20 HP"
+
+[node name="Spacer" type="Control" parent="Screen/TopBar/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="FloorLabel" type="Label" parent="Screen/TopBar/Row"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 20
+text = "Floor #1"
+
+[node name="MinimapPanel" type="PanelContainer" parent="Screen"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -238.0
+offset_top = 64.0
+offset_right = -18.0
+offset_bottom = 228.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Style_panel")
+
+[node name="Minimap" type="Control" parent="Screen/MinimapPanel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("2_map")
+
+[node name="GameOver" type="ColorRect" parent="Screen"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="Center" type="CenterContainer" parent="Screen/GameOver"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Text" type="VBoxContainer" parent="Screen/GameOver/Center"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Screen/GameOver/Center/Text"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.15, 0.15, 1)
+theme_override_font_sizes/font_size = 64
+text = "Game Over"
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="Screen/GameOver/Center/Text"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Press R to restart the game"
+horizontal_alignment = 1

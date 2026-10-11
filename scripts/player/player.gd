@@ -1,8 +1,20 @@
 class_name Player
 extends Node3D
 
+const HealthScript = preload("res://scripts/entities/health.gd")
+
 signal stairs_reached
 signal moved
+signal attack_requested(target: Vector2i)
+
+@export var maximum_hp: int = 20
+@export var attack_damage: int = 3
+
+var health: HealthScript = HealthScript.new()
+var level: int = 5
+var gameplay_enabled: bool = true
+var facing: Vector2i = Vector2i.DOWN
+var damage_tween: Tween
 
 var grid_position: Vector2i = Vector2i.ZERO ## The player's real position on a 2D grid
 var dungeon_data: DungeonData
@@ -29,6 +41,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	if dungeon_data == null:
 		return
+	if event.is_action_pressed("basic_attack"):
+		basic_attack()
+		get_viewport().set_input_as_handled()
+		return
 
 	if event.is_action_pressed("move_up"):
 		try_move(Vector2i(0, -1))
@@ -45,10 +61,11 @@ func _unhandled_input(event: InputEvent) -> void:
 ## Movement functions below
 
 func try_move(direction: Vector2i) -> void:
-	if dungeon_data == null or absi(direction.x) + absi(direction.y) != 1:
+	if not gameplay_enabled or health.current == 0 or dungeon_data == null or absi(direction.x) + absi(direction.y) != 1:
 		return
+	facing = direction
 	var target_position := grid_position + direction
-	var walkable := dungeon_data.is_walkable(target_position)
+	var walkable := dungeon_data.can_traverse(grid_position, target_position)
 
 	print(
 		"MOVE: ",
@@ -75,3 +92,20 @@ func try_move(direction: Vector2i) -> void:
 		stairs_reached.emit()
 		return
 	moved.emit()
+
+
+func basic_attack() -> void:
+	if not gameplay_enabled or health.current == 0 or dungeon_data == null:
+		return
+	attack_requested.emit(grid_position + facing)
+
+
+func receive_damage(amount: int) -> void:
+	health.damage(amount)
+	print("PLAYER HP: ", health.current, "/", health.maximum)
+	if has_node("PlayerSprite"):
+		if damage_tween != null:
+			damage_tween.kill()
+		$PlayerSprite.modulate = Color(1, 0.3, 0.3)
+		damage_tween = create_tween()
+		damage_tween.tween_property($PlayerSprite, "modulate", Color.WHITE, 0.15)
