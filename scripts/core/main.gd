@@ -2,6 +2,8 @@ extends Node3D
 
 const TEST_ENEMY_SCENE := preload("res://scenes/enemies/test_enemy.tscn")
 
+@export var use_elevation_test: bool = false
+
 @onready var dungeon_renderer: DungeonRenderer = $DungeonRenderer
 @onready var player: Player = $Player
 @onready var entities: Node3D = $Entities
@@ -14,8 +16,17 @@ func _ready() -> void:
 	load_test_floor()
 
 
+func _process(_delta: float) -> void:
+	# Keep the larger procedural floor visible while retaining the fixture camera.
+	if not use_elevation_test:
+		$Camera3D.position = player.position + Vector3(0, 10, 8)
+
+
 func load_test_floor() -> void:
-	dungeon = TestDungeonFactory.create_test_dungeon()
+	if use_elevation_test:
+		dungeon = TestDungeonFactory.create_elevation_test_dungeon()
+	else:
+		dungeon = TestDungeonFactory.create_test_dungeon()
 
 	dungeon_renderer.render_dungeon(dungeon)
 	spawn_test_enemies()

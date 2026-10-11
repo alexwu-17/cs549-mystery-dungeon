@@ -28,8 +28,6 @@ func render_dungeon(data: DungeonData) -> void:
 		else:
 			create_floor_tile(grid_position)
 
-		create_floor_tile(grid_position)
-
 
 func create_floor_tile(grid_position: Vector2i) -> void:
 	var mesh_instance := MeshInstance3D.new()

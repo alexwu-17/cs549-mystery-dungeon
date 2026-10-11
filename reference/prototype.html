@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9/24 Presentation Mockup</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #111b2e;
+      --panel-2: #17243a;
+      --border: #2c3d59;
+      --text: #edf4ff;
+      --muted: #aab8cf;
+      --floor: #52657e;
+      --floor-seen: #5f7189;
+      --wall: #26354b;
+      --player: #3fa9f5;
+      --enemy: #e05555;
+      --stairs: #45d17a;
+      --corridor: #485a72;
+      --accent: #7cc8ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0a1020, #0b1526);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 38px);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--panel-2);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    button:hover { background: #20304a; }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      gap: 18px;
+    }
+
+    .game-panel, .side-panel {
+      background: rgba(17, 27, 46, 0.94);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .game-wrap {
+      padding: 14px;
+    }
+
+    .below-game-log {
+      margin-top: 12px;
+      background: #0a1220;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .below-game-log h2 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #050910;
+      border-radius: 10px;
+      image-rendering: pixelated;
+    }
+
+    .side-panel {
+      padding: 16px;
+    }
+
+    .section + .section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .section h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    #minimap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #050910;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      font-size: 14px;
+    }
+
+    .stat-label { color: var(--muted); }
+
+    .log {
+      min-height: 104px;
+      max-height: 160px;
+      overflow: auto;
+      background: #0a1220;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .help {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .legend {
+      display: grid;
+      gap: 7px;
+      font-size: 13px;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .touch-controls {
+      display: none;
+      margin-top: 14px;
+      grid-template-columns: repeat(3, 56px);
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .touch-controls button {
+      width: 56px;
+      height: 48px;
+      padding: 0;
+    }
+
+    .touch-controls .spacer { visibility: hidden; }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      .side-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .section + .section { margin-top: 0; padding-top: 0; border-top: 0; }
+      .touch-controls { display: grid; }
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 12px; }
+      .side-panel { grid-template-columns: 1fr; }
+      .section + .section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+<div class="app" id="app" tabindex="0">
+  <div class="title-row">
+    <div>
+      <h1>9/24 Presentation Mockup</h1>
+      <div class="subtitle">Make your way through the dungeon, defeat enemies, steal life on kills, and find the staircases. Defeat the boss at the end to complete the dungeon!</div>
+    </div>
+    <div class="controls">
+      <button id="newDungeonBtn" type="button">New Dungeon</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <section class="game-panel">
+      <div class="game-wrap">
+        <canvas id="gameCanvas" width="600" height="600" aria-label="Dungeon game view"></canvas>
+
+        <div class="touch-controls" aria-label="Touch controls">
+          <span class="spacer"></span>
+          <button type="button" data-move="up">↑</button>
+          <span class="spacer"></span>
+          <button type="button" data-move="left">←</button>
+          <button type="button" id="attackBtn">Attack</button>
+          <button type="button" data-move="right">→</button>
+          <span class="spacer"></span>
+          <button type="button" data-move="down">↓</button>
+          <span class="spacer"></span>
+        </div>
+
+        <div class="below-game-log">
+          <h2>Message Log</h2>
+          <div class="log" id="log" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side-panel">
+      <div class="section">
+        <h2>Progressive Map</h2>
+        <canvas id="minimap" width="260" height="260" aria-label="Explored dungeon minimap"></canvas>
+      </div>
+
+      <div class="section">
+        <h2>Status</h2>
+        <div class="stats">
+          <div class="stat-label">HP</div><div id="hpValue">22 / 22</div>
+          <div class="stat-label">Floor</div><div id="floorValue">1</div>
+          <div class="stat-label">Lifesteal</div><div>+2 HP / kill</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Controls</h2>
+        <div class="help">
+          <strong>Move:</strong> WASD or arrow keys<br>
+          <strong>Attack:</strong> Space<br><br>
+          Pressing Attack always advances the turn, even if no enemy is hit. This lets you stay in place while enemies move.<br><br>
+          Rooms light up completely when you enter them. If a corridor tile is immediately adjacent to the player while they are in a room, that corridor tile is also lit. In corridors, only the immediately surrounding tiles are clearly lit, and that light does not spill into neighboring rooms.<br><br>          Floors 1–4 are procedural. Floor 5 is the final boss encounter.
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Legend</h2>
+        <div class="legend">
+          <div class="legend-row"><span class="dot" style="background:var(--player)"></span> Swordsman</div>
+          <div class="legend-row"><span class="dot" style="background:var(--enemy)"></span> Skeleton</div>
+          <div class="legend-row"><span style="display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;font-size:15px;">▰</span> Staircase</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(() => {
+  const COLS = 30;
+  const ROWS = 22;
+  const TILE = 30;
+  const ROOM_MIN = 4;
+  const ROOM_MAX = 7;
+  const ENEMY_COUNT = 3;
+  const DETECT_RANGE = 7;
+  const VIEW_COLS = 10;
+  const VIEW_ROWS = 10;
+
+  const TILE_WALL = 0;
+  const TILE_FLOOR = 1;
+
+  const gameCanvas = document.getElementById('gameCanvas');
+  const g = gameCanvas.getContext('2d');
+  const miniCanvas = document.getElementById('minimap');
+  const m = miniCanvas.getContext('2d');
+  const logEl = document.getElementById('log');
+  const hpValue = document.getElementById('hpValue');
+  const floorValue = document.getElementById('floorValue');
+  const newDungeonBtn = document.getElementById('newDungeonBtn');
+  const attackBtn = document.getElementById('attackBtn');
+  const app = document.getElementById('app');
+
+  let grid = [];
+  let rooms = [];
+  let roomIdGrid = [];
+  let discovered = [];
+  let player = null;
+  let enemies = [];
+  let stairs = null;
+  let floor = 1;
+  let gameOver = false;
+  let boss = null;
+  let bossFloor = false;
+  let playerAttackUntil = 0;
+  let enemyAttackUntil = 0;
+  let enemyAttackPos = null;
+
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function log(msg) {
+    const line = document.createElement('div');
+    line.textContent = msg;
+    logEl.prepend(line);
+  }
+
+  function blank2D(rows, cols, value) {
+    return Array.from({ length: rows }, () =>
+      Array.from({ length: cols }, () => value)
+    );
+  }
+
+  function rectanglesOverlap(a, b, padding = 1) {
+    return !(
+      a.x + a.w + padding <= b.x ||
+      b.x + b.w + padding <= a.x ||
+      a.y + a.h + padding <= b.y ||
+      b.y + b.h + padding <= a.y
+    );
+  }
+
+  function carveRoom(room, id) {
+    for (let y = room.y; y < room.y + room.h; y++) {
+      for (let x = room.x; x < room.x + room.w; x++) {
+        grid[y][x] = TILE_FLOOR;
+        roomIdGrid[y][x] = id;
+      }
+    }
+  }
+
+  function carveCorridor(x1, y1, x2, y2) {
+    let x = x1;
+    let y = y1;
+
+    const carve = (cx, cy) => {
+      grid[cy][cx] = TILE_FLOOR;
+      // Preserve a room's ID if the corridor route passes through it.
+      // Only previously unassigned/non-room tiles become corridor tiles.
+      if (roomIdGrid[cy][cx] < 0) {
+        roomIdGrid[cy][cx] = -1;
+      }
+    };
+
+    while (x !== x2) {
+      carve(x, y);
+      x += Math.sign(x2 - x);
+    }
+    while (y !== y2) {
+      carve(x, y);
+      y += Math.sign(y2 - y);
+    }
+    carve(x, y);
+  }
+
+  function center(room) {
+    return {
+      x: Math.floor(room.x + room.w / 2),
+      y: Math.floor(room.y + room.h / 2)
+    };
+  }
+
+  function generateDungeon() {
+    if (floor >= 5) {
+      generateBossFloor();
+      return;
+    }
+
+    bossFloor = false;
+    boss = null;
+    grid = blank2D(ROWS, COLS, TILE_WALL);
+    roomIdGrid = blank2D(ROWS, COLS, -2);
+    discovered = blank2D(ROWS, COLS, false);
+    rooms = [];
+    enemies = [];
+    gameOver = false;
+
+    const desiredRooms = randInt(5, 7);
+    let attempts = 0;
+
+    while (rooms.length < desiredRooms && attempts < 250) {
+      attempts++;
+      const w = randInt(4, 7);
+      const h = randInt(4, 6);
+      const x = randInt(1, COLS - w - 2);
+      const y = randInt(1, ROWS - h - 2);
+      const candidate = { x, y, w, h };
+
+      if (rooms.some(r => rectanglesOverlap(candidate, r, 1))) continue;
+
+      rooms.push(candidate);
+      carveRoom(candidate, rooms.length - 1);
+    }
+
+    if (rooms.length < 4) {
+      generateDungeon();
+      return;
+    }
+
+    for (let i = 1; i < rooms.length; i++) {
+      const a = center(rooms[i - 1]);
+      const b = center(rooms[i]);
+      if (Math.random() < 0.5) {
+        carveCorridor(a.x, a.y, b.x, a.y);
+        carveCorridor(b.x, a.y, b.x, b.y);
+      } else {
+        carveCorridor(a.x, a.y, a.x, b.y);
+        carveCorridor(a.x, b.y, b.x, b.y);
+      }
+    }
+
+    const start = center(rooms[0]);
+    const carriedHp = player ? player.hp : 22;
+    player = { x: start.x, y: start.y, hp: carriedHp, maxHp: 22, facing: 'down' };
+
+    // Random staircase placement on a valid room tile, excluding player spawn.
+    const stairCandidates = [];
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (roomIdGrid[y][x] >= 0 && !(x === player.x && y === player.y)) {
+          stairCandidates.push({ x, y });
+        }
+      }
+    }
+    stairs = stairCandidates[randInt(0, stairCandidates.length - 1)];
+
+    revealAt(player.x, player.y);
+
+    let openTiles = [];
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (grid[y][x] === TILE_FLOOR &&
+            !(x === player.x && y === player.y) &&
+            !(x === stairs.x && y === stairs.y)) {
+          openTiles.push({ x, y });
+        }
+      }
+    }
+
+    for (let i = 0; i < ENEMY_COUNT && openTiles.length; i++) {
+      let idx = randInt(0, openTiles.length - 1);
+      let spot = openTiles.splice(idx, 1)[0];
+      if (manhattan(spot, player) < 6) {
+        i--;
+        continue;
+      }
+      enemies.push({ x: spot.x, y: spot.y, hp: 2, facing: 'down' });
+    }
+
+    logEl.innerHTML = '';
+    log(`Floor ${floor} generated. Find the staircase.`);
+    updateUI();
+    drawAll();
+  }
+
+  function generateBossFloor() {
+    bossFloor = true;
+    enemies = [];
+    rooms = [{ x: 8, y: 5, w: 14, h: 12 }];
+    grid = blank2D(ROWS, COLS, TILE_WALL);
+    roomIdGrid = blank2D(ROWS, COLS, -2);
+    discovered = blank2D(ROWS, COLS, false);
+    gameOver = false;
+    stairs = null;
+
+    carveRoom(rooms[0], 0);
+
+    // Player at lower center, boss at upper center occupying a 3x3 footprint.
+    const carriedHp = player ? player.hp : 22;
+    player = { x: 15, y: 14, hp: carriedHp, maxHp: 22, facing: 'up' };
+    boss = {
+      x: 15,
+      y: 8,
+      hp: 30,
+      maxHp: 30,
+      state: 'hunt',     // hunt -> charge -> cooldown -> hunt
+      facing: 'down'
+    };
+
+    for (let y = rooms[0].y; y < rooms[0].y + rooms[0].h; y++) {
+      for (let x = rooms[0].x; x < rooms[0].x + rooms[0].w; x++) {
+        discovered[y][x] = true;
+      }
+    }
+
+    logEl.innerHTML = '';
+    log('Big Alien has appeared!');
+    log('Big Alien is hunting the swordsman.');
+    updateUI();
+    drawAll();
+  }
+
+  function revealAt(x, y) {
+    const roomId = roomIdGrid[y][x];
+
+    if (roomId >= 0) {
+      const r = rooms[roomId];
+      for (let yy = r.y; yy < r.y + r.h; yy++) {
+        for (let xx = r.x; xx < r.x + r.w; xx++) {
+          discovered[yy][xx] = true;
+        }
+      }
+
+      // reveal door-adjacent corridor tiles too
+      for (let yy = Math.max(0, r.y - 1); yy <= Math.min(ROWS - 1, r.y + r.h); yy++) {
+        for (let xx = Math.max(0, r.x - 1); xx <= Math.min(COLS - 1, r.x + r.w); xx++) {
+          if (grid[yy][xx] === TILE_FLOOR) discovered[yy][xx] = true;
+        }
+      }
+    } else {
+      const dirs = [[0,0],[1,0],[-1,0],[0,1],[0,-1]];
+      for (const [dx,dy] of dirs) {
+        const nx = x + dx, ny = y + dy;
+        if (inside(nx,ny) && grid[ny][nx] === TILE_FLOOR) {
+          discovered[ny][nx] = true;
+        }
+      }
+    }
+  }
+
+  function inside(x, y) {
+    return x >= 0 && y >= 0 && x < COLS && y < ROWS;
+  }
+
+  function occupiedByEnemy(x, y) {
+    if (bossFloor && boss && boss.hp > 0 && bossOccupies(x, y)) return true;
+    return enemies.some(e => e.hp > 0 && e.x === x && e.y === y);
+  }
+
+  function bossOccupies(x, y) {
+    if (!boss) return false;
+    return Math.abs(x - boss.x) <= 1 && Math.abs(y - boss.y) <= 1;
+  }
+
+  function facingFromDelta(dx, dy, fallback = 'down') {
+    if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? 'right' : 'left';
+    if (dy !== 0) return dy > 0 ? 'down' : 'up';
+    if (dx !== 0) return dx > 0 ? 'right' : 'left';
+    return fallback;
+  }
+
+  function facingVector(facing) {
+    if (facing === 'up') return { x: 0, y: -1 };
+    if (facing === 'down') return { x: 0, y: 1 };
+    if (facing === 'left') return { x: -1, y: 0 };
+    return { x: 1, y: 0 };
+  }
+
+  function tileInFront(actor) {
+    const v = facingVector(actor.facing);
+    return { x: actor.x + v.x, y: actor.y + v.y };
+  }
+
+  function manhattan(a, b) {
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  }
+
+  function movePlayer(dx, dy) {
+    if (gameOver) return;
+
+    player.facing = facingFromDelta(dx, dy, player.facing);
+
+    const nx = player.x + dx;
+    const ny = player.y + dy;
+
+    if (!inside(nx,ny) || grid[ny][nx] !== TILE_FLOOR) {
+      drawAll();
+      return;
+    }
+    if (occupiedByEnemy(nx, ny)) {
+      log('An enemy blocks that tile. Face it and press Space to attack.');
+      drawAll();
+      return;
+    }
+
+    player.x = nx;
+    player.y = ny;
+    revealAt(nx, ny);
+
+    if (!bossFloor && stairs && nx === stairs.x && ny === stairs.y) {
+      floor++;
+      floorValue.textContent = floor;
+      log('You reached the staircase! Generating the next floor...');
+      generateDungeon();
+      return;
+    }
+
+    if (bossFloor) {
+      bossTurn();
+    } else {
+      enemyTurn();
+    }
+    updateUI();
+    drawAll();
+  }
+
+  function attack() {
+    if (gameOver) return;
+
+    playerAttackUntil = performance.now() + 180;
+    const target = tileInFront(player);
+
+    if (bossFloor && boss && boss.hp > 0) {
+      if (bossOccupies(target.x, target.y)) {
+        boss.hp -= 3;
+        log('The swordsman slashes Big Alien for 3 damage.');
+        if (boss.hp <= 0) {
+          boss.hp = 0;
+          log('Big Alien has been defeated!');
+          gameOver = true;
+          updateUI();
+          drawAll();
+          scheduleAnimationRefresh();
+          return;
+        }
+      } else {
+        log('The swordsman swings at empty space.');
+      }
+
+      bossTurn();
+      updateUI();
+      drawAll();
+      scheduleAnimationRefresh();
+      return;
+    }
+
+    const enemy = enemies.find(e => e.hp > 0 && e.x === target.x && e.y === target.y);
+
+    if (!enemy) {
+      log('The swordsman swings at empty space.');
+      enemyTurn();
+      updateUI();
+      drawAll();
+      scheduleAnimationRefresh();
+      return;
+    }
+
+    enemy.hp -= 3;
+    log('The swordsman slashes for 3 damage.');
+
+    if (enemy.hp <= 0) {
+      const before = player.hp;
+      player.hp = Math.min(player.maxHp, player.hp + 2);
+      const healed = player.hp - before;
+      log(healed > 0 ? `Skeleton defeated. Lifesteal restores ${healed} HP.` : 'Skeleton defeated.');
+    }
+
+    enemies = enemies.filter(e => e.hp > 0);
+    enemyTurn();
+    updateUI();
+    drawAll();
+    scheduleAnimationRefresh();
+  }
+
+  function enemyTurn() {
+    const living = enemies.filter(e => e.hp > 0);
+
+    for (const enemy of living) {
+      if (gameOver) break;
+
+      if (manhattan(enemy, player) === 1) {
+        enemy.facing = facingFromDelta(player.x - enemy.x, player.y - enemy.y, enemy.facing);
+        const front = tileInFront(enemy);
+
+        if (front.x === player.x && front.y === player.y) {
+          enemyAttackUntil = performance.now() + 180;
+          enemyAttackPos = { x: enemy.x, y: enemy.y };
+          player.hp -= 4;
+          log('Skeleton swipes for 4 damage.');
+          if (player.hp <= 0) {
+            player.hp = 0;
+            gameOver = true;
+            log('You were defeated. Click New Dungeon to restart.');
+            break;
+          }
+        }
+        continue;
+      }
+
+      if (manhattan(enemy, player) <= DETECT_RANGE) {
+        const next = bfsNextStep(enemy, player);
+        if (next && !(next.x === player.x && next.y === player.y) &&
+            !occupiedByOtherEnemy(next.x, next.y, enemy)) {
+          enemy.facing = facingFromDelta(next.x - enemy.x, next.y - enemy.y, enemy.facing);
+          enemy.x = next.x;
+          enemy.y = next.y;
+        }
+      }
+    }
+  }
+
+  function bossTurn() {
+    if (!bossFloor || !boss || boss.hp <= 0 || gameOver) return;
+
+    if (boss.state === 'charge') {
+      log('Big Alien unleashes its charged attack!');
+      const hitTiles = bossAttackTiles();
+
+      if (hitTiles.some(t => t.x === player.x && t.y === player.y)) {
+        player.hp -= 18;
+        log('The blast hits the swordsman for 18 damage!');
+        if (player.hp <= 0) {
+          player.hp = 0;
+          gameOver = true;
+          log('You were defeated by Big Alien.');
+        }
+      } else {
+        log('The swordsman dodges the blast.');
+      }
+
+      boss.state = 'cooldown';
+      log('Big Alien must recharge next turn.');
+      return;
+    }
+
+    if (boss.state === 'cooldown') {
+      log('Big Alien is recharging.');
+      boss.state = 'hunt';
+      boss.facing = facingFromDelta(player.x - boss.x, player.y - boss.y, boss.facing);
+      return;
+    }
+
+    // Hunt state: face the player, charge only if the player is currently
+    // inside the alien's 3-wide, 3-deep frontal attack zone.
+    boss.facing = facingFromDelta(player.x - boss.x, player.y - boss.y, boss.facing);
+
+    if (bossAttackTiles().some(t => t.x === player.x && t.y === player.y)) {
+      boss.state = 'charge';
+      log('Big Alien is charging an attack.');
+      return;
+    }
+
+    moveBossTowardPlayer();
+  }
+
+  function bossAttackTiles() {
+    const tiles = [];
+    const f = facingVector(boss.facing);
+    const side = { x: -f.y, y: f.x };
+
+    // The boss occupies a 3x3 body. Its strike hits only the single 1x3 row
+    // immediately in front of that body.
+    for (let width = -1; width <= 1; width++) {
+      tiles.push({
+        x: boss.x + f.x * 2 + side.x * width,
+        y: boss.y + f.y * 2 + side.y * width
+      });
+    }
+    return tiles;
+  }
+
+  function bossCanOccupy(cx, cy) {
+    for (let y = cy - 1; y <= cy + 1; y++) {
+      for (let x = cx - 1; x <= cx + 1; x++) {
+        if (!inside(x, y) || grid[y][x] !== TILE_FLOOR) return false;
+        if (x === player.x && y === player.y) return false;
+      }
+    }
+    return true;
+  }
+
+  function moveBossTowardPlayer() {
+    const dx = player.x - boss.x;
+    const dy = player.y - boss.y;
+
+    const candidates = [];
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      if (dx !== 0) candidates.push({ x: boss.x + Math.sign(dx), y: boss.y });
+      if (dy !== 0) candidates.push({ x: boss.x, y: boss.y + Math.sign(dy) });
+    } else {
+      if (dy !== 0) candidates.push({ x: boss.x, y: boss.y + Math.sign(dy) });
+      if (dx !== 0) candidates.push({ x: boss.x + Math.sign(dx), y: boss.y });
+    }
+
+    for (const c of candidates) {
+      if (bossCanOccupy(c.x, c.y)) {
+        boss.facing = facingFromDelta(c.x - boss.x, c.y - boss.y, boss.facing);
+        boss.x = c.x;
+        boss.y = c.y;
+        log('Big Alien advances toward the swordsman.');
+        return;
+      }
+    }
+
+    log('Big Alien turns toward the swordsman.');
+  }
+
+  function occupiedByOtherEnemy(x, y, self) {
+    return enemies.some(e => e !== self && e.hp > 0 && e.x === x && e.y === y);
+  }
+
+  function bfsNextStep(start, goal) {
+    const q = [{ x: start.x, y: start.y }];
+    const visited = blank2D(ROWS, COLS, false);
+    const prev = blank2D(ROWS, COLS, null);
+    visited[start.y][start.x] = true;
+    const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+
+    while (q.length) {
+      const cur = q.shift();
+      if (cur.x === goal.x && cur.y === goal.y) break;
+
+      for (const [dx,dy] of dirs) {
+        const nx = cur.x + dx, ny = cur.y + dy;
+        if (!inside(nx,ny) || visited[ny][nx]) continue;
+        if (grid[ny][nx] !== TILE_FLOOR) continue;
+        if (occupiedByEnemy(nx, ny) && !(nx === start.x && ny === start.y)) continue;
+
+        visited[ny][nx] = true;
+        prev[ny][nx] = cur;
+        q.push({ x: nx, y: ny });
+      }
+    }
+
+    if (!visited[goal.y][goal.x]) return null;
+
+    let cur = { x: goal.x, y: goal.y };
+    let p = prev[cur.y][cur.x];
+
+    while (p && !(p.x === start.x && p.y === start.y)) {
+      cur = p;
+      p = prev[cur.y][cur.x];
+    }
+
+    return cur;
+  }
+
+
+  function playerRoomId() {
+    if (!player) return -2;
+    return roomIdGrid[player.y][player.x];
+  }
+
+  function isAdjacentCorridorFromRoom(x, y) {
+    if (!player) return false;
+    const rid = playerRoomId();
+    if (rid < 0) return false;
+    if (!inside(x, y) || roomIdGrid[y][x] !== -1) return false;
+
+    const dx = Math.abs(x - player.x);
+    const dy = Math.abs(y - player.y);
+    return dx <= 1 && dy <= 1;
+  }
+
+  function isBrightTile(x, y) {
+    if (!inside(x, y) || !player) return false;
+
+    const rid = playerRoomId();
+
+    // In a room: light the whole room. Additionally, if a corridor tile is
+    // immediately adjacent to the player, light just that corridor tile too.
+    if (rid >= 0) {
+      return roomIdGrid[y][x] === rid || isAdjacentCorridorFromRoom(x, y);
+    }
+
+    // In a corridor: only show the immediate surrounding corridor area, and do
+    // not let that visibility spill into room tiles.
+    if (rid === -1) {
+      if (roomIdGrid[y][x] >= 0) return false;
+      const dx = Math.abs(x - player.x);
+      const dy = Math.abs(y - player.y);
+      return dx <= 1 && dy <= 1;
+    }
+
+    return false;
+  }
+
+  function isDimTile(x, y) {
+    return inside(x, y);
+  }
+
+  function drawAll() {
+    drawGame();
+    drawMinimap();
+  }
+
+  function drawGame() {
+    g.clearRect(0,0,gameCanvas.width,gameCanvas.height);
+
+    const viewTileW = gameCanvas.width / VIEW_COLS;
+    const viewTileH = gameCanvas.height / VIEW_ROWS;
+    const drawTile = Math.min(viewTileW, viewTileH);
+
+    let camX = Math.floor(player.x - VIEW_COLS / 2);
+    let camY = Math.floor(player.y - VIEW_ROWS / 2);
+    camX = Math.max(0, Math.min(COLS - VIEW_COLS, camX));
+    camY = Math.max(0, Math.min(ROWS - VIEW_ROWS, camY));
+
+    for (let sy = 0; sy < VIEW_ROWS; sy++) {
+      for (let sx = 0; sx < VIEW_COLS; sx++) {
+        const x = camX + sx;
+        const y = camY + sy;
+        const px = sx * drawTile;
+        const py = sy * drawTile;
+
+        if (!inside(x,y)) continue;
+
+        const bright = isBrightTile(x, y);
+        const dim = isDimTile(x, y);
+
+        if (!dim) {
+          g.fillStyle = '#03060b';
+          g.fillRect(px, py, drawTile, drawTile);
+          continue;
+        }
+
+        // Show the map layout everywhere in the current viewport, but only
+        // the player's room or local radius is brightly lit.
+        if (grid[y][x] === TILE_FLOOR) {
+          if (bright) {
+            g.fillStyle = roomIdGrid[y][x] >= 0 ? '#607590' : '#50657f';
+            g.fillRect(px, py, drawTile, drawTile);
+            g.strokeStyle = '#7f96b2';
+            g.strokeRect(px, py, drawTile, drawTile);
+          } else {
+            g.fillStyle = roomIdGrid[y][x] >= 0 ? '#283446' : '#212b39';
+            g.fillRect(px, py, drawTile, drawTile);
+            g.strokeStyle = '#313d50';
+            g.strokeRect(px, py, drawTile, drawTile);
+          }
+        } else {
+          if (bright) {
+            g.fillStyle = '#223142';
+          } else {
+            g.fillStyle = '#101721';
+          }
+          g.fillRect(px, py, drawTile, drawTile);
+        }
+      }
+    }
+
+    const drawEntityAt = (wx, wy, drawer) => {
+      const sx = wx - camX;
+      const sy = wy - camY;
+      if (sx < 0 || sy < 0 || sx >= VIEW_COLS || sy >= VIEW_ROWS) return;
+      drawer(sx * drawTile, sy * drawTile, drawTile);
+    };
+
+    if (!bossFloor && stairs && isBrightTile(stairs.x, stairs.y)) {
+      drawEntityAt(stairs.x, stairs.y, (px,py,t) => {
+        drawStaircase(g, px, py, t);
+      });
+    }
+
+    const now = performance.now();
+
+    if (bossFloor && boss) {
+      if (boss.state === 'charge') {
+        g.fillStyle = 'rgba(255,80,80,0.23)';
+        for (const t of bossAttackTiles()) {
+          const sx = t.x - camX, sy = t.y - camY;
+          if (sx >= 0 && sy >= 0 && sx < VIEW_COLS && sy < VIEW_ROWS && isBrightTile(t.x, t.y)) {
+            g.fillRect(sx*drawTile, sy*drawTile, drawTile, drawTile);
+          }
+        }
+      }
+
+      const bossVisible = isBrightTile(boss.x, boss.y) ||
+                          isBrightTile(boss.x-1, boss.y) ||
+                          isBrightTile(boss.x+1, boss.y) ||
+                          isBrightTile(boss.x, boss.y-1) ||
+                          isBrightTile(boss.x, boss.y+1);
+
+      if (bossVisible) {
+        drawEntityAt(boss.x, boss.y, (px,py,t) => {
+          drawBigAlien(g, px, py, t, boss.state);
+        });
+      }
+    } else {
+      for (const e of enemies) {
+        if (isBrightTile(e.x, e.y)) {
+          const attacking = enemyAttackPos &&
+                            enemyAttackPos.x === e.x &&
+                            enemyAttackPos.y === e.y &&
+                            now < enemyAttackUntil;
+          drawEntityAt(e.x, e.y, (px,py,t) => drawSkeletonScaled(g, px, py, t, e.facing, attacking));
+        }
+      }
+    }
+
+    drawEntityAt(player.x, player.y, (px,py,t) => drawSwordsmanScaled(g, px, py, t, player.facing, now < playerAttackUntil));
+
+    if (gameOver) {
+      g.fillStyle = 'rgba(0,0,0,0.72)';
+      g.fillRect(0,0,gameCanvas.width,gameCanvas.height);
+      g.fillStyle = '#ffffff';
+      g.textAlign = 'center';
+      g.font = 'bold 42px Arial';
+
+      if (bossFloor && boss && boss.hp <= 0) {
+        g.fillText('Dungeon Complete!', gameCanvas.width/2, gameCanvas.height/2);
+        g.font = '20px Arial';
+        g.fillText('Big Alien defeated', gameCanvas.width/2, gameCanvas.height/2 + 40);
+      } else {
+        g.fillText('Defeated', gameCanvas.width/2, gameCanvas.height/2);
+        g.font = '20px Arial';
+        g.fillText('Click New Dungeon to restart', gameCanvas.width/2, gameCanvas.height/2 + 40);
+      }
+    }
+  }
+
+  function drawMinimap() {
+    m.clearRect(0,0,miniCanvas.width,miniCanvas.height);
+    m.fillStyle = '#050910';
+    m.fillRect(0,0,miniCanvas.width,miniCanvas.height);
+
+    const cell = Math.min(miniCanvas.width/COLS, miniCanvas.height/ROWS);
+    const ox = (miniCanvas.width - COLS*cell)/2;
+    const oy = (miniCanvas.height - ROWS*cell)/2;
+
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (!discovered[y][x] || grid[y][x] !== TILE_FLOOR) continue;
+        m.fillStyle = roomIdGrid[y][x] >= 0 ? '#6d8099' : '#4f6178';
+        m.fillRect(ox+x*cell, oy+y*cell, cell+0.3, cell+0.3);
+      }
+    }
+
+    if (!bossFloor && stairs && discovered[stairs.y][stairs.x]) {
+      drawStaircase(m, ox+stairs.x*cell, oy+stairs.y*cell, cell);
+    }
+
+    if (bossFloor && boss) {
+      drawCircle(m, ox+(boss.x+0.5)*cell, oy+(boss.y+0.5)*cell, Math.max(3.5,cell*0.6),
+                 boss.state === 'charge' ? '#ef4444' : boss.state === 'cooldown' ? '#3b82f6' : '#22c55e');
+    }
+
+    for (const e of enemies) {
+      if (discovered[e.y][e.x]) {
+        drawCircle(m, ox+(e.x+0.5)*cell, oy+(e.y+0.5)*cell, Math.max(2,cell*0.30), '#e05555');
+      }
+    }
+
+    drawCircle(m, ox+(player.x+0.5)*cell, oy+(player.y+0.5)*cell, Math.max(2.5,cell*0.35), '#3fa9f5');
+  }
+
+  function drawSwordsmanScaled(ctx, px, py, tileSize, facing, attacking = false) {
+    if (facing === 'down') return drawSwordsmanFront(ctx, px, py, tileSize, attacking);
+    if (facing === 'up') return drawSwordsmanBack(ctx, px, py, tileSize, attacking);
+    if (facing === 'left') return drawSwordsmanSide(ctx, px, py, tileSize, 'left', attacking);
+    return drawSwordsmanSide(ctx, px, py, tileSize, 'right', attacking);
+  }
+
+  function drawSkeletonScaled(ctx, px, py, tileSize, facing, attacking = false) {
+    if (facing === 'down') return drawSkeletonFront(ctx, px, py, tileSize, attacking);
+    if (facing === 'up') return drawSkeletonBack(ctx, px, py, tileSize, attacking);
+    if (facing === 'left') return drawSkeletonSide(ctx, px, py, tileSize, 'left', attacking);
+    return drawSkeletonSide(ctx, px, py, tileSize, 'right', attacking);
+  }
+
+  function drawBigAlien(ctx, px, py, tileSize, state) {
+    const color = state === 'charge' ? '#ef4444' : state === 'cooldown' ? '#3b82f6' : '#22c55e';
+    const body = tileSize * 2.8;
+    const x = px - tileSize * 0.9;
+    const y = py - tileSize * 0.95;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.30)';
+    ctx.fillRect(x + body*0.18, y + body*0.88, body*0.64, body*0.10);
+
+    if (boss.facing === 'down') {
+      // Full front
+      ctx.fillStyle = color;
+      ctx.fillRect(x + body*0.22, y + body*0.26, body*0.56, body*0.46);
+      ctx.fillRect(x + body*0.30, y + body*0.06, body*0.40, body*0.24);
+      ctx.fillRect(x + body*0.16, y + body*0.40, body*0.10, body*0.12);
+      ctx.fillRect(x + body*0.74, y + body*0.40, body*0.10, body*0.12);
+      ctx.fillRect(x + body*0.28, y + body*0.70, body*0.12, body*0.18);
+      ctx.fillRect(x + body*0.60, y + body*0.70, body*0.12, body*0.18);
+
+      ctx.fillStyle = '#081018';
+      ctx.fillRect(x + body*0.38, y + body*0.14, body*0.06, body*0.05);
+      ctx.fillRect(x + body*0.56, y + body*0.14, body*0.06, body*0.05);
+      ctx.fillStyle = '#d9fbff';
+      ctx.fillRect(x + body*0.40, y + body*0.52, body*0.20, body*0.06);
+    } else if (boss.facing === 'up') {
+      // Back view
+      ctx.fillStyle = color;
+      ctx.fillRect(x + body*0.22, y + body*0.26, body*0.56, body*0.46);
+      ctx.fillRect(x + body*0.30, y + body*0.06, body*0.40, body*0.24);
+      ctx.fillRect(x + body*0.16, y + body*0.40, body*0.10, body*0.12);
+      ctx.fillRect(x + body*0.74, y + body*0.40, body*0.10, body*0.12);
+      ctx.fillRect(x + body*0.28, y + body*0.70, body*0.12, body*0.18);
+      ctx.fillRect(x + body*0.60, y + body*0.70, body*0.12, body*0.18);
+
+      ctx.fillStyle = '#0d1722';
+      ctx.fillRect(x + body*0.36, y + body*0.10, body*0.28, body*0.05);
+      ctx.fillRect(x + body*0.38, y + body*0.46, body*0.24, body*0.05);
+    } else {
+      const left = boss.facing === 'left';
+      const headX = left ? x + body*0.18 : x + body*0.42;
+      const armX = left ? x + body*0.10 : x + body*0.80;
+
+      ctx.fillStyle = color;
+      ctx.fillRect(x + body*0.28, y + body*0.26, body*0.42, body*0.46);
+      ctx.fillRect(headX, y + body*0.08, body*0.28, body*0.22);
+      ctx.fillRect(armX, y + body*0.40, body*0.10, body*0.12);
+      ctx.fillRect(x + body*0.38, y + body*0.70, body*0.10, body*0.18);
+      ctx.fillRect(x + body*0.54, y + body*0.70, body*0.10, body*0.18);
+
+      ctx.fillStyle = '#081018';
+      const eyeX = left ? x + body*0.24 : x + body*0.58;
+      ctx.fillRect(eyeX, y + body*0.15, body*0.06, body*0.05);
+      ctx.fillStyle = '#d9fbff';
+      const visorX = left ? x + body*0.28 : x + body*0.50;
+      ctx.fillRect(visorX, y + body*0.52, body*0.12, body*0.06);
+    }
+
+    if (state === 'charge') {
+      ctx.strokeStyle = '#ffd3d3';
+      ctx.lineWidth = Math.max(2, tileSize * 0.08);
+      ctx.strokeRect(x + body*0.10, y + body*0.02, body*0.80, body*0.92);
+    }
+  }
+
+  function drawSwordsmanFront(ctx, px, py, tileSize, attacking = false) {
+    const s = tileSize / 12;
+    const ox = px + tileSize * 0.18;
+    const oy = py + tileSize * 0.08;
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(px + tileSize*0.24, py + tileSize*0.78, tileSize*0.52, tileSize*0.10);
+
+    ctx.fillStyle = '#3a2c26';
+    ctx.fillRect(ox + 3*s, oy + 9*s, 2*s, 2*s);
+    ctx.fillRect(ox + 6*s, oy + 9*s, 2*s, 2*s);
+
+    ctx.fillStyle = '#596b83';
+    ctx.fillRect(ox + 3*s, oy + 7*s, 2*s, 3*s);
+    ctx.fillRect(ox + 6*s, oy + 7*s, 2*s, 3*s);
+
+    ctx.fillStyle = '#2f70b7';
+    ctx.fillRect(ox + 2*s, oy + 3*s, 7*s, 5*s);
+    ctx.fillStyle = '#d7b16b';
+    ctx.fillRect(ox + 2*s, oy + 6*s, 7*s, s);
+
+    ctx.fillStyle = '#e6b87e';
+    ctx.fillRect(ox + 3*s, oy + s, 5*s, 3*s);
+    ctx.fillStyle = '#71462e';
+    ctx.fillRect(ox + 3*s, oy, 5*s, 1.5*s);
+    ctx.fillStyle = '#101820';
+    ctx.fillRect(ox + 4.2*s, oy + 2*s, 0.8*s, 0.8*s);
+    ctx.fillRect(ox + 6.0*s, oy + 2*s, 0.8*s, 0.8*s);
+
+    ctx.fillStyle = '#704b2c';
+    ctx.fillRect(ox + s, oy + 4*s, 2*s, 3*s);
+
+    ctx.fillStyle = '#d8e2ec';
+    if (attacking) {
+      ctx.fillRect(ox + 8*s, oy + 4*s, 3.5*s, 1.2*s);
+      ctx.fillStyle = '#8d642f';
+      ctx.fillRect(ox + 7*s, oy + 3.5*s, 1.5*s, 2*s);
+    } else {
+      ctx.fillRect(ox + 8*s, oy + 3*s, 1.2*s, 5*s);
+      ctx.fillStyle = '#8d642f';
+      ctx.fillRect(ox + 7.5*s, oy + 6.5*s, 2*s, 1.2*s);
+    }
+  }
+
+  function drawSwordsmanBack(ctx, px, py, tileSize, attacking = false) {
+    const s = tileSize / 12;
+    const ox = px + tileSize * 0.18;
+    const oy = py + tileSize * 0.08;
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(px + tileSize*0.24, py + tileSize*0.78, tileSize*0.52, tileSize*0.10);
+
+    ctx.fillStyle = '#3a2c26';
+    ctx.fillRect(ox + 3*s, oy + 9*s, 2*s, 2*s);
+    ctx.fillRect(ox + 6*s, oy + 9*s, 2*s, 2*s);
+    ctx.fillStyle = '#596b83';
+    ctx.fillRect(ox + 3*s, oy + 7*s, 2*s, 3*s);
+    ctx.fillRect(ox + 6*s, oy + 7*s, 2*s, 3*s);
+    ctx.fillStyle = '#2f70b7';
+    ctx.fillRect(ox + 2*s, oy + 3*s, 7*s, 5*s);
+    ctx.fillStyle = '#1f4f82';
+    ctx.fillRect(ox + 4*s, oy + 4*s, 3*s, 2*s);
+
+    ctx.fillStyle = '#71462e';
+    ctx.fillRect(ox + 3*s, oy, 5*s, 1.5*s);
+    ctx.fillStyle = '#c99865';
+    ctx.fillRect(ox + 3*s, oy + s, 5*s, 3*s);
+
+    ctx.fillStyle = '#704b2c';
+    ctx.fillRect(ox + s, oy + 4*s, 2*s, 3*s);
+    ctx.fillStyle = '#d8e2ec';
+    if (attacking) {
+      ctx.fillRect(ox + 8*s, oy + 2.5*s, 1.2*s, 5*s);
+      ctx.fillStyle = '#8d642f';
+      ctx.fillRect(ox + 7.4*s, oy + 2*s, 2*s, 1.2*s);
+    } else {
+      ctx.fillRect(ox + 8*s, oy + 3*s, 1.2*s, 5*s);
+      ctx.fillStyle = '#8d642f';
+      ctx.fillRect(ox + 7.4*s, oy + 6.8*s, 2*s, 1.2*s);
+    }
+  }
+
+  function drawSwordsmanSide(ctx, px, py, tileSize, dir, attacking = false) {
+    const s = tileSize / 12;
+    const ox = px + tileSize * 0.16;
+    const oy = py + tileSize * 0.08;
+    const left = dir === 'left';
+    const faceX = left ? ox + 3*s : ox + 5*s;
+    const eyeX = left ? ox + 3.6*s : ox + 6.0*s;
+    const swordX = left ? ox + 1*s : ox + 9*s;
+    const shieldX = left ? ox + 9*s : ox + 1*s;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(px + tileSize*0.24, py + tileSize*0.78, tileSize*0.52, tileSize*0.10);
+    ctx.fillStyle = '#3a2c26';
+    ctx.fillRect(ox + 4*s, oy + 9*s, 2*s, 2*s);
+    ctx.fillRect(ox + 6*s, oy + 9*s, 2*s, 2*s);
+    ctx.fillStyle = '#596b83';
+    ctx.fillRect(ox + 4*s, oy + 7*s, 2*s, 3*s);
+    ctx.fillRect(ox + 6*s, oy + 7*s, 2*s, 3*s);
+    ctx.fillStyle = '#2f70b7';
+    ctx.fillRect(ox + 3*s, oy + 3*s, 5*s, 5*s);
+
+    ctx.fillStyle = '#e6b87e';
+    ctx.fillRect(faceX, oy + s, 3*s, 3*s);
+    ctx.fillStyle = '#71462e';
+    ctx.fillRect(faceX, oy, 3*s, 1.5*s);
+    ctx.fillStyle = '#101820';
+    ctx.fillRect(eyeX, oy + 2*s, 0.8*s, 0.8*s);
+
+    ctx.fillStyle = '#704b2c';
+    ctx.fillRect(shieldX, oy + 4*s, 1.6*s, 3*s);
+    ctx.fillStyle = '#d8e2ec';
+    if (attacking) {
+      if (left) {
+        ctx.fillRect(swordX - 2.6*s, oy + 4*s, 3.4*s, 1.2*s);
+        ctx.fillStyle = '#8d642f';
+        ctx.fillRect(swordX - 0.2*s, oy + 3.5*s, 1.2*s, 2*s);
+      } else {
+        ctx.fillRect(swordX, oy + 4*s, 3.4*s, 1.2*s);
+        ctx.fillStyle = '#8d642f';
+        ctx.fillRect(swordX - 0.3*s, oy + 3.5*s, 1.2*s, 2*s);
+      }
+    } else {
+      ctx.fillRect(swordX, oy + 3*s, 1.2*s, 5*s);
+      ctx.fillStyle = '#8d642f';
+      ctx.fillRect(swordX - 0.4*s, oy + 6.5*s, 2*s, 1.2*s);
+    }
+  }
+
+  function drawSkeletonFront(ctx, px, py, tileSize, attacking = false) {
+    const s = tileSize / 12;
+    const ox = px + tileSize * 0.18;
+    const oy = py + tileSize * 0.08;
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(px + tileSize*0.24, py + tileSize*0.78, tileSize*0.52, tileSize*0.10);
+
+    ctx.fillStyle = '#e7e0cf';
+    ctx.fillRect(ox + 3*s, oy + s, 5*s, 4*s);
+    ctx.fillStyle = '#101820';
+    ctx.fillRect(ox + 4*s, oy + 2*s, s, s);
+    ctx.fillRect(ox + 6.5*s, oy + 2*s, s, s);
+    ctx.fillRect(ox + 5.2*s, oy + 3.5*s, 1.2*s, 0.8*s);
+
+    ctx.fillStyle = '#ddd6c6';
+    ctx.fillRect(ox + 5*s, oy + 5*s, 1.4*s, 4*s);
+    ctx.fillRect(ox + 3*s, oy + 5.2*s, 5*s, 0.9*s);
+    ctx.fillRect(ox + 3.5*s, oy + 6.6*s, 4*s, 0.9*s);
+    ctx.fillRect(ox + 4*s, oy + 8*s, 3*s, 0.9*s);
+    ctx.fillRect(ox + 4*s, oy + 8*s, s, 3*s);
+    ctx.fillRect(ox + 6*s, oy + 8*s, s, 3*s);
+
+    if (attacking) {
+      ctx.fillRect(ox + 7.2*s, oy + 5*s, 4*s, s);
+      ctx.fillRect(ox + 10.2*s, oy + 4*s, s, 2*s);
+    } else {
+      ctx.fillRect(ox + 2*s, oy + 5*s, s, 3*s);
+      ctx.fillRect(ox + 7.5*s, oy + 5*s, s, 3*s);
+    }
+  }
+
+  function drawSkeletonBack(ctx, px, py, tileSize, attacking = false) {
+    const s = tileSize / 12;
+    const ox = px + tileSize * 0.18;
+    const oy = py + tileSize * 0.08;
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(px + tileSize*0.24, py + tileSize*0.78, tileSize*0.52, tileSize*0.10);
+
+    ctx.fillStyle = '#e7e0cf';
+    ctx.fillRect(ox + 3*s, oy + s, 5*s, 4*s);
+    ctx.fillStyle = '#bbb4a6';
+    ctx.fillRect(ox + 4*s, oy + 2.3*s, 3*s, 0.8*s);
+
+    ctx.fillStyle = '#ddd6c6';
+    ctx.fillRect(ox + 5*s, oy + 5*s, 1.4*s, 4*s);
+    ctx.fillRect(ox + 3*s, oy + 5.2*s, 5*s, 0.9*s);
+    ctx.fillRect(ox + 3.5*s, oy + 6.6*s, 4*s, 0.9*s);
+    ctx.fillRect(ox + 4*s, oy + 8*s, 3*s, 0.9*s);
+    ctx.fillRect(ox + 4*s, oy + 8*s, s, 3*s);
+    ctx.fillRect(ox + 6*s, oy + 8*s, s, 3*s);
+
+    if (attacking) {
+      ctx.fillRect(ox + 7.2*s, oy + 5*s, 3.6*s, s);
+    } else {
+      ctx.fillRect(ox + 2*s, oy + 5*s, s, 3*s);
+      ctx.fillRect(ox + 7.5*s, oy + 5*s, s, 3*s);
+    }
+  }
+
+  function drawSkeletonSide(ctx, px, py, tileSize, dir, attacking = false) {
+    const s = tileSize / 12;
+    const ox = px + tileSize * 0.18;
+    const oy = py + tileSize * 0.08;
+    const left = dir === 'left';
+    const skullX = left ? ox + 3*s : ox + 5*s;
+    const eyeX = left ? ox + 3.8*s : ox + 6.0*s;
+    const armX = left ? ox + 2*s : ox + 8*s;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(px + tileSize*0.24, py + tileSize*0.78, tileSize*0.52, tileSize*0.10);
+    ctx.fillStyle = '#e7e0cf';
+    ctx.fillRect(skullX, oy + s, 3*s, 4*s);
+    ctx.fillStyle = '#101820';
+    ctx.fillRect(eyeX, oy + 2.2*s, 0.8*s, 0.8*s);
+
+    ctx.fillStyle = '#ddd6c6';
+    ctx.fillRect(ox + 4.8*s, oy + 5*s, 1.2*s, 4*s);
+    ctx.fillRect(ox + 4*s, oy + 5.4*s, 3*s, 0.8*s);
+    ctx.fillRect(ox + 4.2*s, oy + 7.0*s, 2.6*s, 0.8*s);
+    ctx.fillRect(ox + 4.2*s, oy + 8*s, s, 3*s);
+    ctx.fillRect(ox + 6.0*s, oy + 8*s, s, 3*s);
+
+    if (attacking) {
+      if (left) {
+        ctx.fillRect(armX - 2.6*s, oy + 5*s, 3.2*s, s);
+      } else {
+        ctx.fillRect(armX, oy + 5*s, 3.2*s, s);
+      }
+    } else {
+      ctx.fillRect(armX, oy + 5*s, s, 3*s);
+    }
+  }
+
+  function drawSwordsman(ctx, px, py, attacking = false) {
+    const s = TILE / 12;
+    const ox = px + TILE * 0.18;
+    const oy = py + TILE * 0.08;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(px + TILE*0.24, py + TILE*0.78, TILE*0.52, TILE*0.10);
+
+    ctx.fillStyle = '#3a2c26';
+    ctx.fillRect(ox + 3*s, oy + 9*s, 2*s, 2*s);
+    ctx.fillRect(ox + 6*s, oy + 9*s, 2*s, 2*s);
+
+    ctx.fillStyle = '#596b83';
+    ctx.fillRect(ox + 3*s, oy + 7*s, 2*s, 3*s);
+    ctx.fillRect(ox + 6*s, oy + 7*s, 2*s, 3*s);
+
+    ctx.fillStyle = '#2f70b7';
+    ctx.fillRect(ox + 2*s, oy + 3*s, 7*s, 5*s);
+    ctx.fillStyle = '#d7b16b';
+    ctx.fillRect(ox + 2*s, oy + 6*s, 7*s, s);
+
+    ctx.fillStyle = '#e6b87e';
+    ctx.fillRect(ox + 3*s, oy + s, 5*s, 3*s);
+    ctx.fillStyle = '#71462e';
+    ctx.fillRect(ox + 3*s, oy, 5*s, 1.5*s);
+    ctx.fillStyle = '#101820';
+    ctx.fillRect(ox + 6.5*s, oy + 2*s, 0.8*s, 0.8*s);
+
+    ctx.fillStyle = '#704b2c';
+    ctx.fillRect(ox + s, oy + 4*s, 2*s, 3*s);
+
+    ctx.fillStyle = '#d8e2ec';
+    if (attacking) {
+      ctx.fillRect(ox + 8*s, oy + 4*s, 5*s, 1.2*s);
+      ctx.fillStyle = '#8d642f';
+      ctx.fillRect(ox + 7*s, oy + 3.5*s, 1.5*s, 2*s);
+    } else {
+      ctx.fillRect(ox + 8*s, oy + 3*s, 1.2*s, 5*s);
+      ctx.fillStyle = '#8d642f';
+      ctx.fillRect(ox + 7.5*s, oy + 6.5*s, 2*s, 1.2*s);
+    }
+  }
+
+  function drawSkeleton(ctx, px, py, attacking = false) {
+    const s = TILE / 12;
+    const ox = px + TILE * 0.18;
+    const oy = py + TILE * 0.08;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(px + TILE*0.24, py + TILE*0.78, TILE*0.52, TILE*0.10);
+
+    ctx.fillStyle = '#e7e0cf';
+    ctx.fillRect(ox + 3*s, oy + s, 5*s, 4*s);
+    ctx.fillStyle = '#101820';
+    ctx.fillRect(ox + 4*s, oy + 2*s, s, s);
+    ctx.fillRect(ox + 6.5*s, oy + 2*s, s, s);
+    ctx.fillRect(ox + 5.2*s, oy + 3.5*s, 1.2*s, 0.8*s);
+
+    ctx.fillStyle = '#ddd6c6';
+    ctx.fillRect(ox + 5*s, oy + 5*s, 1.4*s, 4*s);
+    ctx.fillRect(ox + 3*s, oy + 5.2*s, 5*s, 0.9*s);
+    ctx.fillRect(ox + 3.5*s, oy + 6.6*s, 4*s, 0.9*s);
+    ctx.fillRect(ox + 4*s, oy + 8*s, 3*s, 0.9*s);
+    ctx.fillRect(ox + 4*s, oy + 8*s, s, 3*s);
+    ctx.fillRect(ox + 6*s, oy + 8*s, s, 3*s);
+
+    if (attacking) {
+      ctx.fillRect(ox + 7.2*s, oy + 5*s, 4*s, s);
+      ctx.fillRect(ox + 10.2*s, oy + 4*s, s, 2*s);
+    } else {
+      ctx.fillRect(ox + 2*s, oy + 5*s, s, 3*s);
+      ctx.fillRect(ox + 7.5*s, oy + 5*s, s, 3*s);
+    }
+  }
+
+  function scheduleAnimationRefresh() {
+    requestAnimationFrame(() => {
+      drawAll();
+      setTimeout(() => {
+        if (performance.now() >= playerAttackUntil && performance.now() >= enemyAttackUntil) {
+          enemyAttackPos = null;
+        }
+        drawAll();
+      }, 190);
+    });
+  }
+
+  function drawStaircase(ctx, px, py, size) {
+    const x = px + size * 0.18;
+    const y = py + size * 0.18;
+    const w = size * 0.64;
+    const h = size * 0.62;
+
+    // Background tile shadow
+    ctx.fillStyle = '#223547';
+    ctx.fillRect(px + size*0.08, py + size*0.08, size*0.84, size*0.84);
+
+    // Side-profile stairs shape
+    ctx.beginPath();
+    ctx.moveTo(x, y + h);
+    ctx.lineTo(x + w*0.28, y + h);
+    ctx.lineTo(x + w*0.28, y + h*0.78);
+    ctx.lineTo(x + w*0.48, y + h*0.78);
+    ctx.lineTo(x + w*0.48, y + h*0.54);
+    ctx.lineTo(x + w*0.68, y + h*0.54);
+    ctx.lineTo(x + w*0.68, y + h*0.30);
+    ctx.lineTo(x + w*0.88, y + h*0.30);
+    ctx.lineTo(x + w*0.88, y + h*0.08);
+    ctx.lineTo(x + w, y + h*0.08);
+    ctx.lineTo(x + w, y + h);
+    ctx.closePath();
+    ctx.fillStyle = '#d8e1e8';
+    ctx.fill();
+
+    // Tread edges
+    ctx.strokeStyle = '#8798a7';
+    ctx.lineWidth = Math.max(1, size * 0.04);
+    ctx.beginPath();
+    ctx.moveTo(x + w*0.28, y + h*0.78); ctx.lineTo(x + w, y + h*0.78);
+    ctx.moveTo(x + w*0.48, y + h*0.54); ctx.lineTo(x + w, y + h*0.54);
+    ctx.moveTo(x + w*0.68, y + h*0.30); ctx.lineTo(x + w, y + h*0.30);
+    ctx.moveTo(x + w*0.88, y + h*0.08); ctx.lineTo(x + w, y + h*0.08);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#6f7f8d';
+    ctx.strokeRect(px + size*0.08, py + size*0.08, size*0.84, size*0.84);
+  }
+
+  function drawCircle(ctx, x, y, r, color) {
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function updateUI() {
+    hpValue.textContent = `${player.hp} / ${player.maxHp}`;
+    floorValue.textContent = floor;
+  }
+
+  function handleKey(e) {
+    if (!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','W','A','S','D',' '].includes(e.key)) return;
+    e.preventDefault();
+
+    switch (e.key) {
+      case 'ArrowUp':
+      case 'w':
+      case 'W': movePlayer(0,-1); break;
+      case 'ArrowDown':
+      case 's':
+      case 'S': movePlayer(0,1); break;
+      case 'ArrowLeft':
+      case 'a':
+      case 'A': movePlayer(-1,0); break;
+      case 'ArrowRight':
+      case 'd':
+      case 'D': movePlayer(1,0); break;
+      case ' ': attack(); break;
+    }
+  }
+
+  app.addEventListener('keydown', handleKey);
+  app.addEventListener('click', () => app.focus());
+
+  newDungeonBtn.addEventListener('click', () => {
+    floor = 1;
+    boss = null;
+    bossFloor = false;
+    player = null;
+    generateDungeon();
+    app.focus();
+  });
+
+  attackBtn.addEventListener('click', () => {
+    attack();
+    app.focus();
+  });
+
+  document.querySelectorAll('[data-move]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dir = btn.dataset.move;
+      if (dir === 'up') movePlayer(0,-1);
+      if (dir === 'down') movePlayer(0,1);
+      if (dir === 'left') movePlayer(-1,0);
+      if (dir === 'right') movePlayer(1,0);
+      app.focus();
+    });
+  });
+
+  generateDungeon();
+  app.focus();
+})();
+</script>
+</body>
+</html>
