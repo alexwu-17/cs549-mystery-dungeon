@@ -97,6 +97,54 @@ func validate() -> void:
 	assert(main.enemies[0].visible)
 	main.player.try_move(Vector2i.RIGHT)
 	assert(main.player.grid_position == data.player_spawn and main.enemies[0].visible)
+	# Elevation shading is independent of discovery and bright visibility.
+	main.use_elevation_test = true
+	main.load_test_floor()
+	main.dungeon.enemy_spawns.clear()
+	main.spawn_test_enemies()
+	main.player.setup(Vector2i(6, 2), main.dungeon, main.dungeon_renderer)
+	main.player.try_move(Vector2i.RIGHT)
+	assert(main.player.fog_elevation == 0) # Uphill ramp retains departure level.
+	main.player.try_move(Vector2i.RIGHT)
+	assert(main.player.fog_elevation == 1)
+	for visual in main.dungeon_renderer.fog_visuals:
+		if visual.room == 0:
+			assert(visual.mesh.material_override == main.dungeon_renderer.other_elevation_material)
+		elif visual.room == 1 and not visual.stairs:
+			assert(visual.mesh.material_override == main.dungeon_renderer.normal_material)
+	main.player.try_move(Vector2i.LEFT)
+	assert(main.player.fog_elevation == 1) # Downhill ramp retains upper level.
+	main.player.try_move(Vector2i.RIGHT)
+	assert(main.player.fog_elevation == 1) # Turning back on the ramp.
+	main.player.try_move(Vector2i.LEFT)
+	main.player.try_move(Vector2i.LEFT)
+	assert(main.player.fog_elevation == 0)
+	main.refresh_fog()
+	for visual in main.dungeon_renderer.fog_visuals:
+		if visual.room == 1 and not main.dungeon.is_bright(visual.tiles[0]):
+			assert(visual.mesh.material_override == main.dungeon_renderer.other_elevation_material)
+	main.dungeon = TestDungeonFactory.create_fallback_dungeon()
+	main.dungeon_renderer.render_dungeon(main.dungeon)
+	main.player.setup(Vector2i(6, 3), main.dungeon, main.dungeon_renderer)
+	# Each pair is (destination X, expected fog reference elevation).
+	for step: Vector2i in [Vector2i(7, 0), Vector2i(8, 0), Vector2i(9, 0), Vector2i(10, 1), Vector2i(9, 1), Vector2i(8, 1), Vector2i(7, 1), Vector2i(6, 0)]:
+		var x := step.x
+		main.player.try_move(Vector2i.RIGHT if x > main.player.grid_position.x else Vector2i.LEFT)
+		assert(main.player.fog_elevation == step.y)
+		for visual in main.dungeon_renderer.fog_visuals:
+			var tile: Vector2i = visual.tiles[0]
+			var bright := false
+			for covered: Vector2i in visual.tiles:
+				bright = bright or main.dungeon.is_bright(covered)
+			if bright:
+				assert(visual.mesh.material_override == main.dungeon_renderer.normal_material)
+			elif main.dungeon.get_tile(tile) == DungeonData.TileType.RAMP:
+				assert(visual.mesh.material_override == main.dungeon_renderer.dim_material)
+			elif main.dungeon.get_tile(tile) == DungeonData.TileType.CORRIDOR:
+				var expected: StandardMaterial3D = main.dungeon_renderer.dim_material if main.dungeon.get_elevation(tile) == step.y else main.dungeon_renderer.other_elevation_material
+				assert(visual.mesh.material_override == expected)
+	main.load_test_floor()
+	assert(main.player.fog_elevation == 0)
 	main.free()
 	print("PASS: room/corridor doorway peeks, discovery, walls, whole ramps, stairs, blocking enemies, floor reset")
 	quit()

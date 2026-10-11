@@ -163,7 +163,7 @@ func run_enemy_turn() -> void:
 
 func refresh_fog() -> void:
 	dungeon.update_fog(player.grid_position)
-	dungeon_renderer.apply_fog()
+	dungeon_renderer.apply_fog(player.fog_elevation)
 	for enemy in enemies:
 		enemy.visible = dungeon.is_bright(enemy.grid_position)
 	hud.refresh_map(dungeon, player.grid_position, enemies, floor_number)

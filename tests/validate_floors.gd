@@ -14,6 +14,9 @@ func validate() -> void:
 		var occupied: Dictionary = {dungeon.player_spawn: true}
 		assert(dungeon.get_tile(dungeon.stairs_position) == DungeonData.TileType.STAIRS)
 		assert(reachable.has(dungeon.stairs_position))
+		for y in range(-1, 2):
+			for x in range(-1, 2):
+				assert(dungeon.get_tile(dungeon.stairs_position + Vector2i(x, y)) != DungeonData.TileType.CORRIDOR)
 		assert(not occupied.has(dungeon.stairs_position))
 		occupied[dungeon.stairs_position] = true
 		assert(not dungeon.reserved_transitions.has(dungeon.stairs_position))

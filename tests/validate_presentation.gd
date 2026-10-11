@@ -57,7 +57,7 @@ func validate() -> void:
 	var points: Array[Vector3] = [mesh.global_position + sight * 4]
 	renderer.update_occlusion(camera, Vector2i.ZERO, points)
 	assert(blocked.occluded and not mesh.visible)
-	assert(mesh.material_override == renderer.dim_material)
+	assert(mesh.material_override == renderer.other_elevation_material)
 	# Fog refresh must not undo occlusion or expose hidden stairs.
 	renderer.apply_fog()
 	assert(not mesh.visible)
@@ -76,6 +76,29 @@ func validate() -> void:
 	points[0] = mesh.global_position + sight * 4
 	renderer.update_occlusion(camera, Vector2i(0, 2), points)
 	assert(not blocked.occluded) # Own room/support tile.
+	# Higher corridors also obstruct, including when the player is in a corridor.
+	data.set_tile(Vector2i(2, 2), DungeonData.TileType.CORRIDOR, 1)
+	data.set_tile(Vector2i(2, 0), DungeonData.TileType.CORRIDOR, 0)
+	renderer.render_dungeon(data)
+	data.update_fog(Vector2i.ZERO)
+	renderer.apply_fog()
+	var corridor: Dictionary
+	for visual in renderer.fog_visuals:
+		if visual.tiles == [Vector2i(2, 2)]:
+			corridor = visual
+	var corridor_mesh: MeshInstance3D = corridor.mesh
+	var corridor_sight := (corridor_mesh.global_position - camera.global_position).normalized()
+	points[0] = corridor_mesh.global_position + corridor_sight * 4
+	for player_tile in [Vector2i.ZERO, Vector2i(2, 0)]:
+		renderer.update_occlusion(camera, player_tile, points)
+		assert(corridor.occluded and not corridor_mesh.visible)
+		assert(corridor_mesh.material_override == renderer.other_elevation_material)
+	points[0] += camera.global_basis.x * 2
+	renderer.update_occlusion(camera, Vector2i(2, 0), points)
+	assert(not corridor.occluded and corridor_mesh.visible)
+	points[0] = corridor_mesh.global_position + corridor_sight * 4
+	renderer.update_occlusion(camera, Vector2i(2, 2), points)
+	assert(not corridor.occluded and corridor_mesh.visible) # Support/same height.
 	# Track actual rendered heights on a standardized ramp in both directions,
 	# including -1 and 0 surfaces rather than only the legacy fixture's 0/+1.
 	data.set_tile(Vector2i(4, 0), DungeonData.TileType.CORRIDOR, -1)

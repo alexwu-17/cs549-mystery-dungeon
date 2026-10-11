@@ -12,6 +12,8 @@ signal attack_requested(target: Vector2i)
 
 var health: HealthScript = HealthScript.new()
 var level: int = 5
+# Presentation reference stays at the departure level until leaving a ramp.
+var fog_elevation: int = 0
 var gameplay_enabled: bool = true
 var facing: Vector2i = Vector2i.DOWN
 var damage_tween: Tween
@@ -30,12 +32,15 @@ func setup(
 	grid_position = start_position
 	dungeon_data = data
 	dungeon_renderer = renderer
+	fog_elevation = data.get_elevation(start_position)
 
 	update_world_position()
 
 
 func update_world_position() -> void:
 	position = dungeon_renderer.get_entity_world_position(grid_position)
+	if dungeon_data.get_tile(grid_position) != DungeonData.TileType.RAMP:
+		fog_elevation = dungeon_data.get_elevation(grid_position)
 	
 func _unhandled_input(event: InputEvent) -> void:
 	

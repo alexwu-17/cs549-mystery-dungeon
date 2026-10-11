@@ -10,6 +10,8 @@ var dungeon_data: DungeonData
 var fog_visuals: Array[Dictionary] = []
 var normal_material: StandardMaterial3D
 var dim_material: StandardMaterial3D
+var other_elevation_material: StandardMaterial3D
+@export var other_elevation_fog_color: Color = Color(0.07, 0.07, 0.07)
 
 
 func render_dungeon(data: DungeonData) -> void:
@@ -19,6 +21,8 @@ func render_dungeon(data: DungeonData) -> void:
 		normal_material = StandardMaterial3D.new()
 		dim_material = StandardMaterial3D.new()
 		dim_material.albedo_color = Color(0.22, 0.22, 0.22)
+		other_elevation_material = StandardMaterial3D.new()
+	other_elevation_material.albedo_color = other_elevation_fog_color
 
 	for child in get_children():
 		child.free()
@@ -119,11 +123,12 @@ func create_stairs_tile(grid_position: Vector2i) -> void:
 func register_fog_visual(mesh: MeshInstance3D, covered: Array[Vector2i], stairs: bool = false) -> void:
 	var tile: Vector2i = covered[0]
 	var room := dungeon_data.get_room_id(tile)
-	var candidate := covered.size() == 1 and room >= 0 and dungeon_data.get_tile(tile) != DungeonData.TileType.RAMP and not dungeon_data.reserved_transitions.has(tile)
+	var terrain_candidate := room >= 0 or dungeon_data.get_tile(tile) == DungeonData.TileType.CORRIDOR
+	var candidate := covered.size() == 1 and terrain_candidate and dungeon_data.get_tile(tile) != DungeonData.TileType.RAMP and not dungeon_data.reserved_transitions.has(tile)
 	fog_visuals.append({"mesh": mesh, "tiles": covered, "stairs": stairs, "room": room, "candidate": candidate, "occluded": false, "fog_visible": true})
 
 
-func apply_fog() -> void:
+func apply_fog(reference_elevation: int = 0) -> void:
 	for visual in fog_visuals:
 		var bright := false
 		for tile: Vector2i in visual.tiles:
@@ -134,6 +139,10 @@ func apply_fog() -> void:
 		visual.fog_visible = bright if visual.stairs else true
 		mesh.visible = visual.fog_visible and not visual.occluded
 		mesh.material_override = normal_material if bright else dim_material
+		var tile: Vector2i = visual.tiles[0]
+		var elevation_shaded: bool = visual.room >= 0 or dungeon_data.get_tile(tile) == DungeonData.TileType.CORRIDOR
+		if not bright and elevation_shaded and dungeon_data.get_elevation(tile) != reference_elevation:
+			mesh.material_override = other_elevation_material
 
 
 func update_occlusion(camera: Camera3D, player_tile: Vector2i, sprite_points: Array[Vector3]) -> void:
@@ -146,8 +155,9 @@ func update_occlusion(camera: Camera3D, player_tile: Vector2i, sprite_points: Ar
 	for visual in fog_visuals:
 		var mesh: MeshInstance3D = visual.mesh
 		visual.occluded = false
-		var upper_room := dungeon_data.get_elevation(visual.tiles[0]) > dungeon_data.surface_elevation(player_tile)
-		if visual.candidate and upper_room and visual.room != player_room and not visual.tiles.has(player_tile) and visual.fog_visible:
+		var higher_terrain := dungeon_data.get_elevation(visual.tiles[0]) > dungeon_data.surface_elevation(player_tile)
+		var own_room: bool = player_room >= 0 and visual.room == player_room
+		if visual.candidate and higher_terrain and not own_room and not visual.tiles.has(player_tile) and visual.fog_visible:
 			# Transform the segment into the mesh's local frame. This tests its
 			# actual oriented bounds rather than an inflated world-space AABB.
 			var inverse := mesh.global_transform.affine_inverse()

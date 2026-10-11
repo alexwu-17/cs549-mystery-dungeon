@@ -129,7 +129,8 @@ static func validate_floor(dungeon: DungeonData) -> bool:
 			for room in dungeon.rooms:
 				if room.has_point(tile):
 					return false
-	return true
+	# Reject layouts with no legal staircase site before finalizing spawns.
+	return not staircase_candidates(dungeon, reachable).is_empty()
 
 
 static func finish_spawns(dungeon: DungeonData, size: Vector2i) -> void:
@@ -186,10 +187,7 @@ static func reachable_tiles(dungeon: DungeonData) -> Dictionary:
 static func place_spawns(dungeon: DungeonData, reachable: Dictionary) -> void:
 	# Any reachable room tile is eligible, including the starting room.
 	# Keep the standardized ramp and its buffers intact.
-	var stair_candidates: Array[Vector2i] = []
-	for position: Vector2i in reachable:
-		if position != dungeon.player_spawn and room_id_grid[position.y][position.x] >= 0 and not dungeon.reserved_transitions.has(position) and dungeon.get_tile(position) != TileType.RAMP:
-			stair_candidates.append(position)
+	var stair_candidates := staircase_candidates(dungeon, reachable)
 	var stairs := stair_candidates[rng.randi_range(0, stair_candidates.size() - 1)]
 	dungeon.stairs_position = stairs
 	dungeon.set_tile(stairs, TileType.STAIRS, dungeon.get_elevation(stairs))
@@ -201,6 +199,21 @@ static func place_spawns(dungeon: DungeonData, reachable: Dictionary) -> void:
 		var choice := rng.randi_range(0, candidates.size() - 1)
 		dungeon.enemy_spawns.append(candidates[choice])
 		candidates.remove_at(choice)
+
+
+static func staircase_candidates(dungeon: DungeonData, reachable: Dictionary) -> Array[Vector2i]:
+	var candidates: Array[Vector2i] = []
+	for position: Vector2i in reachable:
+		if position == dungeon.player_spawn or dungeon.get_room_id(position) < 0 or dungeon.reserved_transitions.has(position) or dungeon.get_tile(position) == TileType.RAMP:
+			continue
+		var near_corridor := false
+		for y in range(-1, 2):
+			for x in range(-1, 2):
+				if dungeon.get_tile(position + Vector2i(x, y)) == TileType.CORRIDOR:
+					near_corridor = true
+		if not near_corridor:
+			candidates.append(position)
+	return candidates
 
 
 static func create_elevation_test_dungeon() -> DungeonData:
