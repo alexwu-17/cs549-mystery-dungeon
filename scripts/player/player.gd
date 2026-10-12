@@ -11,6 +11,7 @@ signal attack_requested(target: Vector2i)
 @export var attack_damage: int = 3
 
 var health: HealthScript = HealthScript.new()
+var invincible: bool = false
 var level: int = 5
 # Presentation reference stays at the departure level until leaving a ramp.
 var fog_elevation: int = 0
@@ -120,6 +121,9 @@ func basic_attack() -> void:
 
 
 func receive_damage(amount: int) -> void:
+	if invincible:
+		print("LIMIT TESTING: blocked player damage ", amount)
+		return
 	health.damage(amount)
 	print("PLAYER HP: ", health.current, "/", health.maximum)
 	if has_node("PlayerSprite"):

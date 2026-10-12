@@ -10,6 +10,7 @@ extends Resource
 @export var placement_attempts: int = 250
 @export var layout_attempts: int = 32
 @export var require_minimum_rooms: bool = true
+@export var invincible_player: bool = false
 
 func validation_errors() -> PackedStringArray:
 	var errors := PackedStringArray()

@@ -89,6 +89,7 @@ func update_presentation() -> void:
 
 func load_test_floor() -> void:
 	cancel_round()
+	player.invincible = game_mode == GameModeConfig.Mode.LIMIT_TESTING and generation_config != null and generation_config.invincible_player
 	loading_floor = true
 	player.gameplay_enabled = false
 	if use_elevation_test:
@@ -320,7 +321,7 @@ func refresh_fog() -> void:
 
 
 func _on_enemy_attack(amount: int, actor_name: String) -> void:
-	dialogue.append_event(&"attack", {"actor": actor_name, "target": "Swordsman", "amount": mini(amount, player.health.current)})
+	dialogue.append_event(&"attack", {"actor": actor_name, "target": "Swordsman", "amount": 0 if player.invincible else mini(amount, player.health.current)})
 	player.receive_damage(amount)
 
 
