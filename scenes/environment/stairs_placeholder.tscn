@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/environment/stairs/stairs_placeholder.png" id="1_texture"]
+
+[node name="StairsPlaceholder" type="Node3D"]
+
+[node name="Illustration" type="Sprite3D" parent="."]
+rotation = Vector3(-0.8726646, 0, 0)
+cast_shadow = 0
+pixel_size = 0.004
+offset = Vector2(0, 72.5)
+billboard = 0
+shaded = false
+alpha_cut = 2
+texture_filter = 0
+texture = ExtResource("1_texture")

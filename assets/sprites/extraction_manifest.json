@@ -1,0 +1,465 @@
+{
+  "swordsman": {
+    "source": "AISwordsmanPlaceholderPixelSheet.png",
+    "sha256": "5b3816e4d620084e9250f47ab23de9ec77b432f5531b23a9fb102ff99e2eef46",
+    "canvas": [
+      572,
+      575
+    ],
+    "foot_anchor": [
+      286,
+      450
+    ],
+    "anchors": [
+      [
+        227,
+        424
+      ],
+      [
+        668,
+        424
+      ],
+      [
+        1095,
+        434
+      ],
+      [
+        1538,
+        434
+      ],
+      [
+        230,
+        824
+      ],
+      [
+        669,
+        824
+      ],
+      [
+        1130,
+        834
+      ],
+      [
+        1518,
+        834
+      ]
+    ],
+    "regions": [
+      {
+        "frame": "front",
+        "bounds": [
+          97,
+          104,
+          322,
+          422
+        ]
+      },
+      {
+        "frame": "back",
+        "bounds": [
+          569,
+          104,
+          806,
+          421
+        ]
+      },
+      {
+        "frame": "left",
+        "bounds": [
+          970,
+          106,
+          1182,
+          433
+        ]
+      },
+      {
+        "frame": "right",
+        "bounds": [
+          1452,
+          106,
+          1671,
+          433
+        ]
+      },
+      {
+        "frame": "attack_back",
+        "bounds": [
+          541,
+          482,
+          861,
+          823
+        ]
+      },
+      {
+        "frame": "attack_right",
+        "bounds": [
+          1418,
+          495,
+          1742,
+          832
+        ]
+      },
+      {
+        "frame": "attack_left",
+        "bounds": [
+          925,
+          496,
+          1234,
+          831
+        ]
+      },
+      {
+        "frame": "attack_front",
+        "bounds": [
+          125,
+          517,
+          424,
+          822
+        ]
+      }
+    ],
+    "frames": [
+      "front",
+      "back",
+      "left",
+      "right",
+      "attack_front",
+      "attack_back",
+      "attack_left",
+      "attack_right"
+    ],
+    "alpha_pixels": 540070
+  },
+  "skeleton": {
+    "source": "AISkeletonPlaceholderPixelSheet.png",
+    "sha256": "9321014fb64f3e5c9b83f2e30c6fd71b3f9c018fb2d0bc347919332ac92aa0f0",
+    "canvas": [
+      614,
+      528
+    ],
+    "foot_anchor": [
+      307,
+      447
+    ],
+    "anchors": [
+      [
+        225,
+        440
+      ],
+      [
+        668,
+        430
+      ],
+      [
+        1144,
+        440
+      ],
+      [
+        1504,
+        437
+      ],
+      [
+        236,
+        858
+      ],
+      [
+        684,
+        856
+      ],
+      [
+        1141,
+        856
+      ],
+      [
+        1520,
+        857
+      ]
+    ],
+    "regions": [
+      {
+        "frame": "front",
+        "bounds": [
+          61,
+          52,
+          376,
+          430
+        ]
+      },
+      {
+        "frame": "back",
+        "bounds": [
+          518,
+          53,
+          834,
+          420
+        ]
+      },
+      {
+        "frame": "right",
+        "bounds": [
+          1391,
+          56,
+          1725,
+          426
+        ]
+      },
+      {
+        "frame": "left",
+        "bounds": [
+          931,
+          59,
+          1269,
+          432
+        ]
+      },
+      {
+        "frame": "attack_back",
+        "bounds": [
+          522,
+          455,
+          854,
+          852
+        ]
+      },
+      {
+        "frame": "attack_front",
+        "bounds": [
+          36,
+          512,
+          416,
+          843
+        ]
+      },
+      {
+        "frame": "attack_left",
+        "bounds": [
+          883,
+          525,
+          1295,
+          845
+        ]
+      },
+      {
+        "frame": "attack_right",
+        "bounds": [
+          1365,
+          527,
+          1769,
+          845
+        ]
+      }
+    ],
+    "frames": [
+      "front",
+      "back",
+      "left",
+      "right",
+      "attack_front",
+      "attack_back",
+      "attack_left",
+      "attack_right"
+    ],
+    "alpha_pixels": 636789
+  },
+  "minotaur": {
+    "source": "AIMinotaurPlaceholderPixelSheet.png",
+    "sha256": "ff98bfb77fa21c23fc13abdf1dcc890be29f7c65b44a76f8cb55fd9fdc615cd7",
+    "canvas": [
+      930,
+      647
+    ],
+    "foot_anchor": [
+      465,
+      296
+    ],
+    "anchors": [
+      [
+        152,
+        340
+      ],
+      [
+        460,
+        340
+      ],
+      [
+        770,
+        340
+      ],
+      [
+        1110,
+        342
+      ],
+      [
+        151,
+        635
+      ],
+      [
+        504,
+        630
+      ],
+      [
+        806,
+        630
+      ],
+      [
+        1100,
+        631
+      ],
+      [
+        169,
+        920
+      ],
+      [
+        475,
+        920
+      ],
+      [
+        806,
+        920
+      ],
+      [
+        1090,
+        919
+      ],
+      [
+        172,
+        1206
+      ]
+    ],
+    "regions": [
+      {
+        "frame": "front",
+        "bounds": [
+          24,
+          63,
+          294,
+          337
+        ]
+      },
+      {
+        "frame": "back",
+        "bounds": [
+          323,
+          65,
+          595,
+          336
+        ]
+      },
+      {
+        "frame": "right",
+        "bounds": [
+          1009,
+          68,
+          1218,
+          337
+        ]
+      },
+      {
+        "frame": "left",
+        "bounds": [
+          669,
+          71,
+          883,
+          337
+        ]
+      },
+      {
+        "frame": "charge",
+        "bounds": [
+          18,
+          394,
+          290,
+          630
+        ]
+      },
+      {
+        "frame": "spin_03",
+        "bounds": [
+          965,
+          403,
+          1249,
+          622
+        ]
+      },
+      {
+        "frame": "spin_01",
+        "bounds": [
+          322,
+          406,
+          624,
+          625
+        ]
+      },
+      {
+        "frame": "spin_02",
+        "bounds": [
+          650,
+          406,
+          949,
+          627
+        ]
+      },
+      {
+        "frame": "spin_06",
+        "bounds": [
+          633,
+          696,
+          921,
+          914
+        ]
+      },
+      {
+        "frame": "spin_05",
+        "bounds": [
+          347,
+          702,
+          623,
+          914
+        ]
+      },
+      {
+        "frame": "spin_04",
+        "bounds": [
+          18,
+          706,
+          330,
+          914
+        ]
+      },
+      {
+        "frame": "spin_07",
+        "bounds": [
+          954,
+          708,
+          1244,
+          911
+        ]
+      },
+      {
+        "frame": "spin_08",
+        "bounds": [
+          25,
+          988,
+          334,
+          1197
+        ]
+      }
+    ],
+    "frames": [
+      "front",
+      "back",
+      "left",
+      "right",
+      "charge",
+      "spin_01",
+      "spin_02",
+      "spin_03",
+      "spin_04",
+      "spin_05",
+      "spin_06",
+      "spin_07",
+      "spin_08"
+    ],
+    "alpha_pixels": 608546
+  }
+}

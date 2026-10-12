@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DungeonGenerationConfig" load_steps=2 format=3 uid="uid://bppgihaumkoxs"]
+
+[ext_resource type="Script" uid="uid://sp4gmaqjx07" path="res://scripts/dungeon/dungeon_generation_config.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+map_size = Vector2i(30, 22)
+minimum_rooms = 2
+maximum_rooms = 3
+minimum_room_size = Vector2i(11, 11)
+maximum_room_size = Vector2i(12, 12)
+skeleton_limit = 400
+placement_attempts = 1000
+layout_attempts = 32
+require_minimum_rooms = true
+invincible_player = true
