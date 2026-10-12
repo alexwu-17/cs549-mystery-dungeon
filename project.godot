@@ -21,6 +21,10 @@ run/main_scene.limit_testing_build="res://scenes/main/limit_testing_main.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+MusicManager="*res://scripts/audio/music_manager.gd"
+
 [input]
 
 basic_attack={

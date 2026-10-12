@@ -55,6 +55,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func start_new_run() -> void:
 	cancel_introduction()
+	MusicManager.claim(self)
+	MusicManager.play_dungeon(self, true)
 	player.transition_locked = true
 	floor_introduction.cover_immediately()
 	cancel_round()
@@ -78,6 +80,10 @@ func _process(_delta: float) -> void:
 
 func update_presentation() -> void:
 	presentation_camera.follow_sprite(player.get_node("PlayerSprite"))
+	player.character_visual.clear_ramp_intersection(presentation_camera, player.dungeon_data, player.grid_position, player.attack_leap)
+	for enemy in enemies:
+		if is_instance_valid(enemy):
+			enemy.character_visual.clear_ramp_intersection(presentation_camera, enemy.dungeon_data, enemy.grid_position, enemy.attack_leap)
 	dungeon_renderer.update_occlusion(presentation_camera, player.grid_position, presentation_camera.sprite_samples(player.get_node("PlayerSprite")))
 
 
@@ -199,6 +205,7 @@ func _on_player_died() -> void:
 	# Finish the player's presentation, but let the lethal skeleton's leap play
 	# beneath the immediate overlay. Floor replacement frees enemy animations.
 	game_over = true
+	MusicManager.stop_music(self)
 	player.gameplay_enabled = false
 	cancel_introduction()
 	dialogue.append_event(&"game_over")
@@ -217,6 +224,7 @@ func _on_boss_defeated() -> void:
 	if game_mode != GameModeConfig.Mode.DEMO:
 		return
 	victory = true
+	MusicManager.stop_music(self)
 	cancel_introduction()
 	dialogue.append_event(&"victory")
 	cancel_round()
@@ -240,6 +248,7 @@ func cancel_round() -> void:
 
 
 func _exit_tree() -> void:
+	MusicManager.release(self)
 	cancel_introduction()
 	cancel_round()
 
@@ -327,6 +336,8 @@ func cancel_introduction() -> void:
 
 func _begin_floor_introduction(advancing: bool) -> void:
 	player.transition_locked = true
+	if advancing and game_mode == GameModeConfig.Mode.DEMO and floor_number == GameModeConfig.DEMO_FINAL_FLOOR - 1 and not use_elevation_test:
+		MusicManager.stop_music(self)
 	cancel_round()
 	var token := transition_generation
 	if advancing:
@@ -341,4 +352,7 @@ func _begin_floor_introduction(advancing: bool) -> void:
 	await floor_introduction.reveal(dungeon_name, floor_number, str(floor_subtitles.get(floor_number, "")), hold_override)
 	if token != transition_generation or floor_introduction.disposed or game_over or victory:
 		return
+	# reveal() returns after the final fade and introduction_finished emission.
+	if GameModeConfig.is_arena(game_mode, floor_number) and not use_elevation_test:
+		MusicManager.play_boss(self)
 	player.transition_locked = false

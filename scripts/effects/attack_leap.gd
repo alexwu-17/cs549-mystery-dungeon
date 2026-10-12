@@ -11,6 +11,16 @@ var animation: Tween
 var visual: Node3D
 var starting_transform: Transform3D
 var displacement: Vector3
+var surface_offset: Vector3 = Vector3.ZERO
+
+func set_surface_offset(offset: Vector3) -> void:
+	# Additive presentation correction, also applied to the Tween's baseline.
+	var target := get_node(visual_path) as Node3D
+	var delta: Vector3 = target.get_parent().global_basis.inverse() * (offset - surface_offset)
+	target.position += delta
+	if active:
+		starting_transform.origin += delta
+	surface_offset = offset
 
 func play(direction: Vector2i) -> void:
 	if active or absi(direction.x) + absi(direction.y) != 1:

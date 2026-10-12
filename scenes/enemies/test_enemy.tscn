@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://duwrlsjn2sepb" path="res://scripts/enemies/skeleton.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://dj56fydcymhld" path="res://assets/sprites/skeleton/front.png" id="2"]
 [ext_resource type="Script" uid="uid://bcsgmivclfh5c" path="res://scripts/effects/character_visual.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/effects/attack_leap.gd" id="4"]
+[ext_resource type="Script" uid="uid://bh3y6aguitga" path="res://scripts/effects/attack_leap.gd" id="4"]
 
 [node name="TestEnemy" type="Node3D"]
 script = ExtResource("1")
