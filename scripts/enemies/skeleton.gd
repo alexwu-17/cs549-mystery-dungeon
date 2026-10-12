@@ -13,6 +13,7 @@ var health: HealthScript = HealthScript.new()
 var level: int = 5
 var damage_material: StandardMaterial3D
 var damage_tween: Tween
+@onready var attack_leap: AttackLeap = $AttackLeap
 
 var grid_position: Vector2i
 var dungeon_data: DungeonData
@@ -20,6 +21,7 @@ var dungeon_renderer: DungeonRenderer
 
 
 func setup(start: Vector2i, data: DungeonData, renderer: DungeonRenderer) -> void:
+	attack_leap.finish()
 	health.reset(maximum_hp)
 	grid_position = start
 	dungeon_data = data
@@ -34,18 +36,23 @@ func take_turn(player_position: Vector2i, occupied: Dictionary) -> void:
 	if difference == Vector2i.ZERO or dungeon_data.can_traverse(grid_position, player_position):
 		if difference != Vector2i.ZERO:
 			print("SKELETON ATTACK at ", grid_position, ": ", attack_damage)
+			attack_leap.finish()
+			attack_leap.play(difference)
 			attack_requested.emit(attack_damage)
 		return
 	var next := next_step_toward(player_position, occupied)
 	if next == grid_position or next == player_position or occupied.has(next):
 		return
 	print("SKELETON MOVE: ", grid_position, " -> ", next)
+	attack_leap.finish()
 	grid_position = next
 	position = dungeon_renderer.get_entity_world_position(grid_position)
 
 
 func receive_damage(amount: int) -> void:
 	health.damage(amount)
+	if health.current == 0:
+		attack_leap.finish()
 	print("SKELETON HP at ", grid_position, ": ", health.current, "/", health.maximum)
 	if has_node("EnemyMesh"):
 		if damage_material == null:
@@ -82,3 +89,8 @@ func next_step_toward(goal: Vector2i, occupied: Dictionary) -> Vector2i:
 	while step != grid_position and previous[step] != grid_position:
 		step = previous[step]
 	return step
+
+
+func complete_action() -> void:
+	if attack_leap.active:
+		await attack_leap.presentation_finished

@@ -25,6 +25,7 @@ func validate() -> void:
 	var dead_tile: Vector2i = main.player.grid_position
 	main.player.try_move(Vector2i.RIGHT)
 	main.player.basic_attack()
+	load("res://tests/round_test_helper.gd").complete(main)
 	assert(main.player.grid_position == dead_tile)
 	var restart := InputEventKey.new()
 	restart.physical_keycode = KEY_R
@@ -99,6 +100,37 @@ func validate() -> void:
 	points[0] = corridor_mesh.global_position + corridor_sight * 4
 	renderer.update_occlusion(camera, Vector2i(2, 2), points)
 	assert(not corridor.occluded and corridor_mesh.visible) # Support/same height.
+	# All five transition tiles participate; the slope remains one visual unit.
+	data.set_tile(Vector2i(3, 0), DungeonData.TileType.CORRIDOR, -1)
+	var transition_meshes := 0
+	for visual in renderer.fog_visuals:
+		if not data.reserved_transitions.has(visual.tiles[0]):
+			continue
+		transition_meshes += 1
+		assert(visual.candidate)
+		var transition_mesh: MeshInstance3D = visual.mesh
+		var center := transition_mesh.global_transform * transition_mesh.get_aabb().get_center()
+		var transition_sight := (center - camera.global_position).normalized()
+		points[0] = center + transition_sight * 4
+		# The lower buffer at height zero must not hide for a same-level player.
+		renderer.update_occlusion(camera, Vector2i.ZERO, points)
+		if data.get_tile(visual.tiles[0]) == DungeonData.TileType.RAMP or data.get_elevation(visual.tiles[0]) > 0:
+			assert(visual.occluded and not transition_mesh.visible)
+			var fog_material = transition_mesh.material_override
+			renderer.apply_fog()
+			assert(not transition_mesh.visible and transition_mesh.material_override == fog_material)
+		else:
+			assert(not visual.occluded)
+		renderer.update_occlusion(camera, Vector2i(3, 0), points)
+		assert(visual.occluded and not transition_mesh.visible) # All five tiles above -1.
+		# Support geometry is protected, including the continuous ramp mesh.
+		for support_tile: Vector2i in visual.tiles:
+			renderer.update_occlusion(camera, support_tile, points)
+			assert(not visual.occluded and transition_mesh.visible)
+		points[0] += camera.global_basis.x * 10
+		renderer.update_occlusion(camera, Vector2i.ZERO, points)
+		assert(not visual.occluded and transition_mesh.visible)
+	assert(transition_meshes == 3) # Two buffers plus one three-tile slope.
 	# Track actual rendered heights on a standardized ramp in both directions,
 	# including -1 and 0 surfaces rather than only the legacy fixture's 0/+1.
 	data.set_tile(Vector2i(4, 0), DungeonData.TileType.CORRIDOR, -1)

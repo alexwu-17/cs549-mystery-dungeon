@@ -10,6 +10,7 @@ func _initialize() -> void:
 func validate() -> void:
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
+	main.turn_rng.seed = 1
 	var data := DungeonData.new()
 	for x in range(7):
 		for y in range(3):
@@ -25,18 +26,24 @@ func validate() -> void:
 	main.player.moved.connect(func(): moves += 1)
 	var first: Skeleton = main.enemies[0]
 	var second: Skeleton = main.enemies[1]
+	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.LEFT)
 	assert(moves == 0 and first.grid_position == Vector2i(5, 1))
+	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.RIGHT)
 	assert(moves == 1 and first.grid_position == Vector2i(4, 1))
 	assert(second.grid_position == Vector2i(5, 1))
+	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.RIGHT)
 	assert(moves == 2 and first.grid_position == Vector2i(3, 1))
+	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.RIGHT)
 	assert(moves == 2 and main.player.grid_position == Vector2i(2, 1))
 	assert(first.health.current == 6 and main.player.health.current == 20)
 	assert(first.grid_position == Vector2i(3, 1) and second.grid_position == Vector2i(4, 1))
+	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.DOWN)
+	load("res://tests/round_test_helper.gd").complete(main)
 	assert(moves == 3)
 	assert(main.enemy_occupancy.size() == 2)
 	for enemy: Skeleton in main.enemies:
@@ -59,7 +66,9 @@ func validate() -> void:
 	main.player.setup(Vector2i(0, 1), data, main.dungeon_renderer)
 	var old_first: WeakRef = weakref(first)
 	var old_second: WeakRef = weakref(second)
+	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.DOWN)
+	load("res://tests/round_test_helper.gd").complete(main)
 	assert(moves == 3)
 	assert(old_first.get_ref() == null and old_second.get_ref() == null)
 	assert(main.enemy_occupancy.size() == main.enemies.size())

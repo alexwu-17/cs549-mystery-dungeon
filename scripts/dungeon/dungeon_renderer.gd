@@ -123,8 +123,8 @@ func create_stairs_tile(grid_position: Vector2i) -> void:
 func register_fog_visual(mesh: MeshInstance3D, covered: Array[Vector2i], stairs: bool = false) -> void:
 	var tile: Vector2i = covered[0]
 	var room := dungeon_data.get_room_id(tile)
-	var terrain_candidate := room >= 0 or dungeon_data.get_tile(tile) == DungeonData.TileType.CORRIDOR
-	var candidate := covered.size() == 1 and terrain_candidate and dungeon_data.get_tile(tile) != DungeonData.TileType.RAMP and not dungeon_data.reserved_transitions.has(tile)
+	var terrain_candidate := room >= 0 or dungeon_data.get_tile(tile) in [DungeonData.TileType.CORRIDOR, DungeonData.TileType.RAMP] or dungeon_data.reserved_transitions.has(tile)
+	var candidate := terrain_candidate
 	fog_visuals.append({"mesh": mesh, "tiles": covered, "stairs": stairs, "room": room, "candidate": candidate, "occluded": false, "fog_visible": true})
 
 
@@ -155,7 +155,13 @@ func update_occlusion(camera: Camera3D, player_tile: Vector2i, sprite_points: Ar
 	for visual in fog_visuals:
 		var mesh: MeshInstance3D = visual.mesh
 		visual.occluded = false
-		var higher_terrain := dungeon_data.get_elevation(visual.tiles[0]) > dungeon_data.surface_elevation(player_tile)
+		var tile: Vector2i = visual.tiles[0]
+		# A slope extends above its stored lower elevation. Buffers retain their
+		# own flat heights and remain independently hideable.
+		var top_elevation := float(dungeon_data.get_elevation(tile))
+		if dungeon_data.get_tile(tile) == DungeonData.TileType.RAMP:
+			top_elevation += 1.0
+		var higher_terrain := top_elevation > dungeon_data.surface_elevation(player_tile)
 		var own_room: bool = player_room >= 0 and visual.room == player_room
 		if visual.candidate and higher_terrain and not own_room and not visual.tiles.has(player_tile) and visual.fog_visible:
 			# Transform the segment into the mesh's local frame. This tests its

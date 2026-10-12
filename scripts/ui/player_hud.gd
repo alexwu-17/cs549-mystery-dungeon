@@ -5,8 +5,17 @@ const HealthScript = preload("res://scripts/entities/health.gd")
 
 
 func set_game_over(active: bool) -> void:
+	$Screen/GameOver/Center/Text/Title.text = "Game Over"
+	$Screen/GameOver/Center/Text/Title.add_theme_color_override("font_color", Color(1, 0.15, 0.15))
+	$Screen/GameOver/Center/Text/Hint.text = "Press R to restart the game"
 	$Screen/GameOver.color = Color(0, 0, 0, game_over_opacity)
 	$Screen/GameOver.visible = active
+
+func set_victory() -> void:
+	set_game_over(true)
+	$Screen/GameOver/Center/Text/Title.text = "Victory!"
+	$Screen/GameOver/Center/Text/Title.add_theme_color_override("font_color", Color(0.2, 1, 0.3))
+	$Screen/GameOver/Center/Text/Hint.text = "You defeated the Minotaur!\nPress R to restart the demo."
 
 @onready var hp_bar: ProgressBar = $Screen/TopBar/Row/HPBar
 @onready var hp_label: Label = $Screen/TopBar/Row/HPLabel

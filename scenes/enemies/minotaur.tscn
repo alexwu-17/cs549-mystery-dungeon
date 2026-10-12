@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/enemies/minotaur.gd" id="1"]
+[ext_resource type="Texture2D" path="res://icon.svg" id="2"]
+[node name="Minotaur" type="Node3D"]
+script = ExtResource("1")
+[node name="BossSprite" type="Sprite3D" parent="."]
+position = Vector3(0, 1, 0.5)
+pixel_size = 0.015625
+billboard = 1
+texture = ExtResource("2")

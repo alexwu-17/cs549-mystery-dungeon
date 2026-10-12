@@ -48,38 +48,52 @@ static func assign_heights(count: int) -> Array[int]:
 	return result
 
 
-static func create_test_dungeon(placement_attempts: int = 250, map_size: Vector2i = Vector2i(COLS, ROWS)) -> DungeonData:
+static func create_configured_dungeon(config: DungeonGenerationConfig) -> DungeonData:
+	var errors := config.validation_errors()
+	if not errors.is_empty():
+		push_error("Invalid Limit Testing configuration: " + "; ".join(errors))
+		return null
+	return create_test_dungeon(config.placement_attempts, config.map_size, config)
+
+
+static func create_test_dungeon(placement_attempts: int = 250, map_size: Vector2i = Vector2i(COLS, ROWS), config: DungeonGenerationConfig = null) -> DungeonData:
 	var routing_attempts := 0
-	for attempt in range(MAX_LAYOUT_ATTEMPTS):
-		var dungeon := try_layout(placement_attempts, map_size)
+	var limit := MAX_LAYOUT_ATTEMPTS if config == null else config.layout_attempts
+	var skeletons := 3 if config == null else config.skeleton_limit
+	for attempt in range(limit):
+		var dungeon := try_layout(placement_attempts, map_size, config)
 		routing_attempts += dungeon.routing_attempts
 		if not dungeon.connections.is_empty() and validate_floor(dungeon):
 			dungeon.generation_attempts = attempt + 1
 			dungeon.routing_attempts = routing_attempts
-			finish_spawns(dungeon, map_size)
+			finish_spawns(dungeon, map_size, skeletons)
 			last_statistics = {"layouts": attempt + 1, "routes": routing_attempts, "fallback": false, "size": map_size}
 			return dungeon
-	push_warning("Elevation generation exhausted %d layouts at %s; using known-valid elevated fallback." % [MAX_LAYOUT_ATTEMPTS, map_size])
+	push_warning("Elevation generation exhausted %d layouts at %s; using known-valid elevated fallback." % [limit, map_size])
+	if config != null:
+		push_warning("Limit Testing fallback uses two 4x4 rooms, irrespective of requested room counts/dimensions.")
 	var fallback := create_fallback_dungeon()
-	fallback.generation_attempts = MAX_LAYOUT_ATTEMPTS
+	fallback.generation_attempts = limit
 	fallback.routing_attempts = routing_attempts
-	finish_spawns(fallback, map_size)
-	last_statistics = {"layouts": MAX_LAYOUT_ATTEMPTS, "routes": routing_attempts, "fallback": true, "size": map_size}
+	finish_spawns(fallback, map_size, skeletons)
+	last_statistics = {"layouts": limit, "routes": routing_attempts, "fallback": true, "size": map_size}
 	return fallback
 
 
-static func try_layout(placement_attempts: int, size: Vector2i) -> DungeonData:
+static func try_layout(placement_attempts: int, size: Vector2i, config: DungeonGenerationConfig = null) -> DungeonData:
 	var dungeon := DungeonData.new()
-	var desired_rooms := rng.randi_range(5, 7)
+	var desired_rooms := rng.randi_range(5 if config == null else config.minimum_rooms, 7 if config == null else config.maximum_rooms)
 	for attempt in range(placement_attempts):
-		var w := rng.randi_range(4, 7)
-		var h := rng.randi_range(4, 6)
+		var w := rng.randi_range(4 if config == null else config.minimum_room_size.x, 7 if config == null else config.maximum_room_size.x)
+		var h := rng.randi_range(4 if config == null else config.minimum_room_size.y, 6 if config == null else config.maximum_room_size.y)
 		var room := Rect2i(rng.randi_range(1, size.x - w - 2), rng.randi_range(1, size.y - h - 2), w, h)
 		if not dungeon.rooms.any(func(other: Rect2i) -> bool: return other.grow(1).intersects(room)):
 			dungeon.rooms.append(room)
 		if dungeon.rooms.size() >= desired_rooms:
 			break
 	if dungeon.rooms.size() < 2:
+		return dungeon
+	if config != null and config.require_minimum_rooms and dungeon.rooms.size() < config.minimum_rooms:
 		return dungeon
 	dungeon.room_elevations = assign_heights(dungeon.rooms.size())
 	for id in range(dungeon.rooms.size()):
@@ -133,7 +147,7 @@ static func validate_floor(dungeon: DungeonData) -> bool:
 	return not staircase_candidates(dungeon, reachable).is_empty()
 
 
-static func finish_spawns(dungeon: DungeonData, size: Vector2i) -> void:
+static func finish_spawns(dungeon: DungeonData, size: Vector2i, skeleton_limit: int = 3) -> void:
 	grid = create_2D_array(size.y, size.x, TileType.VOID)
 	room_id_grid = create_2D_array(size.y, size.x, -2)
 	discovered = create_2D_array(size.y, size.x, false)
@@ -145,7 +159,7 @@ static func finish_spawns(dungeon: DungeonData, size: Vector2i) -> void:
 		for y in range(room.position.y, room.end.y):
 			for x in range(room.position.x, room.end.x):
 				room_id_grid[y][x] = id
-	place_spawns(dungeon, reachable_tiles(dungeon))
+	place_spawns(dungeon, reachable_tiles(dungeon), skeleton_limit)
 	grid[dungeon.stairs_position.y][dungeon.stairs_position.x] = TileType.STAIRS
 
 
@@ -184,7 +198,7 @@ static func reachable_tiles(dungeon: DungeonData) -> Dictionary:
 	return visited
 
 
-static func place_spawns(dungeon: DungeonData, reachable: Dictionary) -> void:
+static func place_spawns(dungeon: DungeonData, reachable: Dictionary, skeleton_limit: int = 3) -> void:
 	# Any reachable room tile is eligible, including the starting room.
 	# Keep the standardized ramp and its buffers intact.
 	var stair_candidates := staircase_candidates(dungeon, reachable)
@@ -195,7 +209,9 @@ static func place_spawns(dungeon: DungeonData, reachable: Dictionary) -> void:
 	for position: Vector2i in reachable:
 		if position != dungeon.player_spawn and position != stairs and room_id_grid[position.y][position.x] >= 0:
 			candidates.append(position)
-	for i in range(mini(3, candidates.size())):
+	if skeleton_limit > candidates.size():
+		push_warning("Requested %d skeletons; only %d unique room spawn tiles are available." % [skeleton_limit, candidates.size()])
+	for i in range(mini(skeleton_limit, candidates.size())):
 		var choice := rng.randi_range(0, candidates.size() - 1)
 		dungeon.enemy_spawns.append(candidates[choice])
 		candidates.remove_at(choice)

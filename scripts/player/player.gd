@@ -15,8 +15,10 @@ var level: int = 5
 # Presentation reference stays at the departure level until leaving a ramp.
 var fog_elevation: int = 0
 var gameplay_enabled: bool = true
+var round_locked: bool = false
 var facing: Vector2i = Vector2i.DOWN
 var damage_tween: Tween
+@onready var attack_leap: AttackLeap = $AttackLeap
 
 var grid_position: Vector2i = Vector2i.ZERO ## The player's real position on a 2D grid
 var dungeon_data: DungeonData
@@ -29,6 +31,7 @@ func setup(
 	data: DungeonData,
 	renderer: DungeonRenderer
 ) -> void:
+	attack_leap.finish()
 	grid_position = start_position
 	dungeon_data = data
 	dungeon_renderer = renderer
@@ -66,7 +69,7 @@ func _unhandled_input(event: InputEvent) -> void:
 ## Movement functions below
 
 func try_move(direction: Vector2i) -> void:
-	if not gameplay_enabled or health.current == 0 or dungeon_data == null or absi(direction.x) + absi(direction.y) != 1:
+	if round_locked or attack_leap.active or not gameplay_enabled or health.current == 0 or dungeon_data == null or absi(direction.x) + absi(direction.y) != 1:
 		return
 	facing = direction
 	var target_position := grid_position + direction
@@ -100,8 +103,9 @@ func try_move(direction: Vector2i) -> void:
 
 
 func basic_attack() -> void:
-	if not gameplay_enabled or health.current == 0 or dungeon_data == null:
+	if round_locked or attack_leap.active or not gameplay_enabled or health.current == 0 or dungeon_data == null:
 		return
+	attack_leap.play(facing)
 	attack_requested.emit(grid_position + facing)
 
 
@@ -114,3 +118,8 @@ func receive_damage(amount: int) -> void:
 		$PlayerSprite.modulate = Color(1, 0.3, 0.3)
 		damage_tween = create_tween()
 		damage_tween.tween_property($PlayerSprite, "modulate", Color.WHITE, 0.15)
+
+
+func complete_action() -> void:
+	if attack_leap.active:
+		await attack_leap.presentation_finished

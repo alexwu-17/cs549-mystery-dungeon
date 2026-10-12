@@ -60,8 +60,10 @@ func validate() -> void:
 	main.player.health.damage(5)
 	main.refresh_fog()
 	main.player.basic_attack()
+	load("res://tests/round_test_helper.gd").complete(main)
 	assert(hud.hp_bar.value == 13 and minimap.visible_enemy_tiles().size() == 1)
 	main.player.basic_attack()
+	load("res://tests/round_test_helper.gd").complete(main)
 	assert(hud.hp_bar.value == 16 and minimap.visible_enemy_tiles().is_empty())
 	main.player.level = 7
 	main.player.setup(Vector2i(11, 2), main.dungeon, main.dungeon_renderer)

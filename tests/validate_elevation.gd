@@ -111,7 +111,7 @@ func check_orientation(direction: Vector2i) -> void:
 		data.set_tile(side, DungeonData.TileType.FLOOR, -1)
 		assert(not data.can_traverse(tile, side) and not data.can_traverse(side, tile))
 	# Walk the whole segment with a player, then with a skeleton, in both directions.
-	var player := Player.new()
+	var player: Player = load("res://scenes/player/player.tscn").instantiate()
 	root.add_child(player)
 	player.health.reset(20)
 	player.setup(lower, data, renderer)
@@ -121,7 +121,7 @@ func check_orientation(direction: Vector2i) -> void:
 	for index in range(4):
 		player.try_move(-direction)
 	assert(player.grid_position == lower)
-	var enemy := Skeleton.new()
+	var enemy: Skeleton = load("res://scenes/enemies/test_enemy.tscn").instantiate()
 	root.add_child(enemy)
 	enemy.setup(lower - direction, data, renderer)
 	for index in range(5):
@@ -157,6 +157,7 @@ func check_orientation(direction: Vector2i) -> void:
 	main.player.setup(cliff, data, main.dungeon_renderer)
 	main.player.facing = direction
 	main.player.basic_attack()
+	load("res://tests/round_test_helper.gd").complete(main)
 	assert(main.enemies[0].health.current == 6 and main.player.health.current == 20)
 	main.free()
 	player.free()

@@ -10,6 +10,11 @@ var dungeon: DungeonData
 var player_tile: Vector2i
 var enemies: Array[Skeleton] = []
 var map_bounds: Rect2i
+var boss: Minotaur
+
+func refresh_boss(current_boss: Minotaur) -> void:
+	boss = current_boss
+	queue_redraw()
 
 
 func _ready() -> void:
@@ -64,4 +69,6 @@ func _draw() -> void:
 		draw_rect(Rect2(corner + Vector2.ONE * cell * 0.15, Vector2.ONE * cell * 0.7), STAIRS_COLOR, false, 1.5)
 	for tile in visible_enemy_tiles():
 		draw_circle(origin + (Vector2(tile - map_bounds.position) + Vector2.ONE * 0.5) * cell, maxf(1.5, cell * 0.3), ENEMY_COLOR)
+	if is_instance_valid(boss) and boss.health.current > 0 and boss.visible:
+		draw_circle(origin + (Vector2(boss.grid_position - map_bounds.position) + Vector2.ONE * 0.5) * cell, maxf(2.0, cell * 0.6), ENEMY_COLOR)
 	draw_circle(origin + (Vector2(player_tile - map_bounds.position) + Vector2.ONE * 0.5) * cell, maxf(1.5, cell * 0.35), PLAYER_COLOR)
