@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=3 format=3 uid="uid://bitmaqphdj3ii"]
 
-[ext_resource type="PackedScene" path="res://scenes/main/main.tscn" id="1"]
+[ext_resource type="PackedScene" uid="uid://b7cqo4g87duu1" path="res://scenes/main/main.tscn" id="1"]
 [ext_resource type="Resource" path="res://config/limit_testing.tres" id="2"]
 
 [node name="LimitTestingMain" instance=ExtResource("1")]

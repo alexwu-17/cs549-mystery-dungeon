@@ -1,10 +1,16 @@
-[gd_scene load_steps=6 format=3 uid="uid://b7cqo4g87duu1"]
+[gd_scene load_steps=7 format=3 uid="uid://b7cqo4g87duu1"]
 
 [ext_resource type="Script" uid="uid://vto7pmfc8dce" path="res://scripts/dungeon/dungeon_renderer.gd" id="1_hyk8p"]
 [ext_resource type="Script" uid="uid://caqff8p44lnlc" path="res://scripts/core/main.gd" id="1_iuonh"]
 [ext_resource type="PackedScene" uid="uid://bpxt2riafgpm" path="res://scenes/player/player.tscn" id="3_l3cfh"]
 [ext_resource type="PackedScene" path="res://scenes/ui/player_hud.tscn" id="4_hud"]
 [ext_resource type="Script" uid="uid://d1nbrq084gdg8" path="res://scripts/core/presentation_camera.gd" id="5_camera"]
+
+[sub_resource type="Environment" id="Environment_shared"]
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.25
+reflected_light_source = 2
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_iuonh")
@@ -17,6 +23,15 @@ script = ExtResource("5_camera")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, 0.433013, -0.25, 0, 0.5, 0.866025, 0.5, -0.75, 0.433013, 0, 0, 0)
+light_energy = 0.9
+light_angular_distance = 0.5
+shadow_enabled = true
+shadow_bias = 0.03
+shadow_normal_bias = 0.2
+directional_shadow_max_distance = 40.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_shared")
 
 [node name="DungeonRenderer" type="Node3D" parent="."]
 script = ExtResource("1_hyk8p")

@@ -44,21 +44,25 @@ func validate() -> void:
 	renderer.free()
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.get_node("Entities").get_child_count() == 3)
 	for direction: Vector2i in DungeonData.CARDINALS:
 		var neighbor: Vector2i = main.dungeon.stairs_position - direction
 		if main.dungeon.can_traverse(neighbor, main.dungeon.stairs_position):
 			main.player.setup(neighbor, main.dungeon, main.dungeon_renderer)
 			main.player.try_move(direction)
+			load("res://tests/round_test_helper.gd").complete_introduction(main)
 			break
 	assert(main.player.grid_position == main.dungeon.player_spawn)
 	assert(main.get_node("Entities").get_child_count() == 3)
 	main.use_elevation_test = true
 	main.load_test_floor()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.get_node("Entities").get_child_count() == 1)
 	# Move from immediately above stairs to trigger the actual signal/reset path.
 	main.player.setup(Vector2i(11, 2), main.dungeon, main.dungeon_renderer)
 	main.player.try_move(Vector2i.DOWN)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.grid_position == Vector2i(2, 2))
 	assert(main.get_node("Entities").get_child_count() == 1)
 	main.free()

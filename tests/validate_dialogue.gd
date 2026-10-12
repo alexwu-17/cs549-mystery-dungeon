@@ -9,6 +9,7 @@ func validate() -> void:
 	var main = load("res://scenes/main/main.tscn").instantiate()
 	main.use_elevation_test = true
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	var dialogue: CombatDialogue = main.dialogue
 	assert(dialogue.history.is_empty() and not dialogue.panel.visible)
 	assert(dialogue.text.scroll_active == false and dialogue.visible_lines == 3)
@@ -46,14 +47,17 @@ func validate() -> void:
 	# Floor changes also preserve a currently running inactivity timer.
 	var active_remaining := dialogue.timer.time_left
 	main.load_test_floor()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(dialogue.timer.time_left == active_remaining and dialogue.panel.visible)
 	# Floor changes neither clear history nor activate hidden dialogue/timers.
 	dialogue.timer.stop()
 	dialogue.timer.timeout.emit()
 	var count := dialogue.history.size()
 	main.load_test_floor()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(dialogue.history.size() == count and not dialogue.panel.visible and dialogue.timer.is_stopped())
 	main.start_new_run()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(dialogue.history.is_empty() and not dialogue.panel.visible)
 	# A silent player action and silent round produce no entries or timer.
 	main.dungeon.enemy_spawns.clear()

@@ -9,6 +9,7 @@ func validate() -> void:
 	var main = load("res://scenes/main/main.tscn").instantiate()
 	main.use_elevation_test = true
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	var camera: Camera3D = main.presentation_camera
 	var sprite: Sprite3D = main.player.get_node("PlayerSprite")
 	assert(camera.projection == Camera3D.PROJECTION_PERSPECTIVE)
@@ -24,6 +25,7 @@ func validate() -> void:
 	assert(is_equal_approx(main.hud.get_node("Screen/GameOver").color.a, 0.7))
 	var dead_tile: Vector2i = main.player.grid_position
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	main.player.basic_attack()
 	load("res://tests/round_test_helper.gd").complete(main)
 	assert(main.player.grid_position == dead_tile)
@@ -31,6 +33,7 @@ func validate() -> void:
 	restart.physical_keycode = KEY_R
 	restart.pressed = true
 	main._unhandled_input(restart)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(not main.game_over and not main.hud.get_node("Screen/GameOver").visible)
 	assert(main.player.health.current == 20 and main.floor_number == 1 and main.player.level == 5)
 	assert(main.hud.minimap.dungeon == main.dungeon)

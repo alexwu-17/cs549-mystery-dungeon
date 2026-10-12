@@ -8,6 +8,7 @@ func _initialize() -> void:
 func validate() -> void:
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	var data := DungeonData.new()
 	for x in range(6):
 		data.set_tile(Vector2i(x, 0), DungeonData.TileType.FLOOR)
@@ -40,6 +41,7 @@ func validate() -> void:
 	assert(requests[0] == 1 and enemy.grid_position == Vector2i(4, 0))
 	space.pressed = true
 	main.player.try_move(Vector2i.UP)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.facing == Vector2i.UP and enemy.grid_position == Vector2i(4, 0))
 	main.player.facing = Vector2i.RIGHT
 	main.player._unhandled_input(space)
@@ -69,6 +71,7 @@ func validate() -> void:
 	load("res://tests/round_test_helper.gd").complete(main)
 	assert(main.game_over and requests[0] == before)
 	main.start_new_run()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.facing == Vector2i.DOWN and main.player.health.current == 20)
 	main.free()
 	await process_frame

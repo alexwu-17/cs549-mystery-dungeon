@@ -65,16 +65,19 @@ func validate() -> void:
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
 	main.use_elevation_test = true
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.dungeon.is_bright(Vector2i(0, 0)))
 	assert(not main.enemies[0].visible)
 	main.player.setup(Vector2i(8, 2), main.dungeon, main.dungeon_renderer)
 	main.refresh_fog()
 	assert(main.enemies[0].visible)
 	main.player.try_move(Vector2i.LEFT) # Ramp is corridor; room enemy is hidden.
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	for enemy: Skeleton in main.enemies:
 		assert(enemy.visible == main.dungeon.is_bright(enemy.grid_position))
 	var old_data: DungeonData = main.dungeon
 	main.load_test_floor()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.dungeon != old_data)
 	assert(not main.dungeon.discovered_tiles.has(Vector2i(12, 4)))
 	assert(not main.enemies[0].visible)
@@ -88,6 +91,7 @@ func validate() -> void:
 	main.refresh_fog()
 	assert(main.enemies[0].visible)
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.grid_position == data.player_spawn and main.enemies[0].visible)
 	data.player_spawn = Vector2i(2, 1)
 	data.enemy_spawns = [Vector2i(3, 1)]
@@ -96,16 +100,20 @@ func validate() -> void:
 	main.refresh_fog()
 	assert(main.enemies[0].visible)
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.grid_position == data.player_spawn and main.enemies[0].visible)
 	# Elevation shading is independent of discovery and bright visibility.
 	main.use_elevation_test = true
 	main.load_test_floor()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	main.dungeon.enemy_spawns.clear()
 	main.spawn_test_enemies()
 	main.player.setup(Vector2i(6, 2), main.dungeon, main.dungeon_renderer)
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.fog_elevation == 0) # Uphill ramp retains departure level.
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.fog_elevation == 1)
 	for visual in main.dungeon_renderer.fog_visuals:
 		if visual.room == 0:
@@ -113,11 +121,15 @@ func validate() -> void:
 		elif visual.room == 1 and not visual.stairs:
 			assert(visual.mesh.material_override == main.dungeon_renderer.normal_material)
 	main.player.try_move(Vector2i.LEFT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.fog_elevation == 1) # Downhill ramp retains upper level.
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.fog_elevation == 1) # Turning back on the ramp.
 	main.player.try_move(Vector2i.LEFT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	main.player.try_move(Vector2i.LEFT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.fog_elevation == 0)
 	main.refresh_fog()
 	for visual in main.dungeon_renderer.fog_visuals:
@@ -130,6 +142,7 @@ func validate() -> void:
 	for step: Vector2i in [Vector2i(7, 0), Vector2i(8, 0), Vector2i(9, 0), Vector2i(10, 1), Vector2i(9, 1), Vector2i(8, 1), Vector2i(7, 1), Vector2i(6, 0)]:
 		var x := step.x
 		main.player.try_move(Vector2i.RIGHT if x > main.player.grid_position.x else Vector2i.LEFT)
+		load("res://tests/round_test_helper.gd").complete_introduction(main)
 		assert(main.player.fog_elevation == step.y)
 		for visual in main.dungeon_renderer.fog_visuals:
 			var tile: Vector2i = visual.tiles[0]
@@ -144,6 +157,7 @@ func validate() -> void:
 				var expected: StandardMaterial3D = main.dungeon_renderer.dim_material if main.dungeon.get_elevation(tile) == step.y else main.dungeon_renderer.other_elevation_material
 				assert(visual.mesh.material_override == expected)
 	main.load_test_floor()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.fog_elevation == 0)
 	main.free()
 	print("PASS: room/corridor doorway peeks, discovery, walls, whole ramps, stairs, blocking enemies, floor reset")

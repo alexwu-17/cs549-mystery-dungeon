@@ -22,6 +22,7 @@ func validate() -> void:
 	assert(health.current == 0 and deaths[0] == 1 and health.heal(3) == 0)
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	var data := DungeonData.new()
 	for x in range(5):
 		for y in range(3):
@@ -37,9 +38,12 @@ func validate() -> void:
 	var first: Skeleton = main.enemies[0]
 	var second: Skeleton = main.enemies[1]
 	main.player.try_move(Vector2i(1, 1))
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	main.player.try_move(Vector2i(-2, 0))
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(first.health.current == 6 and main.player.health.current == 20)
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(first.health.current == 6 and main.player.health.current == 20)
 	assert(second.grid_position == Vector2i(4, 1))
 	main.player.basic_attack()
@@ -55,6 +59,7 @@ func validate() -> void:
 	# A newly adjacent skeleton does not also attack on the turn it moves.
 	main.player.receive_damage(6)
 	main.player.try_move(Vector2i.DOWN)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.health.current == 14)
 	assert(main.player.grid_position == main.dungeon.player_spawn)
 	for enemy: Skeleton in main.enemies:
@@ -71,17 +76,20 @@ func validate() -> void:
 	for enemy: Skeleton in main.enemies:
 		enemy.attack_requested.connect(func(_damage: int): attacks[0] += 1)
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(not main.game_over and attacks[0] == 0)
 	main.player.basic_attack()
 	load("res://tests/round_test_helper.gd").complete(main)
 	assert(main.game_over and main.player.health.current == 0 and attacks[0] == 1)
 	main.player.try_move(Vector2i.DOWN)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.grid_position == data.player_spawn and attacks[0] == 1)
 	var old_enemy: WeakRef = weakref(main.enemies[0])
 	var restart := InputEventKey.new()
 	restart.physical_keycode = KEY_R
 	restart.pressed = true
 	main._unhandled_input(restart)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(not main.game_over and main.player.health.current == 20)
 	assert(old_enemy.get_ref() == null and main.enemies.size() == 3)
 	main.free()

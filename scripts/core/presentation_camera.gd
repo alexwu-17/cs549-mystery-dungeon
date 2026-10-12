@@ -33,6 +33,6 @@ func sprite_samples(sprite: Sprite3D) -> Array[Vector3]:
 	var points: Array[Vector3] = []
 	var rect := sprite.get_item_rect()
 	for uv in opaque_uvs:
-		var pixel := rect.position + rect.size * uv
-		points.append(sprite.global_position + global_basis.x * pixel.x * sprite.pixel_size * sprite.global_basis.x.length() - global_basis.y * pixel.y * sprite.pixel_size * sprite.global_basis.y.length())
+		var pixel := Vector2(rect.position.x + rect.size.x * uv.x, rect.position.y + rect.size.y * (1.0 - uv.y))
+		points.append(sprite.global_position + global_basis.x * pixel.x * sprite.pixel_size * sprite.global_basis.x.length() + global_basis.y * pixel.y * sprite.pixel_size * sprite.global_basis.y.length())
 	return points

@@ -12,6 +12,7 @@ signal presentation_event(kind: StringName)
 var health: HealthScript = HealthScript.new()
 var state: State = State.HUNTING
 var grid_position: Vector2i
+@onready var character_visual: CharacterVisual = $VisualController
 var facing: Vector2i = Vector2i.DOWN
 var threatened_tiles: Array[Vector2i] = []
 var markers: Array[MeshInstance3D] = []
@@ -19,6 +20,8 @@ var dungeon_data: DungeonData
 var dungeon_renderer: DungeonRenderer
 
 func setup(center: Vector2i, data: DungeonData, renderer: DungeonRenderer) -> void:
+	character_visual.cancel()
+	character_visual.face(facing)
 	grid_position = center
 	dungeon_data = data
 	dungeon_renderer = renderer
@@ -66,6 +69,8 @@ func face_player(player_tile: Vector2i) -> void:
 	elif delta.x != 0:
 		facing = Vector2i(signi(delta.x), 0)
 
+	character_visual.face(facing)
+
 func take_turn(player_tile: Vector2i) -> void:
 	if state == State.DEAD:
 		return
@@ -73,6 +78,7 @@ func take_turn(player_tile: Vector2i) -> void:
 		var hit := threatened_tiles.has(player_tile)
 		clear_charge()
 		state = State.COOLDOWN
+		character_visual.spin()
 		print("MINOTAUR CHARGE: ", "HIT" if hit else "MISSED")
 		if hit:
 			attack_requested.emit(attack_damage)
@@ -89,6 +95,7 @@ func take_turn(player_tile: Vector2i) -> void:
 	if attack_tiles().has(player_tile):
 		state = State.CHARGING
 		threatened_tiles = attack_tiles()
+		character_visual.show_frame("charge")
 		show_charge()
 		presentation_event.emit(&"charging")
 		print("MINOTAUR CHARGING: ", threatened_tiles)
@@ -105,6 +112,7 @@ func take_turn(player_tile: Vector2i) -> void:
 		if step != Vector2i.ZERO and can_occupy(grid_position + step, player_tile):
 			grid_position += step
 			facing = step
+			character_visual.face(facing)
 			position = dungeon_renderer.get_entity_world_position(grid_position)
 			print("MINOTAUR MOVE: ", grid_position)
 			return
@@ -143,6 +151,7 @@ func receive_damage(amount: int) -> void:
 
 func _on_death() -> void:
 	state = State.DEAD
+	character_visual.cancel()
 	clear_charge()
 	for child in get_children():
 		if child is StatChangeEffect:
@@ -152,5 +161,4 @@ func _on_death() -> void:
 
 
 func complete_action() -> void:
-	# The stat arrow is decorative; charge timing belongs to take_turn.
-	pass
+	await character_visual.complete_action()

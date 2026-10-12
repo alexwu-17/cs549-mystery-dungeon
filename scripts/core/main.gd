@@ -3,6 +3,12 @@ extends Node3D
 const TEST_ENEMY_SCENE := preload("res://scenes/enemies/test_enemy.tscn")
 const BOSS_SCENE := preload("res://scenes/enemies/minotaur.tscn")
 
+@export var dungeon_name: String = "Demo Cave"
+@export var floor_subtitles: Dictionary = {}
+@export_range(0.0, 10.0, 0.05) var final_floor_text_hold_duration: float = 1.0
+var transition_generation: int = 0
+@onready var floor_introduction: FloorIntroduction = $HUD/Screen/FloorIntroduction
+
 @export var use_elevation_test: bool = false
 @export var game_mode: GameModeConfig.Mode = GameModeConfig.Mode.INFINITE
 @export var generation_config: DungeonGenerationConfig
@@ -48,6 +54,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func start_new_run() -> void:
+	cancel_introduction()
+	player.transition_locked = true
+	floor_introduction.cover_immediately()
 	cancel_round()
 	dialogue.clear_history()
 	game_over = false
@@ -60,7 +69,7 @@ func start_new_run() -> void:
 	floor_number = 1
 	player.health.reset(player.maximum_hp)
 	print("NEW RUN: PLAYER HP ", player.health.current, "/", player.health.maximum)
-	load_test_floor()
+	_begin_floor_introduction(false)
 
 
 func _process(_delta: float) -> void:
@@ -108,11 +117,9 @@ func load_test_floor() -> void:
 	player.gameplay_enabled = not game_over and not victory
 	
 func _on_stairs_reached() -> void:
-	if game_over or victory or loading_floor or not GameModeConfig.can_advance(game_mode, floor_number):
+	if player.transition_locked or game_over or victory or loading_floor or not GameModeConfig.can_advance(game_mode, floor_number):
 		return
-	floor_number += 1
-	print("Loading next test floor...")
-	load_test_floor()
+	_begin_floor_introduction(true)
 
 func spawn_test_enemies() -> void:
 	# Remove enemies from the previous floor.
@@ -151,7 +158,7 @@ func _on_player_moved() -> void:
 
 
 func _on_player_attack(target: Vector2i) -> void:
-	if game_over or victory or resolving_turn or loading_floor:
+	if player.transition_locked or game_over or victory or resolving_turn or loading_floor:
 		return
 	var delta := target - player.grid_position
 	if absi(delta.x) + absi(delta.y) != 1:
@@ -192,8 +199,15 @@ func _on_player_died() -> void:
 	# Finish the player's presentation, but let the lethal skeleton's leap play
 	# beneath the immediate overlay. Floor replacement frees enemy animations.
 	game_over = true
+	player.gameplay_enabled = false
+	cancel_introduction()
 	dialogue.append_event(&"game_over")
 	player.attack_leap.finish()
+	if is_instance_valid(boss) and boss.character_visual.active:
+		var token := round_generation
+		await boss.complete_action()
+		if token != round_generation or not game_over or not is_instance_valid(boss) or boss.character_visual.disposed:
+			return
 	hud.set_game_over(true)
 	player.gameplay_enabled = false
 	print("PLAYER DIED. GAME OVER. Press R to restart.")
@@ -203,6 +217,7 @@ func _on_boss_defeated() -> void:
 	if game_mode != GameModeConfig.Mode.DEMO:
 		return
 	victory = true
+	cancel_introduction()
 	dialogue.append_event(&"victory")
 	cancel_round()
 	player.gameplay_enabled = false
@@ -217,17 +232,20 @@ func cancel_round() -> void:
 	resolving_turn = false
 	player.round_locked = false
 	player.attack_leap.finish()
+	if is_instance_valid(boss):
+		boss.character_visual.cancel()
 	for enemy in enemies:
 		if is_instance_valid(enemy):
 			enemy.attack_leap.finish()
 
 
 func _exit_tree() -> void:
+	cancel_introduction()
 	cancel_round()
 
 
 func run_enemy_turn() -> void:
-	if game_over or victory or resolving_turn or loading_floor:
+	if player.transition_locked or game_over or victory or resolving_turn or loading_floor:
 		return
 	resolving_turn = true
 	player.round_locked = true
@@ -269,7 +287,7 @@ func run_enemy_turn() -> void:
 			return
 		refresh_fog()
 		await actor.complete_action()
-		if token != round_generation:
+		if token != round_generation or not is_instance_valid(actor) or actor.character_visual.disposed:
 			return
 	if token != round_generation:
 		return
@@ -299,3 +317,28 @@ func _on_enemy_attack(amount: int, actor_name: String) -> void:
 
 func _on_boss_message(kind: StringName) -> void:
 	dialogue.append_event(kind)
+
+
+func cancel_introduction() -> void:
+	transition_generation += 1
+	floor_introduction.cancel()
+	floor_introduction.hide()
+
+
+func _begin_floor_introduction(advancing: bool) -> void:
+	player.transition_locked = true
+	cancel_round()
+	var token := transition_generation
+	if advancing:
+		await floor_introduction.fade_to_black()
+		if token != transition_generation or floor_introduction.disposed:
+			return
+		floor_number += 1
+	load_test_floor()
+	if token != transition_generation or loading_floor:
+		return
+	var hold_override := final_floor_text_hold_duration if GameModeConfig.is_arena(game_mode, floor_number) and not use_elevation_test else -1.0
+	await floor_introduction.reveal(dungeon_name, floor_number, str(floor_subtitles.get(floor_number, "")), hold_override)
+	if token != transition_generation or floor_introduction.disposed or game_over or victory:
+		return
+	player.transition_locked = false

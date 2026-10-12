@@ -7,6 +7,7 @@ func validate() -> void:
 	var main = load("res://scenes/main/main.tscn").instantiate()
 	main.use_elevation_test = true
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	var player: Player = main.player
 	var leap: AttackLeap = player.attack_leap
 	var sprite: Sprite3D = player.get_node("PlayerSprite")
@@ -87,12 +88,14 @@ func validate() -> void:
 	assert(main.game_over and not leap.active and enemy.attack_leap.active)
 	var killer: WeakRef = weakref(enemy)
 	main.start_new_run()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(killer.get_ref() == null and not leap.active and sprite.transform == original)
 	# Floor changes and setup cancel a partially played leap exactly.
 	leap.play(Vector2i.RIGHT)
 	leap.animation.pause()
 	leap.animation.custom_step(0.1)
 	main.load_test_floor()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(not leap.active and sprite.transform == original)
 	main.free()
 	await process_frame

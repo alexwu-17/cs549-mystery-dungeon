@@ -9,6 +9,7 @@ func validate() -> void:
 		var main = load("res://scenes/main/%s.tscn" % paths[mode]).instantiate()
 		assert(main.game_mode == mode)
 		root.add_child(main)
+		load("res://tests/round_test_helper.gd").complete_introduction(main)
 		assert(main.boss == null)
 		var config: DungeonGenerationConfig = main.generation_config
 		assert((config != null) == (mode == GameModeConfig.Mode.LIMIT_TESTING))
@@ -17,6 +18,7 @@ func validate() -> void:
 			if mode == GameModeConfig.Mode.DEMO and expected > 5:
 				var arena: DungeonData = main.dungeon
 				main._on_stairs_reached()
+				load("res://tests/round_test_helper.gd").complete_introduction(main)
 				assert(main.floor_number == 5 and main.dungeon == arena)
 				continue
 			# Walk onto real stairs; block no enemies in the chosen approach tile.
@@ -26,6 +28,7 @@ func validate() -> void:
 				if main.dungeon.can_traverse(neighbor, main.dungeon.stairs_position):
 					main.player.setup(neighbor, main.dungeon, main.dungeon_renderer)
 					main.player.try_move(direction)
+					load("res://tests/round_test_helper.gd").complete_introduction(main)
 					entered = true
 					break
 			assert(entered and main.floor_number == expected)
@@ -57,6 +60,7 @@ func validate() -> void:
 		restart.physical_keycode = KEY_R
 		restart.pressed = true
 		main._unhandled_input(restart)
+		load("res://tests/round_test_helper.gd").complete_introduction(main)
 		assert(main.game_mode == mode and main.generation_config == config)
 		assert(main.floor_number == 1 and main.player.health.current == 20 and main.player.level == 5)
 		assert(not main.game_over and main.enemies.size() == 3)

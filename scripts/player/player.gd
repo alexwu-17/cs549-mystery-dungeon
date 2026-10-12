@@ -16,8 +16,10 @@ var level: int = 5
 var fog_elevation: int = 0
 var gameplay_enabled: bool = true
 var round_locked: bool = false
+var transition_locked: bool = false
 var facing: Vector2i = Vector2i.DOWN
 var damage_tween: Tween
+@onready var character_visual: CharacterVisual = $VisualController
 @onready var attack_leap: AttackLeap = $AttackLeap
 
 var grid_position: Vector2i = Vector2i.ZERO ## The player's real position on a 2D grid
@@ -26,12 +28,18 @@ var dungeon_renderer: DungeonRenderer
 var is_tile_occupied: Callable
 
 
+func _ready() -> void:
+	attack_leap.presentation_started.connect(character_visual.attack)
+	attack_leap.presentation_finished.connect(character_visual.standing)
+
+
 func setup(
 	start_position: Vector2i,
 	data: DungeonData,
 	renderer: DungeonRenderer
 ) -> void:
 	attack_leap.finish()
+	character_visual.face(facing)
 	grid_position = start_position
 	dungeon_data = data
 	dungeon_renderer = renderer
@@ -69,9 +77,10 @@ func _unhandled_input(event: InputEvent) -> void:
 ## Movement functions below
 
 func try_move(direction: Vector2i) -> void:
-	if round_locked or attack_leap.active or not gameplay_enabled or health.current == 0 or dungeon_data == null or absi(direction.x) + absi(direction.y) != 1:
+	if transition_locked or round_locked or attack_leap.active or not gameplay_enabled or health.current == 0 or dungeon_data == null or absi(direction.x) + absi(direction.y) != 1:
 		return
 	facing = direction
+	character_visual.face(facing)
 	var target_position := grid_position + direction
 	var walkable := dungeon_data.can_traverse(grid_position, target_position)
 
@@ -103,8 +112,9 @@ func try_move(direction: Vector2i) -> void:
 
 
 func basic_attack() -> void:
-	if round_locked or attack_leap.active or not gameplay_enabled or health.current == 0 or dungeon_data == null:
+	if transition_locked or round_locked or attack_leap.active or not gameplay_enabled or health.current == 0 or dungeon_data == null:
 		return
+	character_visual.face(facing)
 	attack_leap.play(facing)
 	attack_requested.emit(grid_position + facing)
 

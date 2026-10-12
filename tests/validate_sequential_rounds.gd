@@ -10,6 +10,7 @@ func validate() -> void:
 	var main = load("res://scenes/main/main.tscn").instantiate()
 	main.use_elevation_test = true
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	var data := DungeonData.new()
 	for x in range(-3, 4):
 		for y in range(-3, 4):
@@ -44,6 +45,7 @@ func validate() -> void:
 		assert(main.resolving_turn and main.player.round_locked)
 		main.player.basic_attack()
 		main.player.try_move(Vector2i.DOWN)
+		load("res://tests/round_test_helper.gd").complete_introduction(main)
 		assert(main.player.grid_position == Vector2i.ZERO)
 		main.player.attack_leap.finish()
 		assert(acted.size() == 1 and main.player.health.current == hp - 2)
@@ -81,11 +83,13 @@ func validate() -> void:
 	acted[0].attack_leap.finish()
 	assert(not main.resolving_turn and acted.size() == 1)
 	main.start_new_run()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	# Cancellation emits completion, but the old token cannot unlock a new round.
 	acted.clear()
 	main.player.basic_attack()
 	var old_token: int = main.round_generation
 	main.load_test_floor()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.round_generation > old_token and not main.resolving_turn)
 	assert(not main.player.round_locked and not main.player.attack_leap.active)
 	main.player.basic_attack()

@@ -10,6 +10,7 @@ func _initialize() -> void:
 func validate() -> void:
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	main.turn_rng.seed = 1
 	var data := DungeonData.new()
 	for x in range(7):
@@ -28,21 +29,26 @@ func validate() -> void:
 	var second: Skeleton = main.enemies[1]
 	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.LEFT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(moves == 0 and first.grid_position == Vector2i(5, 1))
 	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(moves == 1 and first.grid_position == Vector2i(4, 1))
 	assert(second.grid_position == Vector2i(5, 1))
 	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(moves == 2 and first.grid_position == Vector2i(3, 1))
 	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.RIGHT)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(moves == 2 and main.player.grid_position == Vector2i(2, 1))
 	assert(first.health.current == 6 and main.player.health.current == 20)
 	assert(first.grid_position == Vector2i(3, 1) and second.grid_position == Vector2i(4, 1))
 	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.DOWN)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	load("res://tests/round_test_helper.gd").complete(main)
 	assert(moves == 3)
 	assert(main.enemy_occupancy.size() == 2)
@@ -68,6 +74,7 @@ func validate() -> void:
 	var old_second: WeakRef = weakref(second)
 	main.turn_rng.seed = 1
 	main.player.try_move(Vector2i.DOWN)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	load("res://tests/round_test_helper.gd").complete(main)
 	assert(moves == 3)
 	assert(old_first.get_ref() == null and old_second.get_ref() == null)

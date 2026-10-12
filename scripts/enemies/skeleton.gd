@@ -11,7 +11,8 @@ signal attack_requested(damage: int)
 @export var attack_damage: int = 2
 var health: HealthScript = HealthScript.new()
 var level: int = 5
-var damage_material: StandardMaterial3D
+var facing: Vector2i = Vector2i.DOWN
+@onready var character_visual: CharacterVisual = $VisualController
 var damage_tween: Tween
 @onready var attack_leap: AttackLeap = $AttackLeap
 
@@ -20,8 +21,15 @@ var dungeon_data: DungeonData
 var dungeon_renderer: DungeonRenderer
 
 
+func _ready() -> void:
+	attack_leap.presentation_started.connect(character_visual.attack)
+	attack_leap.presentation_finished.connect(character_visual.standing)
+
+
 func setup(start: Vector2i, data: DungeonData, renderer: DungeonRenderer) -> void:
 	attack_leap.finish()
+	facing = Vector2i.DOWN
+	character_visual.face(facing)
 	health.reset(maximum_hp)
 	grid_position = start
 	dungeon_data = data
@@ -37,6 +45,8 @@ func take_turn(player_position: Vector2i, occupied: Dictionary) -> void:
 		if difference != Vector2i.ZERO:
 			print("SKELETON ATTACK at ", grid_position, ": ", attack_damage)
 			attack_leap.finish()
+			facing = difference
+			character_visual.face(facing)
 			attack_leap.play(difference)
 			attack_requested.emit(attack_damage)
 		return
@@ -45,6 +55,8 @@ func take_turn(player_position: Vector2i, occupied: Dictionary) -> void:
 		return
 	print("SKELETON MOVE: ", grid_position, " -> ", next)
 	attack_leap.finish()
+	facing = next - grid_position
+	character_visual.face(facing)
 	grid_position = next
 	position = dungeon_renderer.get_entity_world_position(grid_position)
 
@@ -55,14 +67,11 @@ func receive_damage(amount: int) -> void:
 		attack_leap.finish()
 	print("SKELETON HP at ", grid_position, ": ", health.current, "/", health.maximum)
 	if has_node("EnemyMesh"):
-		if damage_material == null:
-			damage_material = StandardMaterial3D.new()
-			$EnemyMesh.material_override = damage_material
 		if damage_tween != null:
 			damage_tween.kill()
-		damage_material.albedo_color = Color(1, 0.3, 0.3)
+		$EnemyMesh.modulate = Color(1, 0.3, 0.3)
 		damage_tween = create_tween()
-		damage_tween.tween_property(damage_material, "albedo_color", Color.WHITE, 0.15)
+		damage_tween.tween_property($EnemyMesh, "modulate", Color.WHITE, 0.15)
 
 
 func next_step_toward(goal: Vector2i, occupied: Dictionary) -> Vector2i:

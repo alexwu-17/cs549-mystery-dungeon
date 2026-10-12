@@ -149,6 +149,7 @@ func check_orientation(direction: Vector2i) -> void:
 	# Both combat participants must reject a cliff, while a Space miss still acts.
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	data.player_spawn = cliff
 	data.enemy_spawns = [cliff + direction]
 	main.dungeon = data

@@ -5,6 +5,7 @@ extends Node3D
 const TILE_SIZE: float = DungeonData.TILE_SIZE
 const ELEVATION_HEIGHT: float = DungeonData.ELEVATION_HEIGHT
 const FLOOR_THICKNESS: float = 0.2
+const STAIRS_VISUAL: PackedScene = preload("res://scenes/environment/stairs_placeholder.tscn")
 
 var dungeon_data: DungeonData
 var fog_visuals: Array[Dictionary] = []
@@ -118,6 +119,13 @@ func create_stairs_tile(grid_position: Vector2i) -> void:
 
 	add_child(mesh_instance)
 	register_fog_visual(mesh_instance, [grid_position], true)
+	# Mount at the marker's front top edge. The scene's lower opaque edge is
+	# anchored here; its fixed tilted plane extends back over the base.
+	# Replace the visual scene with the Blender model without changing topology.
+	var stairs_visual: Node3D = STAIRS_VISUAL.instantiate()
+	stairs_visual.position = Vector3(0, box.size.y / 2.0 + 0.005, box.size.z / 2.0)
+	stairs_visual.scale = Vector3.ONE * TILE_SIZE
+	mesh_instance.add_child(stairs_visual)
 
 
 func register_fog_visual(mesh: MeshInstance3D, covered: Array[Vector2i], stairs: bool = false) -> void:

@@ -9,6 +9,7 @@ func validate() -> void:
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
 	main.use_elevation_test = true
 	root.add_child(main)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	var hud = main.get_node("HUD")
 	var minimap = hud.minimap
 	assert(hud.hp_label.text == "20 / 20 HP" and hud.hp_bar.value == 20)
@@ -28,6 +29,7 @@ func validate() -> void:
 	assert(hud.hp_bar.value == 0 and main.game_over)
 	assert(hud.hp_bar.size.x == width)
 	main.start_new_run()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(hud.hp_bar.value == 20 and not main.game_over)
 	# Discovery and illumination have different marker policies.
 	assert(minimap.mapped_tiles().has(Vector2i(0, 0)))
@@ -54,6 +56,7 @@ func validate() -> void:
 	assert(minimap.visible_enemy_tiles().is_empty())
 	# Real combat must remove markers and update health through the same signal.
 	main.load_test_floor()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	main.player.setup(Vector2i(9, 2), main.dungeon, main.dungeon_renderer)
 	main.player.facing = Vector2i.RIGHT
 	main.player.health.reset(20)
@@ -68,12 +71,14 @@ func validate() -> void:
 	main.player.level = 7
 	main.player.setup(Vector2i(11, 2), main.dungeon, main.dungeon_renderer)
 	main.player.try_move(Vector2i.DOWN)
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.floor_number == 2 and hud.floor_label.text == "Floor #2")
 	assert(main.player.level == 7 and hud.hp_bar.value == 16)
 	assert(main.enemies[0].level == 5)
 	assert(not minimap.has_stairs_marker() and not minimap.mapped_tiles().has(Vector2i(12, 4)))
 	assert(minimap.player_tile == main.player.grid_position and minimap.dungeon == main.dungeon)
 	main.start_new_run()
+	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(hud.floor_label.text == "Floor #1" and main.player.level == 5)
 	# No staircase marker without an actual STAIRS tile.
 	var no_stairs := DungeonData.new()
