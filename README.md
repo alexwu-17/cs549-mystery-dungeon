@@ -1,219 +1,144 @@
 # CS549 Mystery Dungeon
 
+A 2.5D grid-based, turn-based dungeon crawler built with **Godot 4.4.1** and GDScript for Rutgers University's CS549 Visual AI course.
+
+The project is inspired by *Pokémon Mystery Dungeon*, combining traditional 2D grid-based dungeon gameplay with a 3D environment, elevation changes, lighting, and 2D character sprites.
 
+The current Assignment 3 prototype uses original placeholder gameplay featuring a swordsman, skeleton enemies, and a Minotaur boss while establishing the core dungeon systems.
 
-A 2.5D grid-based dungeon crawler built with Godot 4.4.1 and GDScript.
+## Current Features
 
+### Procedural Dungeon Generation
+- Procedurally generated rooms and connecting corridors.
+- Logical 2D dungeon representation using `Vector2i` coordinates.
+- 3D dungeon rendering based on the underlying 2D grid.
+- Multiple elevation levels (-1, 0, +1) with traversable ramps.
+- Valid player, enemy, and staircase placement.
+- Multi-floor dungeon progression.
 
+### Player Movement and Combat
+- Grid-based, turn-based player movement.
+- Directional facing and basic melee attacks.
+- Logical tile occupancy and collision handling.
+- Player and enemy HP, damage, and death.
+- HP restoration through lifesteal when defeating enemies.
+- Game-over handling when the player's HP reaches zero.
 
-The final project is inspired by Pokemon Mystery Dungeon. The current
+### Enemy AI
+- Skeleton enemies with breadth-first search (BFS) pathfinding.
+- Turn-based enemy movement and attacks.
+- Enemy pursuit based on dungeon walkability and occupied tiles.
+- Combat integrated with the player's turn system.
 
-Assignment 3 prototype intentionally uses generic/test content while the
+### Graphics and Visibility
+- 2D character sprites displayed within a 3D dungeon.
+- Camera-facing sprite presentation.
+- 3D geometry for floors, elevation changes, and ramps.
+- Dungeon lighting and shadows.
+- Fog of war and visibility based on the player's position.
+- Camera occlusion handling to maintain visibility of the player.
+- Character movement and attack animations.
 
-core dungeon systems are developed.
+### Floor Progression and Boss
+- Staircases for transitioning between dungeon floors.
+- A dedicated Minotaur boss encounter.
+- Boss combat and dungeon completion handling.
 
+## Game Modes
 
+The project includes three modes:
 
-\## Current Prototype
+- **Demo Mode:** A five-floor dungeon experience featuring procedurally generated floors 1–4 and a fixed Minotaur boss arena on floor 5.
+- **Infinite Mode:** Continued dungeon progression without a fixed final floor.
+- **Limit Testing Mode:** A dedicated environment for evaluating the game's performance and behavior under increased enemy loads.
 
+## Controls
 
+| Input | Action |
+|---|---|
+| W | Move up |
+| S | Move down |
+| A | Move left |
+| D | Move right |
+| Space | Basic attack |
+| F3 | Toggle performance HUD |
 
-The starter implementation currently demonstrates:
+Movement and combat are turn-based. Successful movement and attack actions advance the game by one turn. Changing facing direction or attempting to move into an impassable tile does not consume a turn.
 
+## Requirements
 
+- **Godot Engine 4.4.1** (Godot 4.4 series)
+- A system capable of running Godot 4's 3D renderer
+- Git (for cloning the repository)
 
-\- Logical 2D grid representation using Vector2i
+No external GDScript dependencies are required.
 
-\- 2D grid to 3D dungeon rendering
+## Building and Running
 
-\- Grid-based player movement
+### Run from the Godot Editor
 
-\- Walkability checks
+1. Install [Godot 4.4.1](https://godotengine.org/download/archive/4.4.1-stable/).
+2. Clone the repository:
+   ```bash
+   git clone https://github.com/alexwu-17/cs549-mystery-dungeon.git
+   ```
+3. Open Godot and select **Import**.
+4. Navigate to the cloned repository and select `project.godot`.
+5. Allow Godot to import the project's resources.
+6. Press **F6** to run the currently open scene, or **F5** to run the project's configured main scene.
 
-\- Room elevation metadata
+### Export a Standalone Build
 
-\- Ramp traversal between elevations
+1. Open the project in Godot 4.4.1.
+2. Navigate to **Project → Export**.
+3. Add an export preset for your target platform (Windows, Linux, macOS, or Web).
+4. Install the matching Godot export templates if prompted.
+5. Configure the export preset and destination.
+6. Select **Export Project** to generate the build.
 
-\- Sprite3D player representation
+For Web exports, use the Web preset and host the generated files on a compatible web server or static hosting service.
 
-\- Enemy spawn positions
+## Architecture
 
-\- Staircase/floor transition signaling
+The project separates dungeon logic from its 3D presentation.
 
+### DungeonData
 
+`DungeonData` is the authoritative logical representation of each floor.
 
-The current test dungeon contains two hard-coded rooms. Room 2 is one
+Gameplay systems use `Vector2i` grid coordinates for movement, occupancy, walkability, enemy pathfinding, and combat rather than relying on 3D physics collisions.
 
-elevation level above Room 1.
+Dungeon data also contains elevation information and the locations of relevant floor entities.
 
+### Dungeon Generation
 
+Procedural generation creates rooms, corridors, elevation assignments, and traversable connections between dungeon areas.
 
-The staircase intentionally reloads the same test floor indefinitely.
+Player, enemy, and staircase positions are selected from valid locations within the generated dungeon.
 
-This behavior is temporary and provides the floor-transition interface
+### DungeonRenderer
 
-for procedural generation.
+`DungeonRenderer` converts logical grid coordinates and elevation metadata into the rendered 3D dungeon.
 
+- `grid_to_world()` maps logical grid coordinates to their corresponding base world positions.
+- `get_entity_world_position()` determines the appropriate surface position for entities, accounting for elevation.
 
+### Turn-Based Gameplay
 
-The test enemy is intentionally static.
+Player actions drive the turn system. Enemy AI processes movement and attacks according to the current dungeon state.
 
+Skeleton pathfinding uses BFS over the logical dungeon grid, while combat and collision rely on logical tile occupancy.
 
+### Visibility and Camera
 
-\## Test Enemy
+Fog of war determines which dungeon areas are visible to the player.
 
+Camera occlusion handling separately adjusts obstructing geometry to keep the player visible within the 3D environment.
 
+## Development Status
 
-The current test enemy is a static spawn marker used to verify that
+**Assignment 3 — Functional MVP**
 
-enemy spawn coordinates from DungeonData are correctly translated into
+The current implementation demonstrates the core dungeon generation, rendering, movement, combat, enemy AI, visibility, elevation, floor progression, and boss systems.
 
-the 3D world.
-
-
-
-The starter implementation intentionally does not implement enemy
-
-occupancy, collision, pathfinding, attacks, or combat.
-
-
-
-The enemy/combat system should implement logical grid occupancy rather
-
-than relying on 3D physics collisions. Attempting to move into a tile
-
-occupied by an enemy should eventually trigger the appropriate combat
-
-behavior rather than allowing the player to occupy the same logical
-
-tile.
-
-
-
-\## Controls
-
-
-
-W - Move up
-
-S - Move down
-
-A - Move left
-
-D - Move right
-
-
-
-\## Running
-
-
-
-1\. Install Godot 4.7.2. (The latest complete one currently on Godot front page)
-
-2\. Clone this repository.
-
-3\. Open `project.godot` in Godot.
-
-4\. Open `scenes/main/main.tscn`.
-
-5\. Run the scene/project (press F6).
-
-
-
-\## Architecture
-
-
-
-DungeonData is the authoritative logical representation of a floor.
-
-
-
-Gameplay systems should primarily use Vector2i grid coordinates rather
-
-than raw Vector3 positions.
-
-
-
-DungeonRenderer converts logical grid coordinates and elevation metadata
-
-into the 3D world.
-
-
-
-`grid\_to\_world()` represents the base geometry coordinate.
-
-
-
-`get\_entity\_world\_position()` returns the surface position where an
-
-entity should stand.
-
-
-
-TestDungeonFactory is temporary reference code and is expected to be
-
-replaced by procedural dungeon generation.
-
-
-
-\## Assignment 3 Work Split
-
-
-
-\### Dungeon / Fog
-
-\- Procedural room generation
-
-\- Corridor generation
-
-\- Elevation assignment
-
-\- Valid ramp connections
-
-\- Player/enemy/stair spawn placement
-
-\- Fog of war
-
-
-
-\### Enemy / Combat
-
-\- Skeleton implementation
-
-\- Enemy grid pathfinding
-
-\- Enemy turn behavior
-
-\- Basic player/enemy attacks
-
-\- HP/death
-
-\- Lifesteal on kill
-
-
-
-\### Graphics
-
-\- Dungeon environment assets
-
-\- Materials/textures
-
-\- Elevation/ramp visual assets
-
-
-
-\### Integration / Core
-
-\- Core Godot architecture
-
-\- Player/grid integration
-
-\- 2D-to-3D rendering integration
-
-\- Elevation integration
-
-\- Floor transitions
-
-\- Team integration/debugging
-
-\- Final polish
+Future development will focus on environmental presentation, visual polish, and expanding the gameplay toward the project's original Pokémon Mystery Dungeon inspiration.
