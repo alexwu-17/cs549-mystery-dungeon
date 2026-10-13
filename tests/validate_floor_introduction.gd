@@ -23,6 +23,9 @@ func check_lock(main: Node3D) -> void:
 func validate() -> void:
 	for scene in ["main", "demo_main", "limit_testing_main"]:
 		var main = load("res://scenes/main/%s.tscn" % scene).instantiate()
+		# This suite covers procedural transitions; the fixed benchmark is tested separately.
+		main.benchmark_enabled = false
+		if scene == "limit_testing_main": main.generation_config = DungeonGenerationConfig.new()
 		root.add_child(main)
 		var intro: FloorIntroduction = main.floor_introduction
 		completions = 0

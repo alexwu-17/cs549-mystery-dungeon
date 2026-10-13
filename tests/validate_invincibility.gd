@@ -8,6 +8,7 @@ func _initialize() -> void:
 func validate() -> void:
 	for scene in ["main", "demo_main", "limit_testing_main"]:
 		var main = load("res://scenes/main/%s.tscn" % scene).instantiate()
+		main.benchmark_enabled = false # Exercise the retained procedural mode.
 		var config := DungeonGenerationConfig.new()
 		config.invincible_player = true
 		main.generation_config = config

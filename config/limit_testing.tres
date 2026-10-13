@@ -5,11 +5,11 @@
 [resource]
 script = ExtResource("1")
 map_size = Vector2i(30, 22)
-minimum_rooms = 2
-maximum_rooms = 3
-minimum_room_size = Vector2i(11, 11)
-maximum_room_size = Vector2i(12, 12)
-skeleton_limit = 400
+minimum_rooms = 8
+maximum_rooms = 11
+minimum_room_size = Vector2i(4, 4)
+maximum_room_size = Vector2i(7, 6)
+skeleton_limit = 100
 placement_attempts = 1000
 layout_attempts = 32
 require_minimum_rooms = true

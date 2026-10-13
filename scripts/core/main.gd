@@ -12,6 +12,8 @@ var transition_generation: int = 0
 @export var use_elevation_test: bool = false
 @export var game_mode: GameModeConfig.Mode = GameModeConfig.Mode.INFINITE
 @export var generation_config: DungeonGenerationConfig
+@export var benchmark_enabled: bool = false
+var benchmark: LimitBenchmark
 
 @onready var dungeon_renderer: DungeonRenderer = $DungeonRenderer
 @onready var player: Player = $Player
@@ -44,6 +46,13 @@ func _ready() -> void:
 	player.health.died.connect(_on_player_died)
 	player.is_tile_occupied = is_enemy_occupied
 	hud.bind_health(player.health)
+	if game_mode == GameModeConfig.Mode.LIMIT_TESTING:
+		LimitBenchmark.apply_cap(self)
+	if game_mode == GameModeConfig.Mode.LIMIT_TESTING and benchmark_enabled and not use_elevation_test:
+		benchmark = LimitBenchmark.new()
+		hud.get_node("Screen").add_child(benchmark)
+		hud.get_node("Screen").move_child(benchmark, floor_introduction.get_index())
+		benchmark.initialize(self)
 	start_new_run()
 
 
@@ -55,6 +64,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func start_new_run() -> void:
 	cancel_introduction()
+	if benchmark != null:
+		benchmark.prepare()
 	MusicManager.claim(self)
 	MusicManager.play_dungeon(self, true)
 	player.transition_locked = true
@@ -94,6 +105,8 @@ func load_test_floor() -> void:
 	player.gameplay_enabled = false
 	if use_elevation_test:
 		dungeon = TestDungeonFactory.create_elevation_test_dungeon()
+	elif benchmark != null:
+		dungeon = benchmark.create_floor()
 	elif GameModeConfig.is_arena(game_mode, floor_number):
 		dungeon = DemoArenaFactory.create_arena()
 	elif game_mode == GameModeConfig.Mode.LIMIT_TESTING:
@@ -125,6 +138,9 @@ func load_test_floor() -> void:
 	
 func _on_stairs_reached() -> void:
 	if player.transition_locked or game_over or victory or loading_floor or not GameModeConfig.can_advance(game_mode, floor_number):
+		return
+	if benchmark != null:
+		run_enemy_turn() # The fixture stays on one floor; no transition resets.
 		return
 	_begin_floor_introduction(true)
 
@@ -249,6 +265,7 @@ func cancel_round() -> void:
 
 
 func _exit_tree() -> void:
+	LimitBenchmark.restore_cap(self)
 	MusicManager.release(self)
 	cancel_introduction()
 	cancel_round()

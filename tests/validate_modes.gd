@@ -7,6 +7,10 @@ func validate() -> void:
 	var paths := ["main", "demo_main", "limit_testing_main"]
 	for mode in range(3):
 		var main = load("res://scenes/main/%s.tscn" % paths[mode]).instantiate()
+		main.benchmark_enabled = false
+		if mode == GameModeConfig.Mode.LIMIT_TESTING:
+			# Tests must not inherit the user's current stress-test resource values.
+			main.generation_config = DungeonGenerationConfig.new()
 		assert(main.game_mode == mode)
 		root.add_child(main)
 		load("res://tests/round_test_helper.gd").complete_introduction(main)

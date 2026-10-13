@@ -19,6 +19,8 @@ func validate() -> void:
 	assert(music.dungeon_track.loop_offset == 0 and music.boss_track.loop_offset == 0)
 	for mode in ["main", "limit_testing_main", "demo_main"]:
 		var main = load("res://scenes/main/%s.tscn" % mode).instantiate()
+		main.benchmark_enabled = false # Music floor progression uses procedural fixtures.
+		if mode == "limit_testing_main": main.generation_config = DungeonGenerationConfig.new()
 		root.add_child(main)
 		assert(music.player.playing and music.player.stream == music.dungeon_track)
 		Helper.complete_introduction(main)

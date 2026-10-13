@@ -63,7 +63,10 @@ func validate() -> void:
 	config.skeleton_limit = -1
 	assert(not config.validation_errors().is_empty())
 	var resource: DungeonGenerationConfig = load("res://config/limit_testing.tres")
-	assert(resource.map_size == Vector2i(30, 22) and resource.skeleton_limit == 3)
+	# The resource is intentionally user-editable; defaults belong to the script.
+	assert(resource != null)
+	var defaults := DungeonGenerationConfig.new()
+	assert(defaults.map_size == Vector2i(30, 22) and defaults.skeleton_limit == 3)
 	assert(resource.validation_errors().is_empty())
 	print("PASS: 30 configured floors at 30x22/36x28/44x34, range/bounds/reachability/spawns, fallback/shortfall, validation, resource isolation")
 	quit()

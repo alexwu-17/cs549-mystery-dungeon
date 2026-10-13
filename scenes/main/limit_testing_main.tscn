@@ -6,3 +6,4 @@
 [node name="LimitTestingMain" instance=ExtResource("1")]
 game_mode = 2
 generation_config = ExtResource("2")
+benchmark_enabled = true
