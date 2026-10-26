@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="DungeonQualitySettings" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/dungeon/dungeon_quality_settings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+enabled = true
+same_elevation_gap = 1
+one_level_gap = 5
+two_level_gap = 9
+camera_pitch_degrees = 35.0
+visual_height = 1.0
+edge_margin = 0.25

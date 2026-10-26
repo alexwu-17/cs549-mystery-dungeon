@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/environment/modular_dungeon/up_stairs.obj" id="1_mesh"]
+
+[node name="RampStairs" type="MeshInstance3D"]
+mesh = ExtResource("1_mesh")

@@ -1,6 +1,8 @@
 class_name DungeonGenerationConfig
 extends Resource
 
+enum ElevationMode { TWO_LEVEL, LEGACY_THREE_LEVEL }
+
 @export var map_size: Vector2i = Vector2i(30, 22)
 @export var minimum_rooms: int = 5
 @export var maximum_rooms: int = 7
@@ -11,9 +13,16 @@ extends Resource
 @export var layout_attempts: int = 32
 @export var require_minimum_rooms: bool = true
 @export var invincible_player: bool = false
+@export var quality_settings: DungeonQualitySettings # Null uses config/layout_quality.tres; diagnostics only.
+@export var elevation_mode: ElevationMode = ElevationMode.TWO_LEVEL
+@export var prefer_both_elevations: bool = true
+# Camera is on +Z: downhill -Z is hidden behind the upper platform.
+@export var restrict_camera_hidden_ramps: bool = true
 
 func validation_errors() -> PackedStringArray:
 	var errors := PackedStringArray()
+	if elevation_mode not in [ElevationMode.TWO_LEVEL, ElevationMode.LEGACY_THREE_LEVEL]:
+		errors.append("Unknown elevation mode.")
 	if map_size.x < 16 or map_size.y < 8 or map_size.x > 128 or map_size.y > 128:
 		errors.append("Map dimensions must be between 16x8 and 128x128 to fit the fallback and bound allocation.")
 	if minimum_rooms < 2 or maximum_rooms < minimum_rooms or maximum_rooms > 100:

@@ -44,28 +44,29 @@ func validate() -> void:
 		player.facing = direction
 		player.basic_attack()
 		assert(leap.active)
+		var action_original := leap.starting_transform # Includes the current wall-clearance offset.
 		var count := actions[0]
 		player.basic_attack()
 		player.try_move(Vector2i.DOWN)
 		assert(actions[0] == count and player.grid_position == Vector2i.ZERO and player.facing == direction)
 		leap.animation.pause()
 		leap.animation.custom_step(0.12)
-		assert(is_equal_approx((sprite.position - original.origin).length_squared(), 1.0 + 0.15 * 0.15))
+		assert(is_equal_approx((sprite.position - action_original.origin).length_squared(), 1.0 + 0.15 * 0.15))
 		leap.finish()
-		assert(sprite.transform == original)
+		assert(sprite.transform == action_original)
 	# Skeleton attacks have visual overlap but retain occupancy and immediate damage.
 	data.set_tile(Vector2i.RIGHT, DungeonData.TileType.FLOOR)
 	data.enemy_spawns = [Vector2i.RIGHT]
 	main.spawn_test_enemies()
 	var enemy: Skeleton = main.enemies[0]
 	var enemy_visual: Node3D = enemy.get_node("EnemyMesh")
-	var enemy_transform := enemy_visual.transform
 	player.facing = Vector2i.RIGHT
 	player.basic_attack()
 	assert(enemy.health.current == 3 and player.health.current == 20)
 	assert(leap.active and not enemy.attack_leap.active)
 	leap.finish()
 	assert(player.health.current == 18 and enemy.attack_leap.active)
+	var enemy_transform := enemy.attack_leap.starting_transform
 	enemy.attack_leap.animation.pause()
 	enemy.attack_leap.animation.custom_step(0.12)
 	assert((enemy_visual.position - enemy_transform.origin).is_equal_approx(Vector3(-1, 0.15, 0)))

@@ -5,6 +5,15 @@ func _initialize() -> void:
 	call_deferred("validate")
 
 
+func fog_state(renderer: DungeonRenderer, mesh: MeshInstance3D) -> int:
+	for visual in renderer.fog_visuals:
+		if visual.mesh == mesh:
+			if visual.asset:
+				assert(mesh.get_surface_override_material(0) == visual.materials[0][visual.fog_state])
+			return visual.fog_state
+	return -1
+
+
 func validate() -> void:
 	var data := DungeonData.new()
 	data.rooms = [Rect2i(0, 0, 3, 3), Rect2i(5, 0, 3, 3)]
@@ -52,15 +61,15 @@ func validate() -> void:
 		else:
 			assert(visual.mesh.visible) # Includes unexplored terrain.
 	assert(not stairs.visible)
-	assert(slope.material_override == renderer.dim_material)
+	assert(fog_state(renderer, slope) == 1)
 	data.update_fog(Vector2i(10, 6))
 	renderer.apply_fog()
 	assert(data.is_bright(Vector2i(11, 6)) and not data.is_bright(Vector2i(13, 6)))
-	assert(slope.material_override == renderer.normal_material) # Any bright tile.
+	assert(fog_state(renderer, slope) == 0) # Any bright tile.
 	data.update_fog(Vector2i(1, 1))
 	renderer.apply_fog()
 	assert(stairs.visible and stairs.material_override == renderer.normal_material)
-	assert(slope.material_override == renderer.dim_material)
+	assert(fog_state(renderer, slope) == 1)
 	renderer.free()
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
 	main.use_elevation_test = true
@@ -117,9 +126,9 @@ func validate() -> void:
 	assert(main.player.fog_elevation == 1)
 	for visual in main.dungeon_renderer.fog_visuals:
 		if visual.room == 0:
-			assert(visual.mesh.material_override == main.dungeon_renderer.other_elevation_material)
+			assert(visual.fog_state == 2)
 		elif visual.room == 1 and not visual.stairs:
-			assert(visual.mesh.material_override == main.dungeon_renderer.normal_material)
+			assert(visual.fog_state == 0)
 	main.player.try_move(Vector2i.LEFT)
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.fog_elevation == 1) # Downhill ramp retains upper level.
@@ -134,7 +143,7 @@ func validate() -> void:
 	main.refresh_fog()
 	for visual in main.dungeon_renderer.fog_visuals:
 		if visual.room == 1 and not main.dungeon.is_bright(visual.tiles[0]):
-			assert(visual.mesh.material_override == main.dungeon_renderer.other_elevation_material)
+			assert(visual.fog_state == 2)
 	main.dungeon = TestDungeonFactory.create_fallback_dungeon()
 	main.dungeon_renderer.render_dungeon(main.dungeon)
 	main.player.setup(Vector2i(6, 3), main.dungeon, main.dungeon_renderer)
@@ -150,12 +159,12 @@ func validate() -> void:
 			for covered: Vector2i in visual.tiles:
 				bright = bright or main.dungeon.is_bright(covered)
 			if bright:
-				assert(visual.mesh.material_override == main.dungeon_renderer.normal_material)
+				assert(visual.fog_state == 0)
 			elif main.dungeon.get_tile(tile) == DungeonData.TileType.RAMP:
-				assert(visual.mesh.material_override == main.dungeon_renderer.dim_material)
+				assert(visual.fog_state == 1)
 			elif main.dungeon.get_tile(tile) == DungeonData.TileType.CORRIDOR:
 				var expected: StandardMaterial3D = main.dungeon_renderer.dim_material if main.dungeon.get_elevation(tile) == step.y else main.dungeon_renderer.other_elevation_material
-				assert(visual.mesh.material_override == expected)
+				assert(visual.fog_state == (1 if expected == main.dungeon_renderer.dim_material else 2))
 	main.load_test_floor()
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.fog_elevation == 0)

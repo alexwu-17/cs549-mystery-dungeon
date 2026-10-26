@@ -1,0 +1,35 @@
+# Modular dungeon asset integration
+
+Source: MysteryDungeon_Godot_Import_Ready.zip. The seven OBJ/MTL pairs and supplied import notes are preserved in `assets/environment/modular_dungeon/`; no source geometry or material text was changed.
+
+`DungeonRenderer` uses `ModularDungeonVisuals` to share imported mesh surfaces and fog-material variants:
+
+- Floor: source scale 0.5 makes the authored 2x2 floor one grid tile. The highest sculpted floor point aligns with the existing +0.1 walking surface; the brick relief is decorative and does not alter movement heights.
+- One boundary: floor_wall. Two adjacent boundaries: floor_corner, rotated through the four cardinal orientations. Other boundary combinations use floor plus separate wall pieces. Combined models' surfaces are registered independently, avoiding duplicate floors and allowing walls to hide without removing the supporting floor.
+- Boundaries are selected against WALL/VOID neighbors. Existing walkable connections and elevation metadata are unchanged. Wall models belong to the neighboring walkable tile for fog purposes.
+- Ramp artwork: `scenes/environment/up_stairs.tscn` supplies the up_stairs OBJ. It rises along source +X; the renderer repeats one complete staircase per rising grid tile, stacking three copies across the existing three-tile run. Each copy is one tile long and wide and rises one third of the elevation height. A cached combined mesh preserves whole-transition fog and occlusion, rotated for each cardinal direction. Flat buffers remain separate. A shared stepped masonry backing beneath the authored treads closes recessed model ends, joins between the three copies, and the buffer interfaces without changing source artwork or logical heights. The legacy debug ramp keeps its original one-tile footprint. Source OBJ/MTL files remain untouched.
+- Floor exits: restored raised marker plus `stairs_placeholder.tscn` PNG. The OBJ staircase is environmental elevation-transition artwork, not the exit marker.
+- Logical ramp interpolation, topology, and actor roots remain unchanged. Cached triangle samples measure the visual tread at each logical tile center; the existing AttackLeap surface-offset mechanism lifts sprites above stepped treads without changing gameplay positions or competing with attack transforms.
+- Bright floor and wall materials use the terrain palette constants in `ModularDungeonVisuals`, retaining the imported material settings. Ramp artwork retains its imported color. Fog variants multiply those colors by the existing dim factors. Hidden elevated terrain stops rendering and casting shadows. Camera-side walls fade to 20% opacity only when their transformed bounds intersect a camera-to-sprite ray, and stop casting shadows while faded. Walls behind the player's feet remain solid; a small view-direction sprite offset prevents the backward-leaning billboard from embedding in a nearby rear wall. The existing AttackLeap surface-offset mechanism handles this without changing entity roots or adding a competing Tween. Sprite pixel size is compensated by camera-space depth so moving the visual toward the perspective camera does not enlarge characters in corridors; source size is restored when clearance ends. Fog materials stay independent; walls restore opacity and shadows when no longer obstructing. Tune `obstructing_wall_opacity` on DungeonRenderer.
+
+The down_stairs model is imported but not selected. It has one surface without an assigned material. The torch is imported but not placed and has no assigned materials; no decorative lights were added. OBJ ambient-material terms are ignored by Godot's PBR importer, which is expected.
+
+Manual checks: run all three entry scenes, inspect floor seams, corners and narrow corridors; walk ramps uphill/downhill in all orientations and inspect sprites; inspect -1/0/+1 rooms and dim fog; approach/leave occluding walls and upper rooms; reveal and enter stairs, confirm floor introduction/restart; inspect Demo 5F; compare the F3 FPS/frame interval at 1920x1080 and with the Limit Testing skeleton counts. Global lighting settings are unchanged; the current camera experiment is described below.
+
+## Terrain-fill visual trial
+
+`TerrainFillVisuals` derives a display-only mask from existing non-walkable cells inside the dungeon tile bounds plus a three-tile margin. No dungeon tiles, elevations, RNG state, discovery, spawns, or movement rules are written. The closest walkable boundary owns each filler cell; an equal-distance tie prefers the higher boundary to cover both wall backs. The mask excludes every walkable cell, including all ramps and buffers.
+
+Adjacent fill uses the existing floor model as a cap, with its highest surface aligned to the actual imported wall top. More distant fill uses simple matching solid geometry. Both extend down to a shared base below the lowest floor so cap edges and height changes do not float. The solid fill is darker than playable flooring. Boundary caps use their owning tile's brightness; deeper fill stays dim. Filler on other elevation levels uses the existing darker fog variant. It does not reveal or discover logical tiles.
+
+Foreground filler fades using the existing wall-opacity setting only when it obstructs the sprite; rear filler stays solid. Sprite clearance and apparent-size compensation remain active. Camera, lighting settings, dungeon generation, and spacing restrictions are unchanged. Tightly packed elevation boundaries can still look abrupt: wider mountain-like terraces remain a future generation change.
+
+To compare or roll back either visual feature, select DungeonRenderer in the shared Main scene and disable `terrain_fill_enabled` and/or `stair_seams_enabled`, then rerun. The controls are independent. `terrain_fill_margin` controls the outer background band. No code deletion or gameplay rollback is needed. Limit Testing's fixed map is useful for repeatable filler comparisons.
+
+Manual checks: inspect the background behind all room and corridor walls; check -1/0/+1 boundaries and ramp sides; verify there is no roof over playable tiles, stairs, or buffers; inspect each stair join and both buffers in all cardinal directions; walk close to foreground fill and check fading/restoration, sprite size and shadows; verify exit/floor transitions and Demo 5F; compare F3 FPS/frame interval at 1920x1080 with fill on/off. GPU appearance and performance require a real rendered run, not headless tests.
+
+## Palette and camera experiment
+
+Base albedo colors: playable floors `#C5BA9C`, wall models `#848590`, terrain fill/caps `#6A6D78`. These are centralized in `ModularDungeonVisuals`; original OBJ/MTL files remain unchanged. Existing lighting and fog still shade the colors.
+
+The shared perspective camera now uses a 35-degree downward pitch. `pitch_degrees` and `follow_distance` are exported on Camera3D's presentation script; the offset rotates with the pitch so the player's feet stay centered. The original camera distance and field of view are preserved. Earlier comparison angles were 25, 40, and 50 degrees. All entry modes inherit the shared scene configuration.

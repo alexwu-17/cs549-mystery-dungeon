@@ -15,9 +15,11 @@ var animation: Tween
 var textures: Dictionary = {}
 var ramp_texture: Texture2D
 var opaque_top: int = 0
+var original_pixel_size: float
 @onready var sprite: Sprite3D = get_node(sprite_path)
 
 func _ready() -> void:
+	original_pixel_size = sprite.pixel_size
 	for name in ["front", "back", "left", "right", "attack_front", "attack_back", "attack_left", "attack_right", "charge", "spin_01", "spin_02", "spin_03", "spin_04", "spin_05", "spin_06", "spin_07", "spin_08"]:
 		var path := asset_directory.path_join(name + ".png")
 		if ResourceLoader.exists(path):
@@ -34,7 +36,13 @@ func direction_name() -> String:
 	return "front"
 
 func clear_ramp_intersection(camera: Camera3D, data: DungeonData, tile: Vector2i, leap: AttackLeap) -> void:
+	# Recompute from the source size so clearance never accumulates magnification.
+	sprite.pixel_size = original_pixel_size
+	var uncorrected_origin := sprite.global_position - leap.surface_offset
 	var correction := Vector3.ZERO
+	var renderer: DungeonRenderer = get_parent().get("dungeon_renderer")
+	if renderer != null and renderer.dungeon_data == data:
+		correction = renderer.get_ramp_visual_offset(tile)
 	if data != null and data.ramp_tiles.has(tile):
 		var segment: Dictionary = data.ramp_segments[data.ramp_tiles[tile].segment]
 		var rise := DungeonData.ELEVATION_HEIGHT / (3.0 * DungeonData.TILE_SIZE)
@@ -52,16 +60,26 @@ func clear_ramp_intersection(camera: Camera3D, data: DungeonData, tile: Vector2i
 							opaque_top = y
 							break
 					if opaque_top != image.get_height(): break
-			var origin := sprite.global_position - leap.surface_offset
-			var surface: Vector3 = get_parent().global_position
+			var origin := sprite.global_position - leap.surface_offset + correction
+			var surface: Vector3 = get_parent().global_position + correction
 			var height := (sprite.get_item_rect().end.y - opaque_top) * sprite.pixel_size * sprite.global_basis.y.length()
 			var top := origin + camera.global_basis.y * height
 			var clearance := normal.dot(top - surface)
 			var toward_camera := (camera.global_position - origin).normalized()
 			var gain := normal.dot(toward_camera)
 			if clearance < 0.0 and gain > 0.001:
-				correction = toward_camera * ((-clearance + 0.005) / gain)
+				correction += toward_camera * ((-clearance + 0.005) / gain)
+	if renderer != null and renderer.dungeon_data == data and camera.has_method("sprite_samples") and sprite.is_visible_in_tree():
+		var points: Array[Vector3] = camera.call("sprite_samples", sprite)
+		for index in range(points.size()):
+			points[index] += correction - leap.surface_offset
+		correction += renderer.get_rear_wall_visual_offset(camera, tile, points)
 	leap.set_surface_offset(correction)
+	if camera.projection == Camera3D.PROJECTION_PERSPECTIVE:
+		var original_depth := -camera.to_local(uncorrected_origin).z
+		var corrected_depth := -camera.to_local(uncorrected_origin + correction).z
+		if original_depth > 0.001 and corrected_depth > 0.001:
+			sprite.pixel_size = original_pixel_size * corrected_depth / original_depth
 
 func face(direction: Vector2i) -> void:
 	if absi(direction.x) + absi(direction.y) == 1:

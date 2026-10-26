@@ -2,6 +2,7 @@ class_name TestDungeonFactory
 extends RefCounted
 
 const Router = preload("res://scripts/dungeon/corridor_router.gd")
+const Quality = preload("res://scripts/dungeon/dungeon_layout_quality.gd")
 const TileType = DungeonData.TileType
 const CORRIDOR_VAL = DungeonData.CORRIDOR_VAL
 const ROWS = 22
@@ -13,6 +14,31 @@ static var room_id_grid: Array[Array] = []
 static var discovered: Array[Array] = []
 static var rng = RandomNumberGenerator.new()
 static var last_statistics: Dictionary = {}
+static var last_quality_report: Dictionary = {}
+static var last_quality_attempts: Array[Dictionary] = []
+static var last_layout_quality: Dictionary = {}
+static var _default_config: DungeonGenerationConfig
+
+
+static func get_default_config() -> DungeonGenerationConfig:
+	# Load after script initialization. Preloading this scripted Resource can leave
+	# it uninitialized under Godot 4.4.1's global-class dependency loading order.
+	if _default_config == null:
+		_default_config = load("res://config/standard_generation.tres")
+	return _default_config
+
+
+static func evaluate_quality(dungeon: DungeonData, config: DungeonGenerationConfig) -> Dictionary:
+	var settings: DungeonQualitySettings = Quality.DEFAULT_SETTINGS if config == null or config.quality_settings == null else config.quality_settings
+	if not settings.enabled: return {}
+	return Quality.evaluate(dungeon.rooms, dungeon.room_elevations, settings)
+
+
+static func record_quality_statistics() -> void:
+	if last_quality_report.is_empty(): return
+	last_statistics["quality"] = Quality.summary(last_quality_report)
+	if not last_quality_report.errors.is_empty():
+		push_warning("Layout quality evaluation skipped: " + "; ".join(last_quality_report.errors))
 
 
 static func create_2D_array(rows: int, cols: int, value) -> Array[Array]:
@@ -29,7 +55,26 @@ static func change_probability(same_connections: int) -> int:
 	return mini(10 + 30 * same_connections, 100)
 
 
-static func assign_heights(count: int) -> Array[int]:
+static func assign_heights(count: int, config: DungeonGenerationConfig = null) -> Array[int]:
+	if count <= 0: return []
+	if config == null: config = get_default_config()
+	if config.elevation_mode == DungeonGenerationConfig.ElevationMode.TWO_LEVEL:
+		var heights: Array[int] = [rng.randi_range(0, 1)]
+		var unchanged := 0
+		for index in range(1, count):
+			var next := heights[-1]
+			if rng.randi_range(0, 99) < change_probability(unchanged):
+				next = 1 - next
+				unchanged = 0
+			else:
+				unchanged += 1
+			heights.append(next)
+		# Short placement-exhausted layouts may not reach the guaranteed 100% roll.
+		# Prefer variety without discarding layouts or consuming additional RNG.
+		if config.prefer_both_elevations and count > 1 and heights.all(func(height: int) -> bool: return height == heights[0]):
+			heights[-1] = 1 - heights[0]
+		return heights
+	# Preserve the original three-level assignment and random sequence exactly.
 	var result: Array[int] = [0]
 	var same := 0
 	for index in range(1, count):
@@ -51,38 +96,60 @@ static func assign_heights(count: int) -> Array[int]:
 static func create_configured_dungeon(config: DungeonGenerationConfig) -> DungeonData:
 	var errors := config.validation_errors()
 	if not errors.is_empty():
-		push_error("Invalid Limit Testing configuration: " + "; ".join(errors))
+		push_error("Invalid dungeon generation configuration: " + "; ".join(errors))
 		return null
 	return create_test_dungeon(config.placement_attempts, config.map_size, config)
 
 
-static func create_test_dungeon(placement_attempts: int = 250, map_size: Vector2i = Vector2i(COLS, ROWS), config: DungeonGenerationConfig = null) -> DungeonData:
+static func create_test_dungeon(placement_attempts: int = -1, map_size: Vector2i = Vector2i.ZERO, config: DungeonGenerationConfig = null) -> DungeonData:
+	if config == null: config = get_default_config()
+	if placement_attempts < 0: placement_attempts = config.placement_attempts
+	if map_size == Vector2i.ZERO: map_size = config.map_size
+	var errors := config.validation_errors()
+	if not errors.is_empty():
+		push_error("Invalid dungeon generation configuration: " + "; ".join(errors))
+		return null
+	last_quality_report = {}
+	last_quality_attempts = []
 	var routing_attempts := 0
-	var limit := MAX_LAYOUT_ATTEMPTS if config == null else config.layout_attempts
-	var skeletons := 3 if config == null else config.skeleton_limit
+	var limit := config.layout_attempts
+	var skeletons := config.skeleton_limit
 	for attempt in range(limit):
 		var dungeon := try_layout(placement_attempts, map_size, config)
+		if not last_layout_quality.is_empty():
+			last_layout_quality["attempt"] = attempt + 1
+			last_layout_quality["outcome"] = "routing_failed" if dungeon.connections.is_empty() else "validation_failed"
+			last_quality_attempts.append(last_layout_quality)
 		routing_attempts += dungeon.routing_attempts
 		if not dungeon.connections.is_empty() and validate_floor(dungeon):
 			dungeon.generation_attempts = attempt + 1
 			dungeon.routing_attempts = routing_attempts
 			finish_spawns(dungeon, map_size, skeletons)
 			last_statistics = {"layouts": attempt + 1, "routes": routing_attempts, "fallback": false, "size": map_size}
+			last_quality_report = last_layout_quality
+			if not last_quality_report.is_empty(): last_quality_report["outcome"] = "accepted"
+			record_quality_statistics()
 			return dungeon
 	push_warning("Elevation generation exhausted %d layouts at %s; using known-valid elevated fallback." % [limit, map_size])
-	if config != null:
-		push_warning("Limit Testing fallback uses two 4x4 rooms, irrespective of requested room counts/dimensions.")
+	push_warning("Generation fallback uses two 4x4 rooms and an east-uphill ramp, irrespective of requested room counts/dimensions.")
 	var fallback := create_fallback_dungeon()
+	fallback.map_bounds = Rect2i(Vector2i.ZERO, map_size)
 	fallback.generation_attempts = limit
 	fallback.routing_attempts = routing_attempts
 	finish_spawns(fallback, map_size, skeletons)
 	last_statistics = {"layouts": limit, "routes": routing_attempts, "fallback": true, "size": map_size}
+	last_quality_report = evaluate_quality(fallback, config)
+	if not last_quality_report.is_empty(): last_quality_report["outcome"] = "fallback"
+	record_quality_statistics()
 	return fallback
 
 
 static func try_layout(placement_attempts: int, size: Vector2i, config: DungeonGenerationConfig = null) -> DungeonData:
+	if config == null: config = get_default_config()
+	last_layout_quality = {}
 	var dungeon := DungeonData.new()
 	var desired_rooms := rng.randi_range(5 if config == null else config.minimum_rooms, 7 if config == null else config.maximum_rooms)
+	dungeon.map_bounds = Rect2i(Vector2i.ZERO, size)
 	for attempt in range(placement_attempts):
 		var w := rng.randi_range(4 if config == null else config.minimum_room_size.x, 7 if config == null else config.maximum_room_size.x)
 		var h := rng.randi_range(4 if config == null else config.minimum_room_size.y, 6 if config == null else config.maximum_room_size.y)
@@ -95,7 +162,9 @@ static func try_layout(placement_attempts: int, size: Vector2i, config: DungeonG
 		return dungeon
 	if config != null and config.require_minimum_rooms and dungeon.rooms.size() < config.minimum_rooms:
 		return dungeon
-	dungeon.room_elevations = assign_heights(dungeon.rooms.size())
+	dungeon.room_elevations = assign_heights(dungeon.rooms.size(), config)
+	last_layout_quality = evaluate_quality(dungeon, config)
+	if not last_layout_quality.is_empty(): last_layout_quality["stage"] = "before_rasterization"
 	for id in range(dungeon.rooms.size()):
 		var room := dungeon.rooms[id]
 		for y in range(room.position.y, room.end.y):
@@ -111,7 +180,8 @@ static func try_layout(placement_attempts: int, size: Vector2i, config: DungeonG
 		if ha == hb:
 			success = Router.flat_connection(a, b, ha, dungeon, size, rng.randi_range(0, 1) == 0)
 		else:
-			success = Router.elevated_connection(a if ha < hb else b, b if ha < hb else a, mini(ha, hb), dungeon, size, rng) >= 0
+			var forbidden := Vector2i.DOWN if config.restrict_camera_hidden_ramps else Vector2i.ZERO
+			success = Router.elevated_connection(a if ha < hb else b, b if ha < hb else a, mini(ha, hb), dungeon, size, rng, forbidden) >= 0
 		if not success:
 			dungeon.connections.clear()
 			return dungeon
@@ -120,7 +190,7 @@ static func try_layout(placement_attempts: int, size: Vector2i, config: DungeonG
 
 
 static func validate_floor(dungeon: DungeonData) -> bool:
-	if dungeon.rooms.is_empty() or dungeon.room_elevations[0] != 0:
+	if dungeon.rooms.is_empty() or dungeon.rooms.size() != dungeon.room_elevations.size():
 		return false
 	for id in range(dungeon.rooms.size()):
 		if dungeon.room_elevations[id] not in [-1, 0, 1]:

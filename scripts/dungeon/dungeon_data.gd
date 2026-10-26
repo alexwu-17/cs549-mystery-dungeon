@@ -18,6 +18,8 @@ const CARDINALS = [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]
 
 
 var tiles: Dictionary = {}
+# Explicit configured extent; rendering must not infer the map from carved rooms.
+var map_bounds: Rect2i = Rect2i()
 var elevations: Dictionary = {}
 var rooms: Array[Rect2i] = []
 var room_elevations: Array[int] = []

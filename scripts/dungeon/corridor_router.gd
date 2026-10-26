@@ -83,11 +83,13 @@ static func find_path(start: Vector2i, goal: Vector2i, height: int, data: Dungeo
 	return []
 
 
-static func elevated_connection(low_center: Vector2i, high_center: Vector2i, lower_height: int, data: DungeonData, size: Vector2i, rng: RandomNumberGenerator) -> int:
+static func elevated_connection(low_center: Vector2i, high_center: Vector2i, lower_height: int, data: DungeonData, size: Vector2i, rng: RandomNumberGenerator, forbidden_uphill: Vector2i = Vector2i.ZERO) -> int:
 	var candidates: Array[Dictionary] = []
 	for y in range(1, size.y - 1):
 		for x in range(1, size.x - 1):
 			for direction: Vector2i in DIRECTIONS:
+				if direction == forbidden_uphill:
+					continue
 				var lower := Vector2i(x, y)
 				var blocked: Dictionary = {}
 				var valid := true

@@ -16,7 +16,7 @@ reflected_light_source = 2
 script = ExtResource("1_iuonh")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.642788, 0.766044, 0, -0.766044, 0.642788, 6, 10, 10)
+transform = Transform3D(1, 0, 0, 0, 0.819152, 0.573576, 0, -0.573576, 0.819152, 0, 7.34536, 10.4903)
 current = true
 fov = 23.1285
 script = ExtResource("5_camera")

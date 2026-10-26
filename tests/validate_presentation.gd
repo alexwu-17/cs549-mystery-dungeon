@@ -13,12 +13,15 @@ func validate() -> void:
 	var camera: Camera3D = main.presentation_camera
 	var sprite: Sprite3D = main.player.get_node("PlayerSprite")
 	assert(camera.projection == Camera3D.PROJECTION_PERSPECTIVE)
+	assert(is_equal_approx(camera.rotation_degrees.x, -35.0))
+	assert(is_equal_approx(camera.follow_offset.length(), Vector3(0, 10, 8).length()))
 	assert(is_equal_approx(tan(deg_to_rad(75.0) / 2) / tan(deg_to_rad(camera.fov) / 2), 3.75))
 	assert(not main.hud.get_node("Screen/GameOver").visible)
 	for tile in [Vector2i(2, 2), Vector2i(7, 2), Vector2i(9, 2)]:
 		main.player.setup(tile, main.dungeon, main.dungeon_renderer)
 		main.refresh_fog()
 		assert(camera.global_position.is_equal_approx(main.player.global_position + camera.follow_offset))
+		assert(camera.unproject_position(main.player.global_position).distance_to(camera.get_viewport().get_visible_rect().get_center()) < 0.1)
 	assert(not camera.sprite_samples(sprite).is_empty())
 	main.player.receive_damage(100)
 	assert(main.game_over and main.hud.get_node("Screen/GameOver").visible)
@@ -52,16 +55,17 @@ func validate() -> void:
 	renderer.apply_fog()
 	var blocked: Dictionary
 	for visual in renderer.fog_visuals:
-		if visual.tiles == [Vector2i(0, 2)]:
+		if visual.tiles == [Vector2i(0, 2)] and not visual.wall and not visual.filler:
 			blocked = visual
 	var mesh: MeshInstance3D = blocked.mesh
 	mesh.rotation.y = 0.4
 	mesh.scale = Vector3(0.7, 1, 0.8)
-	var sight := (mesh.global_position - camera.global_position).normalized()
-	var points: Array[Vector3] = [mesh.global_position + sight * 4]
+	var center := mesh.global_transform * mesh.get_aabb().get_center()
+	var sight := (center - camera.global_position).normalized()
+	var points: Array[Vector3] = [center + sight * 4]
 	renderer.update_occlusion(camera, Vector2i.ZERO, points)
 	assert(blocked.occluded and not mesh.visible)
-	assert(mesh.material_override == renderer.other_elevation_material)
+	assert(blocked.fog_state == 2)
 	# Fog refresh must not undo occlusion or expose hidden stairs.
 	renderer.apply_fog()
 	assert(not mesh.visible)
@@ -74,10 +78,10 @@ func validate() -> void:
 	renderer.update_occlusion(camera, Vector2i.ZERO, points)
 	assert(not blocked.occluded and mesh.visible)
 	# A mesh behind the sprite must never count as obstruction.
-	points[0] = mesh.global_position - sight * 2
+	points[0] = center - sight * 2
 	renderer.update_occlusion(camera, Vector2i.ZERO, points)
 	assert(not blocked.occluded)
-	points[0] = mesh.global_position + sight * 4
+	points[0] = center + sight * 4
 	renderer.update_occlusion(camera, Vector2i(0, 2), points)
 	assert(not blocked.occluded) # Own room/support tile.
 	# Higher corridors also obstruct, including when the player is in a corridor.
@@ -88,33 +92,34 @@ func validate() -> void:
 	renderer.apply_fog()
 	var corridor: Dictionary
 	for visual in renderer.fog_visuals:
-		if visual.tiles == [Vector2i(2, 2)]:
+		if visual.tiles == [Vector2i(2, 2)] and not visual.wall and not visual.get("support", false):
 			corridor = visual
 	var corridor_mesh: MeshInstance3D = corridor.mesh
-	var corridor_sight := (corridor_mesh.global_position - camera.global_position).normalized()
-	points[0] = corridor_mesh.global_position + corridor_sight * 4
+	var corridor_center := corridor_mesh.global_transform * corridor_mesh.get_aabb().get_center()
+	var corridor_sight := (corridor_center - camera.global_position).normalized()
+	points[0] = corridor_center + corridor_sight * 4
 	for player_tile in [Vector2i.ZERO, Vector2i(2, 0)]:
 		renderer.update_occlusion(camera, player_tile, points)
 		assert(corridor.occluded and not corridor_mesh.visible)
-		assert(corridor_mesh.material_override == renderer.other_elevation_material)
+		assert(corridor.fog_state == 2)
 	points[0] += camera.global_basis.x * 2
 	renderer.update_occlusion(camera, Vector2i(2, 0), points)
 	assert(not corridor.occluded and corridor_mesh.visible)
-	points[0] = corridor_mesh.global_position + corridor_sight * 4
+	points[0] = corridor_center + corridor_sight * 4
 	renderer.update_occlusion(camera, Vector2i(2, 2), points)
 	assert(not corridor.occluded and corridor_mesh.visible) # Support/same height.
 	# All five transition tiles participate; the slope remains one visual unit.
 	data.set_tile(Vector2i(3, 0), DungeonData.TileType.CORRIDOR, -1)
 	var transition_meshes := 0
 	for visual in renderer.fog_visuals:
-		if not data.reserved_transitions.has(visual.tiles[0]):
+		if visual.wall or visual.get("support", false) or not data.reserved_transitions.has(visual.tiles[0]):
 			continue
 		transition_meshes += 1
 		assert(visual.candidate)
 		var transition_mesh: MeshInstance3D = visual.mesh
-		var center := transition_mesh.global_transform * transition_mesh.get_aabb().get_center()
-		var transition_sight := (center - camera.global_position).normalized()
-		points[0] = center + transition_sight * 4
+		var transition_center := transition_mesh.global_transform * transition_mesh.get_aabb().get_center()
+		var transition_sight := (transition_center - camera.global_position).normalized()
+		points[0] = transition_center + transition_sight * 4
 		# The lower buffer at height zero must not hide for a same-level player.
 		renderer.update_occlusion(camera, Vector2i.ZERO, points)
 		if data.get_tile(visual.tiles[0]) == DungeonData.TileType.RAMP or data.get_elevation(visual.tiles[0]) > 0:

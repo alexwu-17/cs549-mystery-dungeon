@@ -36,11 +36,15 @@ func validate() -> void:
 	var renderer := DungeonRenderer.new()
 	root.add_child(renderer)
 	renderer.render_dungeon(fixture)
-	assert(renderer.get_child_count() == 54)
+	var original_visual_count := renderer.get_child_count()
+	var terrain_count := 0
+	for visual in renderer.fog_visuals:
+		if not visual.wall and not visual.get("filler", false): terrain_count += 1
+	assert(terrain_count == 54) # Original supporting tiles plus staircase; walls are separate.
 	assert(renderer.get_entity_world_position(Vector2i(7, 2)).is_equal_approx(Vector3(7, 1.6, 2)))
 	assert(renderer.get_entity_world_position(Vector2i(8, 2)).is_equal_approx(Vector3(8, 3.1, 2)))
 	renderer.render_dungeon(fixture)
-	assert(renderer.get_child_count() == 54)
+	assert(renderer.get_child_count() == original_visual_count)
 	renderer.free()
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)

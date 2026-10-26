@@ -21,8 +21,8 @@ func validate() -> void:
 		assert(main.get_node("Camera3D").projection == Camera3D.PROJECTION_PERSPECTIVE)
 		for visual in main.dungeon_renderer.fog_visuals:
 			var mesh: MeshInstance3D = visual.mesh
-			assert(mesh.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON)
-			assert(mesh.visible == (visual.fog_visible and not visual.occluded))
+			assert(mesh.cast_shadow == (GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if (visual.wall or visual.get("filler", false)) and visual.occluded else GeometryInstance3D.SHADOW_CASTING_SETTING_ON))
+			assert(mesh.visible == (visual.fog_visible and (visual.wall or visual.get("filler", false) or not visual.occluded)))
 		main.queue_free()
 		await process_frame
 	for path in ["res://scenes/player/player.tscn", "res://scenes/enemies/test_enemy.tscn", "res://scenes/enemies/minotaur.tscn"]:

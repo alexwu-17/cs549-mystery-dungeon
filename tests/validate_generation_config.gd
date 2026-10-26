@@ -11,11 +11,12 @@ func validate() -> void:
 		var baseline := GDScript.new()
 		baseline.source_code = FileAccess.get_file_as_string(args[0]).replace("class_name TestDungeonFactory", "")
 		assert(baseline.reload() == OK)
+		var legacy: DungeonGenerationConfig = load("res://config/legacy_generation.tres")
 		for seed_value in range(20):
 			baseline.rng.seed = seed_value
 			var before: DungeonData = baseline.create_test_dungeon(20 if seed_value == 19 else 250)
 			TestDungeonFactory.rng.seed = seed_value
-			var after := TestDungeonFactory.create_test_dungeon(20 if seed_value == 19 else 250)
+			var after := TestDungeonFactory.create_test_dungeon(20 if seed_value == 19 else 250, Vector2i(30, 22), legacy)
 			for property in ["tiles", "elevations", "rooms", "room_elevations", "connections", "ramp_segments", "player_spawn", "stairs_position", "enemy_spawns", "generation_attempts", "routing_attempts", "used_fallback"]:
 				assert(before.get(property) == after.get(property), property)
 			assert(baseline.rng.state == TestDungeonFactory.rng.state)

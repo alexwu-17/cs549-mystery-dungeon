@@ -34,6 +34,8 @@ var round_generation: int = 0
 var turn_rng := RandomNumberGenerator.new()
 var resolving_turn: bool = false
 var loading_floor: bool = false
+# Only the player/floor determines terrain fog; actors still refresh every action.
+var _fog_context: Array = []
 var floor_number: int = 1
 @export var healing_on_kill: int = 3
 
@@ -118,10 +120,17 @@ func load_test_floor() -> void:
 			# Invalid experiments remain stopped; do not silently use defaults.
 			return
 	else:
-		dungeon = TestDungeonFactory.create_test_dungeon()
+		# Null uses the shared standard Resource; Inspector overrides also work in
+		# Infinite/Demo, e.g. the optional legacy three-elevation configuration.
+		dungeon = TestDungeonFactory.create_test_dungeon() if generation_config == null else TestDungeonFactory.create_configured_dungeon(generation_config)
+		if dungeon == null: return
 		print("ELEVATION FLOOR: ", TestDungeonFactory.last_statistics, " | room heights=", dungeon.room_elevations, " | ramps=", dungeon.ramp_segments)
 
-	dungeon_renderer.render_dungeon(dungeon)
+	if not dungeon_renderer.render_dungeon(dungeon, use_elevation_test or benchmark != null or GameModeConfig.is_arena(game_mode, floor_number)):
+		# Keep the existing introduction/input lock authoritative if visual structure
+		# cannot be validated even after the structure-only fallback.
+		push_error("Floor presentation blocked by unresolved environmental geometry.")
+		return
 	spawn_test_enemies()
 
 	player.setup(
@@ -277,7 +286,7 @@ func run_enemy_turn() -> void:
 	resolving_turn = true
 	player.round_locked = true
 	var token := round_generation
-	refresh_fog()
+	refresh_turn_visibility()
 	await player.complete_action()
 	if token != round_generation:
 		return
@@ -312,7 +321,7 @@ func run_enemy_turn() -> void:
 			actor.take_turn(player.grid_position)
 		if token != round_generation:
 			return
-		refresh_fog()
+		refresh_turn_visibility()
 		await actor.complete_action()
 		if token != round_generation or not is_instance_valid(actor) or actor.character_visual.disposed:
 			return
@@ -328,13 +337,26 @@ func run_enemy_turn() -> void:
 func refresh_fog() -> void:
 	dungeon.update_fog(player.grid_position)
 	dungeon_renderer.apply_fog(player.fog_elevation)
+	_fog_context = [dungeon.get_instance_id(), player.grid_position, player.fog_elevation]
+	refresh_entity_visibility()
+	update_presentation()
+
+
+func refresh_turn_visibility() -> void:
+	if _fog_context != [dungeon.get_instance_id(), player.grid_position, player.fog_elevation]:
+		refresh_fog()
+	else:
+		refresh_entity_visibility()
+		update_presentation()
+
+
+func refresh_entity_visibility() -> void:
 	for enemy in enemies:
 		enemy.visible = dungeon.is_bright(enemy.grid_position)
 	if is_instance_valid(boss) and boss.state != Minotaur.State.DEAD:
 		boss.refresh_visibility()
 	hud.refresh_map(dungeon, player.grid_position, enemies, floor_number)
 	hud.minimap.refresh_boss(boss)
-	update_presentation()
 
 
 func _on_enemy_attack(amount: int, actor_name: String) -> void:

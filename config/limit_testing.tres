@@ -14,3 +14,6 @@ placement_attempts = 1000
 layout_attempts = 32
 require_minimum_rooms = true
 invincible_player = true
+elevation_mode = 0
+prefer_both_elevations = true
+restrict_camera_hidden_ramps = true

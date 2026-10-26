@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DungeonGenerationConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/dungeon/dungeon_generation_config.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+map_size = Vector2i(30, 22)
+require_minimum_rooms = false
+elevation_mode = 1
+prefer_both_elevations = false
+restrict_camera_hidden_ramps = false

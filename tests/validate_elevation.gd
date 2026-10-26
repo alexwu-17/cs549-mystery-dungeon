@@ -47,7 +47,7 @@ func validate() -> void:
 
 
 func check_floor(data: DungeonData) -> void:
-	assert(data.room_elevations[0] == 0)
+	assert(data.room_elevations[0] in [0, 1])
 	for id in range(data.rooms.size()):
 		assert(data.room_elevations[id] in [-1, 0, 1])
 		var room := data.rooms[id]
@@ -88,22 +88,24 @@ func check_orientation(direction: Vector2i) -> void:
 	var renderer := DungeonRenderer.new()
 	root.add_child(renderer)
 	renderer.render_dungeon(data)
-	assert(renderer.get_child_count() == 5)
+	var terrain_count := 0
 	var slope: MeshInstance3D
-	for child in renderer.get_children():
-		if child.mesh is ArrayMesh:
-			slope = child
+	for visual in renderer.fog_visuals:
+		if not visual.wall and not visual.get("filler", false):
+			terrain_count += 1
+		if visual.tiles.size() == 3:
+			slope = visual.mesh
+	assert(terrain_count == 5) # Four floors and one continuous slope, plus boundary walls.
 	assert(slope != null)
-	var arrays := slope.mesh.surface_get_arrays(0)
-	var mesh_vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-	var mesh_normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
-	assert(mesh_normals[0].y > 0)
-	var start_edge := slope.transform * mesh_vertices[0]
-	var end_edge := slope.transform * mesh_vertices[1]
+	assert(slope.mesh == ModularDungeonVisuals.ramp_mesh(3))
+	var bounds := slope.get_aabb()
+	var lower_edge := slope.transform * Vector3(bounds.position.x, 0, bounds.get_center().z)
+	var upper_edge := slope.transform * Vector3(bounds.end.x, bounds.end.y, bounds.get_center().z)
 	var lower_surface := renderer.get_entity_world_position(lower)
 	var upper_surface := renderer.get_entity_world_position(lower + direction * 4)
-	assert(is_equal_approx(start_edge.y, lower_surface.y) and is_equal_approx(end_edge.y, upper_surface.y))
-	assert(is_equal_approx((Vector2(end_edge.x, end_edge.z) - Vector2(start_edge.x, start_edge.z)).dot(Vector2(direction)), 3.0))
+	assert(is_equal_approx(lower_edge.y, lower_surface.y) and is_equal_approx(upper_edge.y, upper_surface.y))
+	assert(is_equal_approx((Vector2(upper_edge.x, upper_edge.z) - Vector2(lower_edge.x, lower_edge.z)).dot(Vector2(direction)), 3.0))
+	assert(is_equal_approx(slope.basis.z.length() * bounds.size.z, 1.0))
 	for index in range(3):
 		var tile := lower + direction * (index + 1)
 		assert(is_equal_approx(renderer.get_entity_world_position(tile).y, -3.0 + (index + 0.5) + 0.1))
