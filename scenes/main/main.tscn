@@ -1,10 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://b7cqo4g87duu1"]
+[gd_scene load_steps=9 format=3 uid="uid://b7cqo4g87duu1"]
 
 [ext_resource type="Script" uid="uid://vto7pmfc8dce" path="res://scripts/dungeon/dungeon_renderer.gd" id="1_hyk8p"]
 [ext_resource type="Script" uid="uid://caqff8p44lnlc" path="res://scripts/core/main.gd" id="1_iuonh"]
 [ext_resource type="PackedScene" uid="uid://bpxt2riafgpm" path="res://scenes/player/player.tscn" id="3_l3cfh"]
 [ext_resource type="PackedScene" path="res://scenes/ui/player_hud.tscn" id="4_hud"]
 [ext_resource type="Script" uid="uid://d1nbrq084gdg8" path="res://scripts/core/presentation_camera.gd" id="5_camera"]
+[ext_resource type="Script" path="res://scripts/core/dungeon_lighting.gd" id="6_lighting"]
+[ext_resource type="PackedScene" path="res://scenes/effects/sunlight_atmosphere.tscn" id="7_sunlight"]
 
 [sub_resource type="Environment" id="Environment_shared"]
 ambient_light_source = 2
@@ -33,6 +35,9 @@ directional_shadow_max_distance = 40.0
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_shared")
 
+[node name="LightingPresets" type="Node" parent="."]
+script = ExtResource("6_lighting")
+
 [node name="DungeonRenderer" type="Node3D" parent="."]
 script = ExtResource("1_hyk8p")
 
@@ -41,3 +46,5 @@ script = ExtResource("1_hyk8p")
 [node name="Entities" type="Node3D" parent="."]
 
 [node name="HUD" parent="." instance=ExtResource("4_hud")]
+
+[node name="SunlightAtmosphere" parent="." instance=ExtResource("7_sunlight")]

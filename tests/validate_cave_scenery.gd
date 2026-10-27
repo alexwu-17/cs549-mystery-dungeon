@@ -23,6 +23,8 @@ func validate() -> void:
 	camera.rotation_degrees.x=-camera.pitch_degrees
 	camera.fov=camera.field_of_view
 	var renderer := DungeonRenderer.new()
+	renderer.cave_continuous_ground_enabled = false
+	renderer.cave_stone_mapping_enabled = false
 	root.add_child(renderer)
 	for seed_value in [4,17]:
 		TestDungeonFactory.rng.seed=seed_value

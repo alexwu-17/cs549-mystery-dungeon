@@ -7,6 +7,7 @@ var caps: MultiMeshInstance3D
 var bodies: MultiMeshInstance3D
 var batches: Array[Dictionary] = []
 var scenery_apron: CaveSceneryApron
+var ground_surface: CaveGroundSurface
 var _interior_indices: Array[int] = []
 var _all_indices: Array[int] = []
 var _border_shade := Color(-1,-1,-1,1)
@@ -148,10 +149,28 @@ func setup(data: DungeonData, covered: Dictionary, renderer: DungeonRenderer) ->
 	set_meta("geometry_purpose", "bounded_cave_background")
 	set_meta("geometry_bounds", planned.visual_bounds)
 	if records.is_empty(): return
+	if renderer.cave_continuous_ground_enabled:
+		for index in range(records.size()):
+			_all_indices.append(index)
+			if not records[index].external: _interior_indices.append(index)
+			var hash_value := renderer.floor_hash(records[index].cell)
+			var tint := 1.0
+			if renderer.cave_ceiling_variation_enabled: tint += (float(posmod(hash_value / 4, 9)) / 4.0 - 1.0) * renderer.cave_ceiling_color_variation
+			records[index]["tint"] = tint
+		ground_surface = CaveGroundSurface.new()
+		ground_surface.setup(self,records,planned.visual_bounds,renderer)
+		diagnostics.mesh_nodes = ground_surface.chunks.size()
+		diagnostics["surface"] = ground_surface.stats
+		setup_apron(data,planned.visual_bounds,renderer)
+		apply_fog(data,0,renderer.dim_material.albedo_color,renderer.other_elevation_material.albedo_color)
+		return
 	var body := BoxMesh.new()
 	body.size = Vector3.ONE
 	var side_material: StandardMaterial3D = TerrainFillVisuals.material().duplicate()
 	var top_material: StandardMaterial3D = TerrainFillVisuals.material().duplicate()
+	if renderer.cave_stone_mapping_enabled:
+		CaveStoneMaterial.configure(side_material)
+		CaveStoneMaterial.configure(top_material)
 	# A single map-wide MultiMesh cannot cull distant instances. Small spatial
 	# groups retain batching while avoiding unnecessary off-screen model detail.
 	var groups: Dictionary = {}
@@ -198,14 +217,18 @@ func setup(data: DungeonData, covered: Dictionary, renderer: DungeonRenderer) ->
 		var ceiling := TerrainFillVisuals.wall_top_offset(0.1, 1.0) if records[index].varied else 0.1
 		if not is_equal_approx(bounds.end.y, top) or top > ceiling + 0.001: diagnostics.violations.append(tile)
 	diagnostics.mesh_nodes = batches.size() * 2
+	setup_apron(data,planned.visual_bounds,renderer)
+	apply_fog(data, 0, renderer.dim_material.albedo_color, renderer.other_elevation_material.albedo_color)
+
+func setup_apron(data: DungeonData, visual_bounds: Rect2i, renderer: DungeonRenderer) -> void:
 	if renderer.cave_scenery_border_width > 0:
 		scenery_apron = CaveSceneryApron.new()
 		scenery_apron.name = "DistantCaveScenery"
 		add_child(scenery_apron)
-		scenery_apron.setup(data,planned.visual_bounds,get_viewport().get_camera_3d())
+		scenery_apron.setup(data,visual_bounds,get_viewport().get_camera_3d())
+		if renderer.cave_stone_mapping_enabled: CaveStoneMaterial.configure(scenery_apron.material_override)
 		diagnostics.mesh_nodes += 1
 		diagnostics["apron_triangles"] = 8
-	apply_fog(data, 0, renderer.dim_material.albedo_color, renderer.other_elevation_material.albedo_color)
 
 func apply_fog(data: DungeonData, reference: int, dim: Color, other: Color) -> void:
 	if records.is_empty(): return
@@ -214,13 +237,18 @@ func apply_fog(data: DungeonData, reference: int, dim: Color, other: Color) -> v
 	var border_shade := dim if reference == 0 else other
 	var border_changed := _border_shade != border_shade
 	var indices: Array[int] = _all_indices if border_changed else _interior_indices
+	var palette_changed := false
 	for index in indices:
 		var record: Dictionary = records[index]
 		var bright: bool = data.is_bright(record.cell) or (record.adjacent and data.is_bright(record.owner))
 		var shade := border_shade if record.external else (Color.WHITE if bright else (dim if reference == 0 else other))
 		records[index]["shade"] = shade
-		body_batch(record).multimesh.set_instance_color(record.instance, instance_color(shade, 1.0))
-		cap_batch(record).multimesh.set_instance_color(record.instance, instance_color(shade, record.tint))
+		if ground_surface != null:
+			palette_changed = ground_surface.set_shade(record,shade) or palette_changed
+		else:
+			body_batch(record).multimesh.set_instance_color(record.instance, instance_color(shade, 1.0))
+			cap_batch(record).multimesh.set_instance_color(record.instance, instance_color(shade, record.tint))
+	if palette_changed: ground_surface.upload_palette()
 	_border_shade = border_shade
 	if border_changed and is_instance_valid(scenery_apron): scenery_apron.apply_shade(border_shade)
 

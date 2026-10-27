@@ -10,6 +10,8 @@ func validate() -> void:
 		assert((base * CaveTerrainBackdrop.instance_color(shade, 1.0)).is_equal_approx(expected))
 	var config: DungeonGenerationConfig = TestDungeonFactory.get_default_config().duplicate()
 	var renderer := DungeonRenderer.new()
+	renderer.cave_continuous_ground_enabled = false
+	renderer.cave_stone_mapping_enabled = false
 	renderer.cave_scenery_border_width = 0 # This suite isolates the original logical footprint.
 	root.add_child(renderer)
 	var totals := {"floors": 0, "nonwalkable": 0, "existing": 0, "protected_voids": 0, "background": 0, "new_mesh_nodes": 0, "unresolved": 0}

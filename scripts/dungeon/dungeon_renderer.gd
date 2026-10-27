@@ -45,14 +45,23 @@ var terrain_fill_cells: Dictionary = {}
 @export var cave_ground_blending_enabled: bool = true
 @export var cave_ground_height_variation_enabled: bool = true
 @export_range(0, 16, 1) var cave_scenery_border_width: int = 6
+@export var cave_continuous_ground_enabled: bool = true
+@export var cave_stone_mapping_enabled: bool = true
+@export var cave_weathered_edges_enabled: bool = true
 var cave_background: CaveTerrainBackdrop
 var cave_fill_active: bool = false
 var _occlusion_frame: int = -1
 var _occlusion_context: Array = []
+var _stone_variants: Dictionary = {}
+var cave_rock_profiles: Dictionary = {}
+var _rock_meshes: Dictionary = {}
 
 
 func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure_only: bool = false) -> bool:
 	_occlusion_context.clear()
+	_stone_variants.clear()
+	cave_rock_profiles.clear()
+	_rock_meshes.clear()
 	dungeon_data = data
 	fog_visuals.clear()
 	terrain_fill_cells.clear()
@@ -89,6 +98,8 @@ func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure
 				return restored
 			push_error("Environmental structure could not be validated: " + str(checked.unresolved))
 			return false
+	if cave_fill_active and cave_continuous_ground_enabled and cave_weathered_edges_enabled:
+		cave_rock_profiles = CaveRockSlopes.prepare(data,geometry_plan.get("elements",[]),self)
 	if normal_material == null:
 		normal_material = StandardMaterial3D.new()
 		dim_material = StandardMaterial3D.new()
@@ -157,9 +168,14 @@ func create_planned_element(record: Dictionary) -> void:
 	var tint := ModularDungeonVisuals.FILL_COLOR
 	var ceiling: bool = cave_fill_active and record.purpose in [EnvironmentGeometryPlan.BOUNDARY, EnvironmentGeometryPlan.TERRACE]
 	if record.purpose == EnvironmentGeometryPlan.BOUNDARY or ceiling:
-		mesh.mesh = TerrainFillVisuals.cave_mesh(bounds.size.y) if cave_fill_active else TerrainFillVisuals.mesh(bounds.size.y, record.detailed)
+		if record.has("rock_profile"):
+			var shape := CaveRockSlopes.shape_key(record)
+			if not _rock_meshes.has(shape): _rock_meshes[shape] = CaveRockSlopes.mesh(record)
+			mesh.mesh = _rock_meshes[shape]
+		else:
+			mesh.mesh = TerrainFillVisuals.cave_mesh(bounds.size.y) if cave_fill_active else TerrainFillVisuals.mesh(bounds.size.y, record.detailed)
 		mesh.position = Vector3(record.cell.x, bounds.end.y, record.cell.y)
-		if cave_fill_active and cave_ceiling_variation_enabled: mesh.rotation.y = float(posmod(floor_hash(record.cell), 4)) * PI / 2.0
+		if cave_fill_active and cave_ceiling_variation_enabled and not record.has("rock_profile"): mesh.rotation.y = float(posmod(floor_hash(record.cell), 4)) * PI / 2.0
 	else:
 		var key := "%s:%s:%s" % [record.purpose, bounds.size, record.layer]
 		if not geometry_box_meshes.has(key):
@@ -185,6 +201,18 @@ func create_planned_element(record: Dictionary) -> void:
 		var factor := 1.0
 		if cave_ceiling_variation_enabled: factor += (float(posmod(floor_hash(record.cell) / 4, 9)) / 4.0 - 1.0) * cave_ceiling_color_variation
 		visual.materials[1] = ModularDungeonVisuals.materials(mesh.mesh.surface_get_material(1), dim_material.albedo_color, other_elevation_material.albedo_color, ModularDungeonVisuals.FILL_COLOR * Color(factor, factor, factor, 1))
+	# Keep the existing three fog states and selective transparency ownership.
+	# Duplicate cached variants before adding optional world-space stone detail.
+	if cave_stone_mapping_enabled and record.purpose != EnvironmentGeometryPlan.WALKWAY:
+		for surface in range(visual.materials.size()):
+			for state in range(visual.materials[surface].size()):
+				var original: StandardMaterial3D = visual.materials[surface][state]
+				var key := original.get_instance_id()
+				if not _stone_variants.has(key):
+					var stone: StandardMaterial3D = original.duplicate()
+					CaveStoneMaterial.configure(stone)
+					_stone_variants[key] = stone
+				visual.materials[surface][state] = _stone_variants[key]
 	if record.purpose == EnvironmentGeometryPlan.WALKWAY:
 		visual["support"] = true
 	else:

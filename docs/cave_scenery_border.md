@@ -44,4 +44,4 @@ Start with an optional **ground-only chunk ArrayMesh** driven by `CaveTerrainBac
 - For Stage 3, test a shared world-space triplanar stone material on the prototype ground and then compatible cliff materials. Reuse deterministic textures, keep normal/roughness detail subtle, preserve fog/shadow/opacity behavior, and retain the three recognizable foundation layers. Current source assets mostly use modeled detail and colors, so texture mapping alone will not remove cubic geometry.
 - For Stage 4, first weather exposed decorative cliff faces with anchored joins. Any bevel/displacement must stay inside decorative footprints and away from ramps/walkable clearances. Preserve full required foundation coverage and bridge depth. Avoid smoothing topology/elevation boundaries or silently relaxing geometry validation.
 
-Stages 2–4 are proposals only in this pass. They need their own small reversible prototype and matched performance/appearance check.
+Stages 2–4 were proposals in the Stage-1 checkpoint. The subsequent reversible implementation and matched checks are documented in [continuous cave terrain](continuous_cave_terrain.md).

@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="DungeonLightingPreset" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/core/dungeon_lighting_preset.gd" id="1"]
+[resource]
+script = ExtResource("1")
+display_name = "A - Current baseline"
+restore_scene_baseline = true

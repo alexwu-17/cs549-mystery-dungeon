@@ -14,6 +14,9 @@ func appearance(renderer: DungeonRenderer, upper_only: bool = false) -> Array:
 
 func validate() -> void:
 	var renderer := DungeonRenderer.new()
+	# Isolate authored wall-style/material identity; optional stone variants are
+	# floor-owned and independently covered by validate_continuous_terrain.
+	renderer.cave_stone_mapping_enabled = false
 	root.add_child(renderer)
 	var config: DungeonGenerationConfig = TestDungeonFactory.get_default_config().duplicate()
 	config.map_size = Vector2i(42, 32)
@@ -59,7 +62,12 @@ func validate() -> void:
 				elif visual.purpose == EnvironmentGeometryPlan.BOUNDARY:
 					var varied: bool = renderer.geometry_plan.elements.any(func(entry): return entry.id == visual.plan_id and entry.get("ground_variation",false))
 					if varied:
-						assert(is_equal_approx(bounds.end.y,CaveTerrainBackdrop.varied_top(tile,renderer.floor_visual_seed)))
+						var entry: Dictionary = renderer.geometry_plan.elements.filter(func(record): return record.id == visual.plan_id)[0]
+						# The deterministic plateau height is unchanged; a shared rocky
+						# corner can continue upward to the neighboring decorative tile.
+						var nominal: AABB = entry.get("nominal_bounds",entry.bounds)
+						assert(is_equal_approx(nominal.end.y,CaveTerrainBackdrop.varied_top(tile,renderer.floor_visual_seed)))
+						assert(EnvironmentGeometryPlan.same_bounds(bounds,entry.bounds))
 					else:
 						assert(is_equal_approx(bounds.end.y, TerrainFillVisuals.wall_top_offset(0.1, ratio)))
 			assert(index > 0)
