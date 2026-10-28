@@ -38,6 +38,9 @@ func sprite_samples(sprite: Sprite3D) -> Array[Vector3]:
 func _sprite_opaque_uvs(texture: Texture2D) -> PackedVector2Array:
 	if texture == null:
 		return PackedVector2Array()
+	# Immutable Pokémon atlas masks are prepared once with their species library.
+	if texture is AtlasTexture and texture.has_meta("pokemon_opaque_uvs"):
+		return texture.get_meta("pokemon_opaque_uvs")
 	var id := texture.get_instance_id()
 	_sample_clock += 1
 	if _sprite_sample_cache.has(id):

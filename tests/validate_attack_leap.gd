@@ -6,6 +6,7 @@ func _initialize() -> void:
 func validate() -> void:
 	var main = load("res://scenes/main/main.tscn").instantiate()
 	main.use_elevation_test = true
+	load("res://tests/round_test_helper.gd").use_placeholder_visuals(main)
 	root.add_child(main)
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	var player: Player = main.player

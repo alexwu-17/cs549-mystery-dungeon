@@ -12,8 +12,10 @@ signal presentation_event(kind: StringName)
 var health: HealthScript = HealthScript.new()
 var state: State = State.HUNTING
 var grid_position: Vector2i
+@onready var sprite_clearance: AttackLeap = $SpriteClearance
 @onready var character_visual: CharacterVisual = $VisualController
 var facing: Vector2i = Vector2i.DOWN
+var attack_row: int = 0
 var threatened_tiles: Array[Vector2i] = []
 var markers: Array[MeshInstance3D] = []
 var dungeon_data: DungeonData
@@ -51,17 +53,18 @@ func can_occupy(center: Vector2i, player_tile: Vector2i) -> bool:
 
 func attack_tiles() -> Array[Vector2i]:
 	var tiles: Array[Vector2i] = []
-	var body := footprint()
-	for occupied in body:
-		for y in range(-1, 2):
-			for x in range(-1, 2):
-				var tile := occupied + Vector2i(x, y)
-				if not body.has(tile) and not tiles.has(tile) and dungeon_data.is_walkable(tile):
-					tiles.append(tile)
+	if absi(facing.x) + absi(facing.y) != 1: return tiles
+	var front := grid_position
+	if facing == Vector2i.DOWN: front += Vector2i.DOWN
+	elif facing.x != 0: front += Vector2i.DOWN * attack_row
+	for depth in [1,2]:
+		var tile: Vector2i = front + facing * depth
+		if dungeon_data.is_walkable(tile): tiles.append(tile)
 	return tiles
 
 func face_player(player_tile: Vector2i) -> void:
-	var delta := player_tile - grid_position
+	attack_row = clampi(player_tile.y-grid_position.y,0,1)
+	var delta := (player_tile-grid_position)*2-Vector2i.DOWN
 	if absi(delta.x) > absi(delta.y):
 		facing = Vector2i(signi(delta.x), 0)
 	elif delta.y != 0:
@@ -78,7 +81,7 @@ func take_turn(player_tile: Vector2i) -> void:
 		var hit := threatened_tiles.has(player_tile)
 		clear_charge()
 		state = State.COOLDOWN
-		character_visual.spin()
+		character_visual.swing()
 		print("MINOTAUR CHARGE: ", "HIT" if hit else "MISSED")
 		if hit:
 			attack_requested.emit(attack_damage)
@@ -87,6 +90,7 @@ func take_turn(player_tile: Vector2i) -> void:
 		return
 	if state == State.COOLDOWN:
 		state = State.HUNTING
+		character_visual.recharge()
 		face_player(player_tile)
 		presentation_event.emit(&"cooldown")
 		print("MINOTAUR COOLDOWN")
@@ -95,7 +99,7 @@ func take_turn(player_tile: Vector2i) -> void:
 	if attack_tiles().has(player_tile):
 		state = State.CHARGING
 		threatened_tiles = attack_tiles()
-		character_visual.show_frame("charge")
+		character_visual.charge()
 		show_charge()
 		presentation_event.emit(&"charging")
 		print("MINOTAUR CHARGING: ", threatened_tiles)
@@ -110,6 +114,7 @@ func take_turn(player_tile: Vector2i) -> void:
 		steps.assign([vertical, horizontal])
 	for step in steps:
 		if step != Vector2i.ZERO and can_occupy(grid_position + step, player_tile):
+			character_visual.walk()
 			grid_position += step
 			facing = step
 			character_visual.face(facing)
@@ -146,7 +151,10 @@ func refresh_visibility() -> void:
 		markers[index].visible = dungeon_data.is_walkable(threatened_tiles[index]) and dungeon_data.is_bright(threatened_tiles[index])
 
 func receive_damage(amount: int) -> void:
+	var previous_hp := health.current
 	health.damage(amount)
+	if health.current > 0 and health.current < previous_hp:
+		character_visual.hurt()
 	print("MINOTAUR HP: ", health.current, "/", health.maximum)
 
 func _on_death() -> void:
@@ -156,7 +164,6 @@ func _on_death() -> void:
 	for child in get_children():
 		if child is StatChangeEffect:
 			child.free()
-	visible = false
 	defeated.emit()
 
 

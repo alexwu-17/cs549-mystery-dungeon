@@ -15,6 +15,7 @@ static var surfaces: Dictionary = {}
 static var fog_materials: Dictionary = {}
 static var tread_heights: Dictionary = {}
 static var ramp_meshes: Dictionary = {}
+static var _ramp_clearance_fraction: float = -1.0
 
 static func ramp_mesh(tile_count: int, seal_seams: bool = true) -> ArrayMesh:
 	var key := Vector2i(tile_count, int(seal_seams))
@@ -102,3 +103,15 @@ static func materials(source: Material, dim: Color, other: Color, albedo: Color)
 	var result: Array[Material] = []
 	result.assign(fog_materials[key])
 	return result
+
+
+static func ramp_clearance_height(tile_count: int) -> float:
+	# Cache the authored treads' maximum height above their logical slope once.
+	if _ramp_clearance_fraction < 0.0:
+		_ramp_clearance_fraction = 0.0
+		var bounds := RAMP.get_aabb()
+		for vertex in RAMP.get_faces():
+			var along := (vertex.x-bounds.position.x)/bounds.size.x
+			var height := (vertex.y-bounds.position.y)/bounds.size.y
+			_ramp_clearance_fraction = maxf(_ramp_clearance_fraction,height-along)
+	return _ramp_clearance_fraction * DungeonData.ELEVATION_HEIGHT / tile_count

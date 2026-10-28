@@ -13,6 +13,34 @@ func validate() -> void:
 	var dialogue: CombatDialogue = main.dialogue
 	assert(dialogue.history.is_empty() and not dialogue.panel.visible)
 	assert(dialogue.text.scroll_active == false and dialogue.visible_lines == 3)
+	# Names are resolved when events occur, including per-instance enemy profiles.
+	var original_profile = main.player.character_visual.profile
+	var selected_profile = original_profile.duplicate()
+	main.player.character_visual.profile = selected_profile
+	selected_profile.display_name = "Riolu"
+	dialogue.append_event(&"heal", {"amount": 2})
+	assert(dialogue.history[-1].message == "Riolu recovered 2 HP.")
+	selected_profile.display_name = "Eevee"
+	dialogue.append_event(&"game_over")
+	assert(dialogue.history[-1].message == "Eevee was defeated. Game over.")
+	assert(dialogue.history[-2].message == "Riolu recovered 2 HP.")
+	main.player.character_visual.profile = original_profile
+	var enemy = main.enemies[0]
+	var original_enemy_profile = enemy.character_visual.profile
+	enemy.character_visual.profile = original_enemy_profile.duplicate()
+	for species in ["Zubat", "Koffing"]:
+		enemy.character_visual.profile.display_name = species
+		enemy.attack_requested.emit(0)
+		assert(dialogue.history[-1].message.begins_with(species + " attacks Chimchar"))
+	enemy.character_visual.profile = original_enemy_profile
+	var boss_name_provider := dialogue.enemy_name_provider
+	dialogue.enemy_name_provider = func(): return "Drapion"
+	for kind in [&"charging", &"charge_miss", &"cooldown", &"victory"]:
+		dialogue.append_event(kind)
+		assert(dialogue.history[-1].message.begins_with("Drapion"))
+	dialogue.enemy_name_provider = boss_name_provider
+	dialogue.clear_history()
+
 	dialogue.append_event(&"charging")
 	assert(dialogue.panel.visible and is_equal_approx(dialogue.timer.wait_time, 4.0))
 	var remaining := dialogue.timer.time_left
@@ -25,7 +53,7 @@ func validate() -> void:
 	assert(not dialogue.panel.visible)
 	# Preserve full messages while selecting shaped lines at different widths.
 	var long_name := "A very long combatant name with many words ".repeat(10)
-	dialogue.append_event(&"attack", {"actor": long_name, "target": "Skeleton", "amount": 3})
+	dialogue.append_event(&"attack", {"actor": long_name, "target": "Stunky", "amount": 3})
 	var full_message: String = dialogue.history[-1].message
 	# Standalone resizing is intentional; remove inherited full-screen anchors.
 	dialogue.set_anchors_preset(Control.PRESET_TOP_LEFT)
@@ -77,9 +105,9 @@ func validate() -> void:
 	main.player.setup(Vector2i.ZERO, data, main.dungeon_renderer)
 	main.player.facing = Vector2i.RIGHT
 	main.player.basic_attack()
-	assert(dialogue.history.size() == 1 and dialogue.history[0].message.begins_with("Swordsman attacks"))
+	assert(dialogue.history.size() == 1 and dialogue.history[0].message.begins_with("Chimchar attacks"))
 	Helper.complete(main)
-	assert(dialogue.history[1].message.begins_with("Skeleton attacks") and dialogue.history[-1].type == &"separator")
+	assert(dialogue.history[1].message.begins_with("Stunky attacks") and dialogue.history[-1].type == &"separator")
 	main.player.basic_attack()
 	Helper.complete(main)
 	assert(dialogue.history[-3].type == &"defeat" and dialogue.history[-2].type == &"heal" and dialogue.history[-1].type == &"separator")

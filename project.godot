@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="cs549 mystery dungeon"
 run/main_scene="uid://wdld06klqson"
-config/features=PackedStringArray("4.4", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 run/main_scene.demo_build="res://scenes/main/demo_main.tscn"
 run/main_scene.limit_testing_build="res://scenes/main/limit_testing_main.tscn"

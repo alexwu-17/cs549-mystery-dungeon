@@ -28,6 +28,7 @@ func _ready() -> void:
 
 func setup(start: Vector2i, data: DungeonData, renderer: DungeonRenderer) -> void:
 	attack_leap.finish()
+	character_visual.cancel()
 	facing = Vector2i.DOWN
 	character_visual.face(facing)
 	health.reset(maximum_hp)
@@ -57,14 +58,23 @@ func take_turn(player_position: Vector2i, occupied: Dictionary) -> void:
 	attack_leap.finish()
 	facing = next - grid_position
 	character_visual.face(facing)
+	character_visual.walk()
 	grid_position = next
 	position = dungeon_renderer.get_entity_world_position(grid_position)
 
 
 func receive_damage(amount: int) -> void:
+	if health.current == 0: return
+	var previous_hp := health.current
 	health.damage(amount)
+	if health.current > 0 and health.current < previous_hp:
+		character_visual.hurt()
 	if health.current == 0:
 		attack_leap.finish()
+		if damage_tween != null: damage_tween.kill()
+		character_visual.sprite.modulate = Color.WHITE
+		character_visual.defeat()
+		return
 	print("SKELETON HP at ", grid_position, ": ", health.current, "/", health.maximum)
 	if has_node("EnemyMesh"):
 		if damage_tween != null:

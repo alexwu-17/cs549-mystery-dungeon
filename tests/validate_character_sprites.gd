@@ -7,6 +7,7 @@ func _initialize() -> void:
 
 func validate() -> void:
 	var main = load("res://scenes/main/demo_main.tscn").instantiate()
+	load("res://tests/round_test_helper.gd").use_placeholder_visuals(main)
 	root.add_child(main)
 	Helper.complete_introduction(main)
 	var visual: CharacterVisual = main.player.character_visual

@@ -20,3 +20,6 @@ Thumbs.db
 
 # Andrew personal file(s) and folder(s)
 notes-to-self/
+
+# Original Pokémon downloads remain local; extracted source files are tracked.
+/assets/sprites/pokemon/*.[zZ][iI][pP]

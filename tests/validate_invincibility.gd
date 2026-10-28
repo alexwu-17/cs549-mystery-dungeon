@@ -16,7 +16,7 @@ func validate() -> void:
 		Helper.complete_introduction(main)
 		var limit: bool = scene == "limit_testing_main"
 		assert(main.player.invincible == limit)
-		main._on_enemy_attack(2, "Skeleton")
+		main.enemies[0].attack_requested.emit(2)
 		assert(main.player.health.current == (20 if limit else 18))
 		main.player.receive_damage(100)
 		assert(main.player.health.current == (20 if limit else 0))

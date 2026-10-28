@@ -4,11 +4,19 @@ extends Node3D
 const HealthScript = preload("res://scripts/entities/health.gd")
 
 signal stairs_reached
+signal movement_speed_changed(speed: float)
 signal moved
 signal attack_requested(target: Vector2i)
 
 @export var maximum_hp: int = 20
 @export var attack_damage: int = 3
+
+const MOVE_INTERVAL: float = 0.24
+const HELD_SPEED: float = 3.0
+var held_action: StringName = &""
+var held_direction: Vector2i = Vector2i.ZERO
+var repeat_remaining: float = 0.0
+var movement_speed: float = 1.0
 
 var health: HealthScript = HealthScript.new()
 var invincible: bool = false
@@ -39,7 +47,9 @@ func setup(
 	data: DungeonData,
 	renderer: DungeonRenderer
 ) -> void:
+	stop_held_movement()
 	attack_leap.finish()
+	character_visual.cancel()
 	character_visual.face(facing)
 	grid_position = start_position
 	dungeon_data = data
@@ -63,17 +73,53 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.is_action_pressed("move_up"):
-		try_move(Vector2i(0, -1))
+	var actions := [&"move_up", &"move_down", &"move_left", &"move_right"]
+	var directions := [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
+	for index in range(actions.size()):
+		if event.is_action_released(actions[index]) and held_action == actions[index]:
+			stop_held_movement()
+		elif event.is_action_pressed(actions[index]):
+			stop_held_movement()
+			if not can_accept_movement():
+				return
+			held_action = actions[index]
+			held_direction = directions[index]
+			repeat_remaining = MOVE_INTERVAL
+			try_move(held_direction)
+			get_viewport().set_input_as_handled()
+			return
 
-	elif event.is_action_pressed("move_down"):
-		try_move(Vector2i(0, 1))
 
-	elif event.is_action_pressed("move_left"):
-		try_move(Vector2i(-1, 0))
+func can_accept_movement() -> bool:
+	return not transition_locked and not round_locked and not attack_leap.active and gameplay_enabled and health.current > 0 and dungeon_data != null
 
-	elif event.is_action_pressed("move_right"):
-		try_move(Vector2i(1, 0))
+
+func stop_held_movement() -> void:
+	held_action = &""
+	held_direction = Vector2i.ZERO
+	repeat_remaining = 0.0
+	_set_movement_speed(1.0)
+
+
+func _set_movement_speed(speed: float) -> void:
+	if movement_speed != speed:
+		movement_speed = speed
+		movement_speed_changed.emit(speed)
+
+
+func _process(delta: float) -> void:
+	if held_action == &"":
+		return
+	if not Input.is_action_pressed(held_action) or transition_locked or not gameplay_enabled or health.current == 0:
+		stop_held_movement()
+		return
+	repeat_remaining = maxf(0.0, repeat_remaining - delta)
+	if repeat_remaining > 0.0:
+		return
+	_set_movement_speed(HELD_SPEED)
+	if can_accept_movement():
+		repeat_remaining = MOVE_INTERVAL / HELD_SPEED
+		try_move(held_direction)
 
 ## Movement functions below
 
@@ -95,17 +141,21 @@ func try_move(direction: Vector2i) -> void:
 	)
 
 	if not walkable:
+		stop_held_movement()
 		return
 	if is_tile_occupied.is_valid() and is_tile_occupied.call(target_position):
+		stop_held_movement()
 		print("MOVE BLOCKED: skeleton at ", target_position)
 		return
 
+	character_visual.walk()
 	grid_position = target_position
 	update_world_position()
 
 	print("NEW WORLD POSITION: ", position)
 	
 	if dungeon_data.get_tile(grid_position) == DungeonData.TileType.STAIRS:
+		stop_held_movement()
 		print("STAIRS REACHED at ", grid_position)
 		stairs_reached.emit()
 		return
@@ -115,6 +165,7 @@ func try_move(direction: Vector2i) -> void:
 func basic_attack() -> void:
 	if transition_locked or round_locked or attack_leap.active or not gameplay_enabled or health.current == 0 or dungeon_data == null:
 		return
+	stop_held_movement()
 	character_visual.face(facing)
 	attack_leap.play(facing)
 	attack_requested.emit(grid_position + facing)
@@ -124,7 +175,12 @@ func receive_damage(amount: int) -> void:
 	if invincible:
 		print("LIMIT TESTING: blocked player damage ", amount)
 		return
+	var previous_hp := health.current
 	health.damage(amount)
+	if health.current > 0 and health.current < previous_hp:
+		character_visual.hurt()
+	elif health.current == 0:
+		character_visual.freeze_defeated()
 	print("PLAYER HP: ", health.current, "/", health.maximum)
 	if has_node("PlayerSprite"):
 		if damage_tween != null:
@@ -137,3 +193,8 @@ func receive_damage(amount: int) -> void:
 func complete_action() -> void:
 	if attack_leap.active:
 		await attack_leap.presentation_finished
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		stop_held_movement()

@@ -3,7 +3,7 @@ extends Node3D
 const TEST_ENEMY_SCENE := preload("res://scenes/enemies/test_enemy.tscn")
 const BOSS_SCENE := preload("res://scenes/enemies/minotaur.tscn")
 
-@export var dungeon_name: String = "Demo Cave"
+@export var dungeon_name: String = "Mt. Midterm"
 @export var floor_subtitles: Dictionary = {}
 @export_range(0.0, 10.0, 0.05) var final_floor_text_hold_duration: float = 1.0
 var transition_generation: int = 0
@@ -24,6 +24,7 @@ var benchmark: LimitBenchmark
 
 var dungeon: DungeonData
 var enemies: Array[Skeleton] = []
+var retiring_enemies: Array[Skeleton] = []
 var enemy_occupancy: Dictionary = {}
 var game_over: bool = false
 var victory: bool = false
@@ -41,7 +42,10 @@ var floor_number: int = 1
 
 
 func _ready() -> void:
+	dialogue.character_name_provider = _player_display_name
+	dialogue.enemy_name_provider = _boss_display_name
 	turn_rng.randomize()
+	player.movement_speed_changed.connect(_set_action_speed)
 	player.stairs_reached.connect(_on_stairs_reached)
 	player.moved.connect(_on_player_moved)
 	player.attack_requested.connect(_on_player_attack)
@@ -97,6 +101,11 @@ func update_presentation() -> void:
 	for enemy in enemies:
 		if is_instance_valid(enemy):
 			enemy.character_visual.clear_ramp_intersection(presentation_camera, enemy.dungeon_data, enemy.grid_position, enemy.attack_leap)
+	for enemy in retiring_enemies:
+		if is_instance_valid(enemy):
+			enemy.character_visual.clear_ramp_intersection(presentation_camera, enemy.dungeon_data, enemy.grid_position, enemy.attack_leap)
+	if is_instance_valid(boss):
+		boss.character_visual.clear_ramp_intersection(presentation_camera, boss.dungeon_data, boss.grid_position, boss.sprite_clearance)
 	dungeon_renderer.update_occlusion(presentation_camera, player.grid_position, presentation_camera.sprite_samples(player.get_node("PlayerSprite")))
 
 
@@ -169,14 +178,14 @@ func spawn_test_enemies() -> void:
 		entities.add_child(enemy)
 
 		enemy.setup(spawn_position, dungeon, dungeon_renderer)
-		enemy.attack_requested.connect(_on_enemy_attack.bind("Skeleton"))
+		enemy.attack_requested.connect(_on_enemy_attack.bind(enemy))
 		enemies.append(enemy)
 		enemy_occupancy[spawn_position] = enemy
 	if game_mode == GameModeConfig.Mode.DEMO and floor_number == GameModeConfig.DEMO_FINAL_FLOOR and not use_elevation_test:
 		boss = BOSS_SCENE.instantiate()
 		entities.add_child(boss)
 		boss.setup(DemoArenaFactory.BOSS_CENTER, dungeon, dungeon_renderer)
-		boss.attack_requested.connect(_on_enemy_attack.bind("Minotaur"))
+		boss.attack_requested.connect(_on_enemy_attack.bind(boss))
 		boss.presentation_event.connect(_on_boss_message)
 		boss.defeated.connect(_on_boss_defeated)
 
@@ -197,7 +206,7 @@ func _on_player_attack(target: Vector2i) -> void:
 		return
 	if dungeon.can_traverse(player.grid_position, target) and is_instance_valid(boss) and boss.occupies(target):
 		print("PLAYER ATTACK MINOTAUR at ", target)
-		dialogue.append_event(&"attack", {"actor": "Swordsman", "target": "Minotaur", "amount": mini(player.attack_damage, boss.health.current)})
+		dialogue.append_event(&"attack", {"actor": _player_display_name(), "target": _boss_display_name(), "amount": mini(player.attack_damage, boss.health.current)})
 		boss.receive_damage(player.attack_damage)
 		if not victory:
 			run_enemy_turn()
@@ -210,16 +219,14 @@ func _on_player_attack(target: Vector2i) -> void:
 		return
 	var enemy: Skeleton = enemy_occupancy[target]
 	print("PLAYER ATTACK at ", target, ": ", player.attack_damage)
-	dialogue.append_event(&"attack", {"actor": "Swordsman", "target": "Skeleton", "amount": mini(player.attack_damage, enemy.health.current)})
+	dialogue.append_event(&"attack", {"actor": _player_display_name(), "target": enemy.character_visual.get_display_name(), "amount": mini(player.attack_damage, enemy.health.current)})
 	enemy.receive_damage(player.attack_damage)
 	if enemy.health.current == 0:
-		dialogue.append_event(&"defeat", {"target": "Skeleton"})
+		dialogue.append_event(&"defeat", {"target": enemy.character_visual.get_display_name()})
 		print("SKELETON DIED at ", target)
 		enemy_occupancy.erase(target)
 		enemies.erase(enemy)
-		# Detach immediately; deletion waits until the current signal has unwound.
-		entities.remove_child(enemy)
-		enemy.queue_free()
+		_retire_enemy(enemy)
 		var healed: int = player.health.heal(healing_on_kill)
 		if healed > 0:
 			dialogue.append_event(&"heal", {"amount": healed})
@@ -230,6 +237,7 @@ func _on_player_attack(target: Vector2i) -> void:
 func _on_player_died() -> void:
 	# Finish the player's presentation, but let the lethal skeleton's leap play
 	# beneath the immediate overlay. Floor replacement frees enemy animations.
+	player.stop_held_movement()
 	game_over = true
 	MusicManager.stop_music(self)
 	player.gameplay_enabled = false
@@ -252,20 +260,35 @@ func _on_boss_defeated() -> void:
 	victory = true
 	MusicManager.stop_music(self)
 	cancel_introduction()
-	dialogue.append_event(&"victory")
-	cancel_round()
+	cancel_round(true) # Let the finishing player attack complete beneath the faint effect.
 	player.gameplay_enabled = false
-	hud.set_victory()
+	var defeated_boss: Minotaur = boss
+	var token := round_generation
+	defeated_boss.character_visual.defeat()
+	if defeated_boss.character_visual.defeating:
+		await defeated_boss.character_visual.defeat_finished
+	if token != round_generation or not victory or not is_instance_valid(defeated_boss) or boss != defeated_boss or defeated_boss.character_visual.disposed or not defeated_boss.character_visual.defeat_completed:
+		return
+	await player.complete_action()
+	if token != round_generation or not victory or not is_instance_valid(defeated_boss) or boss != defeated_boss or defeated_boss.character_visual.disposed:
+		return
+	defeated_boss.hide()
+	hud.minimap.refresh_boss(defeated_boss)
+	dialogue.append_event(&"victory")
+	hud.set_victory(_boss_display_name())
 	print("VICTORY: Minotaur defeated. Press R to restart the demo.")
 
 
-func cancel_round() -> void:
+func cancel_round(preserve_player_presentation: bool = false) -> void:
+	_clear_retiring_enemies()
+	player.stop_held_movement()
 	# Invalidate before emitting completion signals: old continuations must stop.
 	dialogue.abandon_round()
 	round_generation += 1
 	resolving_turn = false
 	player.round_locked = false
-	player.attack_leap.finish()
+	if not preserve_player_presentation:
+		player.attack_leap.finish()
 	if is_instance_valid(boss):
 		boss.character_visual.cancel()
 	for enemy in enemies:
@@ -307,6 +330,9 @@ func run_enemy_turn() -> void:
 			break
 		if not is_instance_valid(actor) or actor.health.current == 0:
 			continue
+		if actor is Skeleton:
+			actor.attack_leap.action_speed = player.movement_speed
+		actor.character_visual.action_speed = player.movement_speed
 		enemy_action_started.emit(actor)
 		if token != round_generation or game_over or victory:
 			break
@@ -351,6 +377,8 @@ func refresh_turn_visibility() -> void:
 
 
 func refresh_entity_visibility() -> void:
+	for enemy in retiring_enemies:
+		if is_instance_valid(enemy): enemy.visible = dungeon.is_bright(enemy.grid_position)
 	for enemy in enemies:
 		enemy.visible = dungeon.is_bright(enemy.grid_position)
 	if is_instance_valid(boss) and boss.state != Minotaur.State.DEAD:
@@ -359,8 +387,9 @@ func refresh_entity_visibility() -> void:
 	hud.minimap.refresh_boss(boss)
 
 
-func _on_enemy_attack(amount: int, actor_name: String) -> void:
-	dialogue.append_event(&"attack", {"actor": actor_name, "target": "Swordsman", "amount": 0 if player.invincible else mini(amount, player.health.current)})
+func _on_enemy_attack(amount: int, actor: Node3D) -> void:
+	var visual: CharacterVisual = actor.get("character_visual")
+	dialogue.append_event(&"attack", {"actor": visual.get_display_name(), "target": _player_display_name(), "amount": 0 if player.invincible else mini(amount, player.health.current)})
 	player.receive_damage(amount)
 
 
@@ -396,3 +425,38 @@ func _begin_floor_introduction(advancing: bool) -> void:
 	if GameModeConfig.is_arena(game_mode, floor_number) and not use_elevation_test:
 		MusicManager.play_boss(self)
 	player.transition_locked = false
+
+
+func _set_action_speed(speed: float) -> void:
+	player.attack_leap.action_speed = speed
+	player.character_visual.action_speed = speed
+	for enemy in enemies:
+		if is_instance_valid(enemy):
+			enemy.attack_leap.action_speed = speed
+			enemy.character_visual.action_speed = speed
+	if is_instance_valid(boss):
+		boss.character_visual.action_speed = speed
+
+
+func _retire_enemy(enemy: Skeleton) -> void:
+	retiring_enemies.append(enemy)
+	if enemy.character_visual.defeating:
+		await enemy.character_visual.defeat_finished
+	if not is_instance_valid(enemy) or not retiring_enemies.has(enemy): return
+	retiring_enemies.erase(enemy)
+	if enemy.character_visual.disposed: return
+	entities.remove_child(enemy)
+	enemy.queue_free()
+
+func _clear_retiring_enemies() -> void:
+	var retired := retiring_enemies.duplicate()
+	retiring_enemies.clear() # Invalidate before freeing nodes emits completion signals.
+	for enemy in retired:
+		if is_instance_valid(enemy): enemy.free()
+
+
+func _player_display_name() -> String:
+	return player.character_visual.get_display_name()
+
+func _boss_display_name() -> String:
+	return boss.character_visual.get_display_name() if is_instance_valid(boss) else "Boss"

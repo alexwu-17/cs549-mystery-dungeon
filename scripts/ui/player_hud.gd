@@ -11,11 +11,11 @@ func set_game_over(active: bool) -> void:
 	$Screen/GameOver.color = Color(0, 0, 0, game_over_opacity)
 	$Screen/GameOver.visible = active
 
-func set_victory() -> void:
+func set_victory(enemy_name: String = "Boss") -> void:
 	set_game_over(true)
-	$Screen/GameOver/Center/Text/Title.text = "Victory!"
+	$Screen/GameOver/Center/Text/Title.text = "Demo Complete"
 	$Screen/GameOver/Center/Text/Title.add_theme_color_override("font_color", Color(0.2, 1, 0.3))
-	$Screen/GameOver/Center/Text/Hint.text = "You defeated the Minotaur!\nPress R to restart the demo."
+	$Screen/GameOver/Center/Text/Hint.text = "You defeated {enemy}!\nPress R to restart the demo.".format({"enemy": enemy_name})
 
 @onready var hp_bar: ProgressBar = $Screen/TopBar/Row/HPBar
 @onready var hp_label: Label = $Screen/TopBar/Row/HPLabel

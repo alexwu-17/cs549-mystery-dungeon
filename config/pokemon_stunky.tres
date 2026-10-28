@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="PokemonSpriteProfile" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/effects/pokemon_sprite_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+display_name = "Stunky"
+directory = "res://assets/sprites/pokemon/Stunky"
+pixel_size = 0.032
+body_to_ground = 15.0

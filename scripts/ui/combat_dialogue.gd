@@ -5,6 +5,8 @@ const Formatter = preload("res://scripts/ui/combat_message_formatter.gd")
 @export var history_limit: int = 200
 @export var visible_lines: int = 3
 @export var inactivity_seconds: float = 4.0
+var character_name_provider: Callable
+var enemy_name_provider: Callable
 var history: Array[Dictionary] = []
 var sequence: int = 0
 var round_has_messages: bool = false
@@ -19,11 +21,16 @@ func _ready() -> void:
 	_queue_window()
 
 func append_event(kind: StringName, data: Dictionary = {}, context: Dictionary = {}) -> void:
-	var message := Formatter.format_event(kind, data)
+	var resolved := data.duplicate(true)
+	if not resolved.has("character"):
+		resolved["character"] = character_name_provider.call() if character_name_provider.is_valid() else "Player"
+	if not resolved.has("enemy"):
+		resolved["enemy"] = enemy_name_provider.call() if enemy_name_provider.is_valid() else "Enemy"
+	var message := Formatter.format_event(kind, resolved)
 	if message.is_empty():
 		return
 	_store(kind, message, context)
-	history[-1]["data"] = data.duplicate(true)
+	history[-1]["data"] = resolved
 	round_has_messages = true
 	panel.show()
 	timer.start(inactivity_seconds)

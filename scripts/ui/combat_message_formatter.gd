@@ -1,13 +1,18 @@
 extends RefCounted
 
+const TEMPLATES := {
+	&"attack": "{actor} attacks {target} for {amount} damage.",
+	&"defeat": "{target} was defeated.",
+	&"heal": "{character} recovered {amount} HP.",
+	&"charging": "{enemy} is powering up!",
+	&"charge_miss": "{enemy}'s charged attack missed!",
+	&"cooldown": "{enemy} is recovering.",
+	&"game_over": "{character} was defeated. Game over.",
+	&"victory": "{enemy} was defeated. Victory!"}
+
 static func format_event(kind: StringName, data: Dictionary) -> String:
-	match kind:
-		&"attack": return "%s attacks %s for %d damage." % [data.actor, data.target, data.amount]
-		&"defeat": return "%s was defeated." % data.target
-		&"heal": return "Swordsman recovered %d HP." % data.amount
-		&"charging": return "Minotaur is powering up!"
-		&"charge_miss": return "Minotaur's charged attack missed!"
-		&"cooldown": return "Minotaur is recovering."
-		&"game_over": return "Swordsman was defeated. Game over."
-		&"victory": return "Minotaur was defeated. Victory!"
-	return ""
+	var template: String = TEMPLATES.get(kind, "")
+	if template.is_empty(): return ""
+	var values := {"character": "Player", "enemy": "Enemy", "actor": "Combatant", "target": "Target", "amount": 0}
+	values.merge(data,true)
+	return template.format(values)

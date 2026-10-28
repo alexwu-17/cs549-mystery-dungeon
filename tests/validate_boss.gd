@@ -79,10 +79,15 @@ func validate() -> void:
 	print("BOSS ARENA: ", centers, " valid 1x2 anchors; ", dodges, " threat positions with a one-step dodge; ", trapped, " edge hazards")
 	# Attack/body collision from all four directions.
 	boss.grid_position = DemoArenaFactory.ARENA_CENTER
-	var fixed_ring := boss.attack_tiles()
+	var regions: Array = []
 	for direction: Vector2i in DungeonData.CARDINALS:
 		boss.facing = direction
-		assert(boss.attack_tiles() == fixed_ring)
+		var region := boss.attack_tiles()
+		assert(region.size() == 2)
+		for tile in region:
+			assert(not boss.footprint().has(tile))
+		assert(not regions.has(region))
+		regions.append(region)
 	for direction: Vector2i in DungeonData.CARDINALS:
 		boss.health.reset(30)
 		boss.state = Minotaur.State.HUNTING
@@ -97,7 +102,7 @@ func validate() -> void:
 		main.player.basic_attack()
 		load("res://tests/round_test_helper.gd").complete(main)
 		assert(boss.health.current == 27 and boss.state == Minotaur.State.CHARGING)
-		assert(boss.threatened_tiles.size() == 10 and boss.markers.size() == 10)
+		assert(boss.threatened_tiles.size() == 2 and boss.markers.size() == 2)
 		for index in range(boss.markers.size()):
 			assert(boss.markers[index].global_position.is_equal_approx(main.dungeon_renderer.get_entity_world_position(boss.threatened_tiles[index]) + Vector3(0, 0.035, 0)))
 	# Greedy pursuit moves at most one tile; entering range by moving does not
@@ -122,7 +127,7 @@ func validate() -> void:
 			child.animation.pause()
 			child.animation.custom_step(1.0)
 	await process_frame
-	assert(boss.state == Minotaur.State.CHARGING and boss.markers.size() == 10 and main.player.health.current == 20)
+	assert(boss.state == Minotaur.State.CHARGING and boss.markers.size() == 2 and main.player.health.current == 20)
 	assert(boss.grid_position == locked_position)
 	for marker in boss.markers:
 		assert(marker.visible)
@@ -130,7 +135,7 @@ func validate() -> void:
 	load("res://tests/round_test_helper.gd").complete(main)
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(boss.threatened_tiles == locked and boss.facing == locked_facing and main.player.health.current == 20)
-	main.player.try_move(Vector2i.DOWN)
+	main.player.try_move(Vector2i.RIGHT)
 	load("res://tests/round_test_helper.gd").complete(main)
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.player.health.current == 20 and boss.state == Minotaur.State.COOLDOWN and boss.markers.is_empty())
@@ -163,7 +168,7 @@ func validate() -> void:
 	for child in boss.get_children():
 		assert(not child is StatChangeEffect)
 	assert(not main.is_enemy_occupied(boss.grid_position))
-	assert(main.hud.get_node("Screen/GameOver/Center/Text/Title").text == "Victory!")
+	assert(main.hud.get_node("Screen/GameOver/Center/Text/Title").text == "Demo Complete")
 	main.run_enemy_turn()
 	main.player.basic_attack()
 	load("res://tests/round_test_helper.gd").complete(main)
@@ -200,7 +205,7 @@ func validate() -> void:
 	main.player.facing = Vector2i.UP
 	main.player.basic_attack()
 	load("res://tests/round_test_helper.gd").complete(main)
-	assert(boss.markers.size() == 10)
+	assert(boss.markers.size() == 2)
 	main._unhandled_input(restart)
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(not is_instance_valid(boss) and main.boss == null)

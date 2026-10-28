@@ -36,7 +36,7 @@ func initialize(source: Node3D) -> void:
 	var column := VBoxContainer.new()
 	add_child(column)
 	var title := Label.new()
-	title.text = "Skeleton test - 30 x 22"
+	title.text = "Enemy test - 30 x 22"
 	column.add_child(title)
 	var controls := HBoxContainer.new()
 	column.add_child(controls)
