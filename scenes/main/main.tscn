@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://bpxt2riafgpm" path="res://scenes/player/player.tscn" id="3_l3cfh"]
 [ext_resource type="PackedScene" path="res://scenes/ui/player_hud.tscn" id="4_hud"]
 [ext_resource type="Script" uid="uid://d1nbrq084gdg8" path="res://scripts/core/presentation_camera.gd" id="5_camera"]
-[ext_resource type="Script" path="res://scripts/core/dungeon_lighting.gd" id="6_lighting"]
+[ext_resource type="Script" uid="uid://0gpp8kwfcbc1" path="res://scripts/core/dungeon_lighting.gd" id="6_lighting"]
 [ext_resource type="PackedScene" path="res://scenes/effects/sunlight_atmosphere.tscn" id="7_sunlight"]
 
 [sub_resource type="Environment" id="Environment_shared"]

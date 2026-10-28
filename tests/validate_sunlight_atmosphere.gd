@@ -8,6 +8,7 @@ func check_room_lifecycle(main: Node3D, effect: SunlightAtmosphere) -> void:
 	effect.apply_mode(SunlightAtmosphere.Mode.MESH)
 	var data: DungeonData = main.dungeon
 	var anchors: Dictionary = {}
+	var supports: Dictionary = {}
 	var maximum_ms := 0.0
 	var widths: Array = []
 	for room_id in range(data.rooms.size()):
@@ -27,6 +28,12 @@ func check_room_lifecycle(main: Node3D, effect: SunlightAtmosphere) -> void:
 		assert(effect.effective_width > effect.beam_width)
 		widths.append(effect.effective_width)
 		anchors[room_id] = effect.receiver
+		supports[room_id] = effect.supporting_beams.duplicate(true)
+		assert(effect.supporting_beams.size() <= 2)
+		assert(effect.mesh_effect.mesh.surface_get_array_len(0) == 12*(1+effect.supporting_beams.size()))
+		for beam in effect.supporting_beams:
+			assert(room.has_point(beam.tile) and beam.width < effect.effective_width)
+			assert(beam.length < effect.effective_length)
 		var placements := effect.room_placements
 		var mesh_id := effect.mesh_effect.mesh.get_instance_id()
 		for i in range(3): effect._update_context()
@@ -47,7 +54,17 @@ func check_room_lifecycle(main: Node3D, effect: SunlightAtmosphere) -> void:
 		main.refresh_fog()
 		effect._update_context()
 		assert(effect.receiver == anchors[room_id] and effect.room_placements == placements)
+		assert(effect.supporting_beams == supports[room_id])
 	assert(effect._room_cache.size() <= data.rooms.size())
+	# Recompute every placement to prove coordinate/visual-seed determinism.
+	var before := Snapshots.snapshot(data)
+	var state: int = TestDungeonFactory.rng.state
+	effect._room_cache.clear()
+	for room_id in anchors:
+		effect._place_room(data,room_id)
+		assert(effect.receiver == anchors[room_id] and effect.supporting_beams == supports[room_id])
+	assert(Snapshots.snapshot(data) == before and TestDungeonFactory.rng.state == state)
+	print("SUPPORTING BEAMS ",supports.values().map(func(beams): return beams.size()))
 	print("ROOM SUNLIGHT widths=",widths," maximum first-entry visual update ms=",maximum_ms)
 
 func validate() -> void:

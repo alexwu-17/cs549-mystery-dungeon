@@ -17,6 +17,7 @@ var other_elevation_material: StandardMaterial3D
 @export_range(0.5, 1.0, 0.25) var conventional_wall_height_scale: float = 0.5
 @export var floor_variation_enabled: bool = true
 @export var floor_quarter_turns_enabled: bool = true
+@export var upper_floor_quarter_turns_enabled: bool = true
 @export_range(0.0, 0.1, 0.01) var floor_color_variation: float = 0.04
 @export var floor_visual_seed: int = 0
 @export_range(0.0, 1.0) var obstructing_wall_opacity: float = 0.2
@@ -339,8 +340,11 @@ func create_platform_skirt(entry: Dictionary) -> void:
 
 func create_floor_tile(grid_position: Vector2i) -> void:
 	if is_open_upper_tile(grid_position):
+		var angle := 0.0
+		if upper_floor_quarter_turns_enabled and floor_variation_enabled and floor_quarter_turns_enabled and dungeon_data.get_tile(grid_position) in [DungeonData.TileType.FLOOR, DungeonData.TileType.CORRIDOR] and not dungeon_data.reserved_transitions.has(grid_position):
+			angle = float(posmod(floor_hash(grid_position),4))*PI/2.0
 		for index in range(ModularDungeonVisuals.FLOOR.get_surface_count()):
-			create_asset_surface(grid_position, ModularDungeonVisuals.surface_mesh(ModularDungeonVisuals.FLOOR, index), 0.0, false)
+			create_asset_surface(grid_position, ModularDungeonVisuals.surface_mesh(ModularDungeonVisuals.FLOOR, index), angle, false)
 		if dungeon_data.get_tile(grid_position) == DungeonData.TileType.CORRIDOR and not validated_geometry_active:
 			create_upper_corridor_support(grid_position)
 		return

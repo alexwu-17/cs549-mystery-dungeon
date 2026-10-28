@@ -1,14 +1,19 @@
-[gd_resource type="Resource" script_class="DungeonLightingPreset" load_steps=2 format=3]
-[ext_resource type="Script" path="res://scripts/core/dungeon_lighting_preset.gd" id="1"]
+[gd_resource type="Resource" script_class="DungeonLightingPreset" load_steps=2 format=3 uid="uid://c8mqpt3coewlb"]
+
+[ext_resource type="Script" uid="uid://bamyilxtqecw3" path="res://scripts/core/dungeon_lighting_preset.gd" id="1"]
+
 [resource]
 script = ExtResource("1")
 display_name = "C - Atmospheric HD-2D"
+restore_scene_baseline = false
 sun_rotation_degrees = Vector3(-48, -32, 0)
-sun_color = Color(1, 0.94, 0.84, 1)
+sun_color = Color(1, 0.98, 0.95, 1)
 sun_energy = 1.0
 sun_angular_distance = 0.75
 ambient_color = Color(0.72, 0.8, 0.94, 1)
 ambient_energy = 0.27
+shadow_bias = 0.025
+shadow_normal_bias = 0.12
 ssao_enabled = true
 ssao_radius = 0.65
 ssao_intensity = 0.55

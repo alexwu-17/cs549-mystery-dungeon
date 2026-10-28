@@ -9,7 +9,7 @@ var ground_mist: MeshInstance3D
 var selected_mode: int = Mode.MESH
 @export_range(1.0,10.0,0.1) var beam_length: float = 6.0
 @export_range(0.3,3.0,0.1) var beam_width: float = 1.6
-@export var beam_color := Color(1.0,0.88,0.63)
+@export var beam_color := Color(1.0,0.98,0.95)
 @export var mist_color := Color(1.0,0.98,0.93)
 @export_range(0.0,3.0,0.05) var mesh_intensity: float = 1.6
 @export_range(0.0,0.35,0.01) var mesh_opacity: float = 0.16
@@ -45,6 +45,7 @@ var effective_length: float = 6.0
 var _room_coverage: bool = false
 var _sun_bounds: Array[AABB] = []
 var _sun_cells: Dictionary = {}
+var supporting_beams: Array[Dictionary] = []
 
 func _ready() -> void:
 	ground_mist = GROUND_MIST.new()
@@ -92,7 +93,7 @@ func _update_context() -> void:
 		ground_mist.build(main,mask_bounds)
 		mask_image = Image.create(mask_bounds.size.x,mask_bounds.size.y,false,Image.FORMAT_L8)
 		mask_texture = ImageTexture.create_from_image(mask_image)
-		for material in [mesh_material,mist_material]:
+		for material in [mist_material]:
 			material.set_shader_parameter("bright_mask",mask_texture)
 			material.set_shader_parameter("mask_origin",Vector2(mask_bounds.position))
 			material.set_shader_parameter("mask_size",Vector2(mask_bounds.size))
@@ -109,6 +110,7 @@ func _update_context() -> void:
 
 func _place_room(data: DungeonData, room_id: int) -> void:
 	_room_coverage = true
+	supporting_beams.clear()
 	if _room_cache.has(room_id):
 		var saved: Dictionary = _room_cache[room_id]
 		receiver_tile = saved.tile
@@ -117,11 +119,15 @@ func _place_room(data: DungeonData, room_id: int) -> void:
 		effective_length = saved.length
 		placement_safe = saved.safe
 		blocked_by = saved.blocked
+		supporting_beams.assign(saved.supports)
 		rebuild(false)
 		return
 	room_placements += 1
 	var room: Rect2i = data.rooms[room_id]
 	var center := Vector2(room.position)+Vector2(room.size-Vector2i.ONE)*0.5
+	# Salted coordinates/visual seed only; no gameplay RNG consumption.
+	var salt := _visual_hash(room.position,room_id)
+	center += Vector2(float(salt % 101)/100.0-0.5,float((salt/101) % 101)/100.0-0.5)*1.2
 	var center_tile := Vector2i(roundi(center.x),roundi(center.y))
 	var candidates: Array[Vector2i] = []
 	if data.is_walkable(center_tile): candidates.append(center_tile)
@@ -145,11 +151,15 @@ func _place_room(data: DungeonData, room_id: int) -> void:
 			rebuild()
 			if placement_safe: break
 		if placement_safe: break
-	_room_cache[room_id] = {"tile":receiver_tile,"receiver":receiver,"width":effective_width,"length":effective_length,"safe":placement_safe,"blocked":blocked_by}
+	if placement_safe:
+		_plan_supports(data,room_id,candidates,across)
+		rebuild(false)
+	_room_cache[room_id] = {"tile":receiver_tile,"receiver":receiver,"width":effective_width,"length":effective_length,"safe":placement_safe,"blocked":blocked_by,"supports":supporting_beams.duplicate(true)}
 	if not placement_safe: push_warning("Sunlight: no clear placement in room %d; beam hidden."%room_id)
 
 func place_at(tile: Vector2i) -> void:
 	_room_coverage = false
+	supporting_beams.clear()
 	effective_width = beam_width
 	effective_length = beam_length
 	receiver_tile = tile
@@ -166,15 +176,10 @@ func rebuild(check_clearance: bool = true) -> void:
 	var start := receiver-direction*effective_length
 	var tool := SurfaceTool.new()
 	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for angle in [-0.22,0.22]:
-		var side := across.rotated(direction,angle)
-		var a := start-side*effective_width*0.3
-		var b := start+side*effective_width*0.3
-		var c := receiver+side*effective_width*0.65
-		var d := receiver-side*effective_width*0.65
-		for pair in [[a,Vector2(0,0)],[b,Vector2(1,0)],[c,Vector2(1,1)],[a,Vector2(0,0)],[c,Vector2(1,1)],[d,Vector2(0,1)]]:
-			tool.set_uv(pair[1])
-			tool.add_vertex(pair[0])
+	_append_shaft(tool,receiver,effective_width,effective_length,across,1.0)
+	if placement_safe:
+		for beam in supporting_beams:
+			_append_shaft(tool,beam.receiver,beam.width,beam.length,across,0.5)
 	mesh_effect.mesh = tool.commit()
 	mesh_material.set_shader_parameter("beam_color",beam_color)
 	mesh_material.set_shader_parameter("intensity",mesh_intensity)
@@ -189,6 +194,50 @@ func rebuild(check_clearance: bool = true) -> void:
 	mist_material.set_shader_parameter("density",mist_density)
 	mist_material.set_shader_parameter("mist_color",mist_color)
 	_update_visible()
+
+func _append_shaft(tool: SurfaceTool, target: Vector3, width: float, length: float, across: Vector3, strength: float) -> void:
+	var start := target-direction*length
+	for angle in [-0.22,0.22]:
+		var side := across.rotated(direction,angle)
+		var a := start-side*width*0.3
+		var b := start+side*width*0.3
+		var c := target+side*width*0.65
+		var d := target-side*width*0.65
+		for pair in [[a,Vector2(0,0)],[b,Vector2(1,0)],[c,Vector2(1,1)],[a,Vector2(0,0)],[c,Vector2(1,1)],[d,Vector2(0,1)]]:
+			tool.set_color(Color(1,1,1,strength))
+			tool.set_uv(pair[1])
+			tool.add_vertex(pair[0])
+
+func _visual_hash(tile: Vector2i, salt: int) -> int:
+	return int((tile.x*73856093 ^ tile.y*19349663 ^ main.dungeon_renderer.floor_visual_seed*83492791 ^ salt*2654435761) & 0x7fffffff)
+
+func _plan_supports(data: DungeonData, room_id: int, candidates: Array[Vector2i], across: Vector3) -> void:
+	var primary := receiver
+	var width := effective_width
+	var length := effective_length
+	var blocked := blocked_by
+	var desired := _visual_hash(data.rooms[room_id].position,room_id+71)%3
+	var ordered := candidates.duplicate()
+	ordered.sort_custom(func(a: Vector2i,b: Vector2i) -> bool:
+		var ha := _visual_hash(a,room_id+113)
+		var hb := _visual_hash(b,room_id+113)
+		return ha < hb if ha != hb else (a.y < b.y if a.y != b.y else a.x < b.x))
+	for tile in ordered:
+		if supporting_beams.size() >= desired: break
+		receiver = main.dungeon_renderer.get_entity_world_position(tile)+Vector3(0,0.12,0)
+		if receiver.distance_to(primary) < maxf(1.2,width*0.45): continue
+		var separated := true
+		for beam in supporting_beams:
+			if receiver.distance_to(beam.receiver) < 1.3: separated = false
+		if not separated: continue
+		effective_width = width*0.32
+		effective_length = length*0.8
+		if _clear_sun_path(across):
+			supporting_beams.append({"tile":tile,"receiver":receiver,"width":effective_width,"length":effective_length})
+	receiver = primary
+	effective_width = width
+	effective_length = length
+	blocked_by = blocked
 
 func _clear_sun_path(across: Vector3) -> bool:
 	# Conservative static visual-bound tests, never physics or gameplay collision.

@@ -5,7 +5,10 @@ uniform sampler2D coverage_mask : filter_linear, repeat_disable;
 uniform vec2 mask_origin;
 uniform vec2 mask_size;
 uniform vec3 mist_color : source_color = vec3(0.65,0.70,0.73);
-uniform float opacity = 0.085;
+// 50% stronger than Checkpoint 2 (0.085); animation is independent of turns.
+uniform float opacity = 0.1275;
+// Negative uses engine time; nonnegative values allow isolated render checks.
+uniform float preview_time = -1.0;
 varying vec3 world_position;
 float hash(vec2 p) { return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p) {
@@ -21,8 +24,11 @@ void fragment() {
  float soft=clamp((-view.z-fragment_depth)/0.3,0.0,1.0);
  vec2 mask_uv=(behind.xz-mask_origin+vec2(0.5))/mask_size;
  float coverage=texture(coverage_mask,mask_uv).r;
- vec2 drift=vec2(TIME*0.022,TIME*0.013);
- float wisps=noise(world_position.xz*0.6+drift)*0.65+noise(world_position.xz*1.5-drift)*0.35;
+ float mist_time = preview_time < 0.0 ? TIME : preview_time;
+ // Both noise scales travel together: opposing flows previously dissolved
+ // into one another instead of reading as a moving bank of mist.
+ vec2 advected = world_position.xz-vec2(0.24,0.09)*mist_time;
+ float wisps=noise(advected*0.6)*0.65+noise(advected*1.5)*0.35;
  ALBEDO=mist_color;
  ALPHA=opacity*smoothstep(0.22,0.8,wisps)*soft*coverage*COLOR.a;
 }
