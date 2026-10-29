@@ -69,3 +69,12 @@ Prioritize working, testable, maintainable changes. Pokémon gameplay is future 
 - Validation: 48/48 scripts have final PASS results after stair/name fixes; the final Strike-only profile change passed four focused tests (Drapion swing, species frames/anchoring, boss, defeat lifecycle). Normal 1920×1080 captures cover native motion, visibility/shadows, ramp attacks/ordinary front stair poses, four-direction Strike and defeat. Flat player/Stunky attack traces matched 168 samples. Deterministic completion helpers control action/defeat/cancellation; capture helpers may force diagnostic draws to avoid inactive-window waits. Consult handoff for exact runs and initial failures corrected before passing reruns.
 - No sustained 60 FPS certification: latest native movement p95 was about 22.87ms on Apple M1 Pro; captures/readback are not benchmarks. Preserve current detail rather than changing gameplay or terrain speculatively. Existing certificate/shutdown resource warnings and historical music flake remain documented.
 - Compatibility caveat: local editor/imports used Godot **4.7.2** and `project.godot` currently declares feature version `4.7`; source APIs appear available in 4.4, but 4.4.1 requires a fresh import, full regressions and GPU checks before certification. Do not silently call 4.7-only validation proof of 4.4.1 compatibility. Import descriptors are source settings; `.godot/` caches are machine-local. Preserve `.uid` files for scripts/resources across PCs.
+
+## Boss footprint correction (2026-10-28)
+
+- Current user-authorized Drapion gameplay footprint is **one tile at grid_position**, superseding Checkpoint 4's historical fixed 1x2 and nearer-row rules. Preserve the same large sprite scale, offsets, profile, authored motion and assets.
+- Charge/Strike still threatens two cells straight forward from that single tile; no lower-body offset or alternate horizontal row remains. Preserve HP30, damage18, frozen warning/direction, charge/attack/one-turn recharge, greedy movement and defeat lifecycle. Occupancy, melee targeting and traversal use the existing footprint API, not sprite dimensions.
+
+## Condensed presentation Demo (2026-10-28)
+
+- Current Demo is two exploration floors followed by the boss on Floor 3 (`GameModeConfig.DEMO_FINAL_FLOOR=3`). This supersedes historical Floor-5 descriptions for this iteration. Infinite/Limit modes remain unchanged. Tests and capture helpers should use the shared final-floor constant; keep Demo subtitle keys consistent.

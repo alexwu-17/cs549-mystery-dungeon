@@ -15,7 +15,6 @@ var grid_position: Vector2i
 @onready var sprite_clearance: AttackLeap = $SpriteClearance
 @onready var character_visual: CharacterVisual = $VisualController
 var facing: Vector2i = Vector2i.DOWN
-var attack_row: int = 0
 var threatened_tiles: Array[Vector2i] = []
 var markers: Array[MeshInstance3D] = []
 var dungeon_data: DungeonData
@@ -35,8 +34,8 @@ func footprint() -> Array[Vector2i]:
 	return footprint_at(grid_position)
 
 func footprint_at(center: Vector2i) -> Array[Vector2i]:
-	# grid_position is the upper tile; facing never rotates the body.
-	var tiles: Array[Vector2i] = [center, center + Vector2i.DOWN]
+	# Gameplay occupies one tile independently of the unchanged large sprite.
+	var tiles: Array[Vector2i] = [center]
 	return tiles
 
 func occupies(tile: Vector2i) -> bool:
@@ -55,16 +54,13 @@ func attack_tiles() -> Array[Vector2i]:
 	var tiles: Array[Vector2i] = []
 	if absi(facing.x) + absi(facing.y) != 1: return tiles
 	var front := grid_position
-	if facing == Vector2i.DOWN: front += Vector2i.DOWN
-	elif facing.x != 0: front += Vector2i.DOWN * attack_row
 	for depth in [1,2]:
 		var tile: Vector2i = front + facing * depth
 		if dungeon_data.is_walkable(tile): tiles.append(tile)
 	return tiles
 
 func face_player(player_tile: Vector2i) -> void:
-	attack_row = clampi(player_tile.y-grid_position.y,0,1)
-	var delta := (player_tile-grid_position)*2-Vector2i.DOWN
+	var delta := player_tile-grid_position
 	if absi(delta.x) > absi(delta.y):
 		facing = Vector2i(signi(delta.x), 0)
 	elif delta.y != 0:

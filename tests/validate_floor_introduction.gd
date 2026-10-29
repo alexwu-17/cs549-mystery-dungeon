@@ -84,10 +84,11 @@ func validate() -> void:
 		assert(intro.get_node("CenterContainer/VBoxContainer/FloorSubtitle").text == "Custom Depths")
 		Helper.complete_introduction(main)
 		if scene == "demo_main":
-			main.floor_number = 4
+			main.floor_subtitles[GameModeConfig.DEMO_FINAL_FLOOR] = "Cavern Depths"
+			main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR - 1
 			main._on_stairs_reached()
 			step(intro, 0.251)
-			assert(main.boss != null and main.floor_number == 5)
+			assert(main.boss != null and main.floor_number == GameModeConfig.DEMO_FINAL_FLOOR)
 			assert(intro.get_node("CenterContainer/VBoxContainer/FloorSubtitle").text == "Cavern Depths")
 			step(intro, 0.25)
 			step(intro, 0.75)

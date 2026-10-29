@@ -36,11 +36,11 @@ func validate() -> void:
 	assert(enemy.character_visual.current_frame == "attack_right")
 	enemy.attack_leap.finish()
 	assert(enemy.character_visual.current_frame == "right")
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	var boss: Minotaur = main.boss
 	assert(is_zero_approx(boss.character_visual.sprite.get_item_rect().end.y - boss.character_visual.foot_anchor.y))
-	main.player.setup(Vector2i(13,11),main.dungeon,main.dungeon_renderer)
+	main.player.setup(Vector2i(13,10),main.dungeon,main.dungeon_renderer)
 	main.player.health.reset(18)
 	boss.take_turn(main.player.grid_position)
 	assert(boss.character_visual.current_frame == "charge" and boss.state == Minotaur.State.CHARGING)
@@ -65,10 +65,10 @@ func validate() -> void:
 	# Restart during a lethal spin must suppress the old overlay callback.
 	main.start_new_run()
 	Helper.complete_introduction(main)
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	boss = main.boss
-	main.player.setup(Vector2i(13,11),main.dungeon,main.dungeon_renderer)
+	main.player.setup(Vector2i(13,10),main.dungeon,main.dungeon_renderer)
 	main.player.health.reset(18)
 	boss.take_turn(main.player.grid_position)
 	main.player.facing = Vector2i.UP
@@ -78,10 +78,10 @@ func validate() -> void:
 	main.start_new_run()
 	Helper.complete_introduction(main)
 	assert(not main.game_over and not main.hud.get_node("Screen/GameOver").visible and not main.resolving_turn)
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	boss = main.boss
-	main.player.setup(Vector2i(13,11),main.dungeon,main.dungeon_renderer)
+	main.player.setup(Vector2i(13,10),main.dungeon,main.dungeon_renderer)
 	boss.take_turn(main.player.grid_position)
 	main.player.facing = Vector2i.UP
 	main.player.basic_attack()

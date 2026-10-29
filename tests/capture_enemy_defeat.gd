@@ -39,11 +39,11 @@ func capture() -> void:
 	enemy.character_visual.finish_defeat()
 	await save_capture("Stunky_gone")
 	assert(main.retiring_enemies.is_empty())
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	var boss: Minotaur = main.boss
-	main.player.setup(Vector2i(13,11),main.dungeon,main.dungeon_renderer)
+	main.player.setup(Vector2i(13,10),main.dungeon,main.dungeon_renderer)
 	main.player.facing = Vector2i.UP
 	main.refresh_fog()
 	boss.health.reset(3)

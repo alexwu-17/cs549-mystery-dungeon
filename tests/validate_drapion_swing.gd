@@ -7,7 +7,7 @@ func validate() -> void:
 	var main = load("res://scenes/main/demo_main.tscn").instantiate()
 	root.add_child(main)
 	Helper.complete_introduction(main)
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	var boss: Minotaur = main.boss
@@ -21,7 +21,7 @@ func validate() -> void:
 	var events: Array[int] = []
 	boss.attack_requested.connect(func(damage: int): events.append(damage))
 	var patterns := {
-		Vector2i.DOWN: [Vector2i(0,2),Vector2i(0,3)],
+		Vector2i.DOWN: [Vector2i(0,1),Vector2i(0,2)],
 		Vector2i.UP: [Vector2i(0,-1),Vector2i(0,-2)],
 		Vector2i.RIGHT: [Vector2i(1,0),Vector2i(2,0)],
 		Vector2i.LEFT: [Vector2i(-1,0),Vector2i(-2,0)]}
@@ -31,7 +31,6 @@ func validate() -> void:
 		boss.health.reset(30)
 		visual.cancel()
 		boss.facing = facing
-		boss.attack_row = 0
 		visual.face(facing)
 		var region := boss.attack_tiles()
 		assert(region.size() == 2)
@@ -77,15 +76,16 @@ func validate() -> void:
 		assert(visual.active and visual.action == "Swing")
 		visual.finish()
 		assert(visual.action == "Idle")
-	# Horizontal attacks select the nearest of the two occupied front-edge rows.
+	# No second occupied row: all attacks start directly beyond the anchor.
 	for direction in [Vector2i.LEFT,Vector2i.RIGHT]:
-		var lower_target: Vector2i = boss.grid_position+direction+Vector2i.DOWN
-		boss.face_player(lower_target)
-		assert(boss.facing == direction and boss.attack_row == 1)
-		assert(boss.attack_tiles() == [lower_target,lower_target+direction])
+		var target: Vector2i = boss.grid_position+direction
+		boss.face_player(target)
+		assert(boss.facing == direction)
+		assert(boss.attack_tiles() == [target,target+direction])
+		assert(not boss.attack_tiles().has(target+Vector2i.DOWN))
 	# Arena boundaries clip warning cells to real floor without widening the attack.
 	for tile: Vector2i in main.dungeon.tiles:
-		if not main.dungeon.is_walkable(tile) or not main.dungeon.is_walkable(tile+Vector2i.DOWN): continue
+		if not main.dungeon.is_walkable(tile): continue
 		boss.grid_position = tile
 		for direction: Vector2i in DungeonData.CARDINALS:
 			boss.facing = direction
@@ -95,11 +95,11 @@ func validate() -> void:
 	# Restart cancels the native lethal Swing and suppresses stale overlay completion.
 	main.start_new_run()
 	Helper.complete_introduction(main)
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	boss = main.boss
-	main.player.setup(Vector2i(13,11),main.dungeon,main.dungeon_renderer)
+	main.player.setup(Vector2i(13,10),main.dungeon,main.dungeon_renderer)
 	main.player.health.reset(18)
 	main.player.facing = Vector2i.UP
 	main.player.basic_attack()

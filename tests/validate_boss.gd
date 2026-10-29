@@ -8,13 +8,13 @@ func validate() -> void:
 	root.add_child(main)
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.boss == null)
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	var boss: Minotaur = main.boss
 	assert(boss.health.current == 30 and boss.grid_position == DemoArenaFactory.BOSS_CENTER)
 	assert(main.player.grid_position == DemoArenaFactory.PLAYER_SPAWN)
-	assert(main.enemies.is_empty() and boss.footprint() == [Vector2i(13, 9), Vector2i(13, 10)] and boss.visible)
+	assert(main.enemies.is_empty() and boss.footprint() == [Vector2i(13, 9)] and boss.visible)
 	var sprite: Sprite3D = boss.get_node("BossSprite")
 	# Transparent extraction padding is not the rendered character width.
 	var artwork := sprite.texture.get_image()
@@ -29,11 +29,13 @@ func validate() -> void:
 	assert(sprite.position.x == 0 and sprite.position.z == 0.5)
 	for direction: Vector2i in DungeonData.CARDINALS:
 		boss.facing = direction
-		assert(boss.footprint() == [Vector2i(13, 9), Vector2i(13, 10)])
+		assert(boss.footprint() == [Vector2i(13, 9)])
 	for tile in boss.footprint():
 		assert(main.is_enemy_occupied(tile) and main.dungeon.is_walkable(tile))
 	assert(not boss.can_occupy(Vector2i(12, 5), main.player.grid_position))
-	assert(not boss.can_occupy(boss.grid_position + Vector2i.DOWN, boss.grid_position + Vector2i(0, 2)))
+	assert(boss.can_occupy(boss.grid_position + Vector2i.DOWN, boss.grid_position + Vector2i(0, 2)))
+	assert(not main.is_enemy_occupied(boss.grid_position+Vector2i.DOWN))
+	assert(not boss.can_occupy(boss.grid_position+Vector2i.DOWN,boss.grid_position+Vector2i.DOWN))
 	# Enumerate valid body centers and verify an immediate dodge exists for every
 	# walkable threat tile. No arena geometry changes are needed.
 	var centers := 0
@@ -60,7 +62,7 @@ func validate() -> void:
 				dodges += 1
 			else:
 				trapped += 1
-	assert(centers == 50)
+	assert(centers == 61)
 	# The full valid anchor space is connected under the actual body traversal.
 	boss.grid_position = DemoArenaFactory.BOSS_CENTER
 	var visited := {boss.grid_position: true}
@@ -76,7 +78,7 @@ func validate() -> void:
 				queue.append(destination)
 	assert(visited.size() == centers)
 	assert(dodges > trapped)
-	print("BOSS ARENA: ", centers, " valid 1x2 anchors; ", dodges, " threat positions with a one-step dodge; ", trapped, " edge hazards")
+	print("BOSS ARENA: ", centers, " valid 1x1 anchors; ", dodges, " threat positions with a one-step dodge; ", trapped, " edge hazards")
 	# Attack/body collision from all four directions.
 	boss.grid_position = DemoArenaFactory.ARENA_CENTER
 	var regions: Array = []
@@ -92,7 +94,7 @@ func validate() -> void:
 		boss.health.reset(30)
 		boss.state = Minotaur.State.HUNTING
 		boss.clear_charge()
-		main.player.setup(boss.grid_position + direction * (2 if direction == Vector2i.DOWN else 1), main.dungeon, main.dungeon_renderer)
+		main.player.setup(boss.grid_position + direction, main.dungeon, main.dungeon_renderer)
 		main.player.facing = -direction
 		var start: Vector2i = main.player.grid_position
 		main.player.try_move(-direction)
@@ -114,7 +116,7 @@ func validate() -> void:
 	assert(boss.grid_position == Vector2i(13, 10) and boss.state == Minotaur.State.HUNTING)
 	# Player attacks charge, blocked bumps do nothing, escaping causes a miss.
 	boss.grid_position = DemoArenaFactory.BOSS_CENTER
-	main.player.setup(Vector2i(13, 11), main.dungeon, main.dungeon_renderer)
+	main.player.setup(Vector2i(13, 10), main.dungeon, main.dungeon_renderer)
 	main.player.health.reset(20)
 	main.player.facing = Vector2i.UP
 	main.player.basic_attack()
@@ -145,7 +147,7 @@ func validate() -> void:
 	# Hit for exactly 18, then kill during charge: no last attack or lifesteal.
 	boss.grid_position = DemoArenaFactory.BOSS_CENTER
 	boss.health.reset(30)
-	main.player.setup(Vector2i(13, 11), main.dungeon, main.dungeon_renderer)
+	main.player.setup(Vector2i(13, 10), main.dungeon, main.dungeon_renderer)
 	main.player.facing = Vector2i.UP
 	main.player.basic_attack()
 	load("res://tests/round_test_helper.gd").complete(main)
@@ -181,11 +183,11 @@ func validate() -> void:
 	assert(main.boss == null and not main.victory and main.floor_number == 1 and main.game_mode == GameModeConfig.Mode.DEMO)
 	assert(main.player.health.current == 20 and not main.hud.get_node("Screen/GameOver").visible)
 	# Losing to a charge uses the original game-over path, not victory.
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	boss = main.boss
-	main.player.setup(Vector2i(13, 11), main.dungeon, main.dungeon_renderer)
+	main.player.setup(Vector2i(13, 10), main.dungeon, main.dungeon_renderer)
 	main.player.health.reset(18)
 	main.player.facing = Vector2i.UP
 	main.player.basic_attack()
@@ -197,11 +199,11 @@ func validate() -> void:
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.boss == null and not main.game_over and main.player.health.current == 20)
 	# Restart during an active charge removes markers/effects with their owner.
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	boss = main.boss
-	main.player.setup(Vector2i(13, 11), main.dungeon, main.dungeon_renderer)
+	main.player.setup(Vector2i(13, 10), main.dungeon, main.dungeon_renderer)
 	main.player.facing = Vector2i.UP
 	main.player.basic_attack()
 	load("res://tests/round_test_helper.gd").complete(main)

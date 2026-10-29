@@ -87,7 +87,7 @@ func profile() -> void:
 	results.append(await measure(main,"procedural_movement_3x",true))
 	while main.resolving_turn: await process_frame
 	main.player.stop_held_movement()
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	main.player.invincible = true

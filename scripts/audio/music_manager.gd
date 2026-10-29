@@ -1,7 +1,7 @@
 extends Node
 
-var dungeon_track: AudioStreamMP3 = preload("res://assets/audio/music/dungeon_placeholder.mp3")
-var boss_track: AudioStreamMP3 = preload("res://assets/audio/music/boss_placeholder.mp3")
+var dungeon_track: AudioStreamMP3 = preload("res://assets/audio/music/mtcoronet_midterm.mp3")
+var boss_track: AudioStreamMP3 = preload("res://assets/audio/music/pmd_bosstheme_midterm.mp3")
 
 var player: AudioStreamPlayer
 var playback_owner: WeakRef

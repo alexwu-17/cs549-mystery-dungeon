@@ -19,11 +19,11 @@ func validate() -> void:
 		assert((config != null) == (mode == GameModeConfig.Mode.LIMIT_TESTING))
 		main.player.health.damage(5)
 		for expected in range(2, 7):
-			if mode == GameModeConfig.Mode.DEMO and expected > 5:
+			if mode == GameModeConfig.Mode.DEMO and expected > GameModeConfig.DEMO_FINAL_FLOOR:
 				var arena: DungeonData = main.dungeon
 				main._on_stairs_reached()
 				load("res://tests/round_test_helper.gd").complete_introduction(main)
-				assert(main.floor_number == 5 and main.dungeon == arena)
+				assert(main.floor_number == GameModeConfig.DEMO_FINAL_FLOOR and main.dungeon == arena)
 				continue
 			# Walk onto real stairs; block no enemies in the chosen approach tile.
 			var entered := false
@@ -39,9 +39,9 @@ func validate() -> void:
 			assert(main.player.health.current == 15)
 			assert(main.hud.floor_label.text == "Floor #%d" % expected)
 			assert(main.hud.minimap.dungeon == main.dungeon)
-			if mode != GameModeConfig.Mode.DEMO or expected < 5:
+			if mode != GameModeConfig.Mode.DEMO or expected < GameModeConfig.DEMO_FINAL_FLOOR:
 				assert(main.boss == null)
-			if mode == GameModeConfig.Mode.DEMO and expected == 5:
+			if mode == GameModeConfig.Mode.DEMO and expected == GameModeConfig.DEMO_FINAL_FLOOR:
 				assert(main.dungeon.rooms == [Rect2i(8, 5, 11, 11)])
 				assert(main.dungeon.tiles.size() == 61)
 				assert(TestDungeonFactory.reachable_tiles(main.dungeon).size() == 61)

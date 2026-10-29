@@ -14,7 +14,9 @@ func validate() -> void:
 	music = root.get_node("MusicManager")
 	assert(music.get_child_count() == 1 and music.player.bus == &"Master")
 	assert(music.dungeon_track is AudioStreamMP3 and music.boss_track is AudioStreamMP3)
-	assert(music.dungeon_track.get_length() > 500 and music.boss_track.get_length() > 500)
+	assert(music.dungeon_track.get_length() > 30 and music.boss_track.get_length() > 0)
+	assert(music.dungeon_track.resource_path.ends_with("mtcoronet_midterm.mp3"))
+	assert(music.boss_track.resource_path.ends_with("pmd_bosstheme_midterm.mp3"))
 	assert(music.dungeon_track.loop and music.boss_track.loop)
 	assert(music.dungeon_track.loop_offset == 0 and music.boss_track.loop_offset == 0)
 	for mode in ["main", "limit_testing_main", "demo_main"]:
@@ -39,12 +41,12 @@ func validate() -> void:
 		main.start_new_run()
 		Helper.complete_introduction(main)
 		if mode == "demo_main":
-			main.floor_number = 4
+			main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR - 1
 			main.load_test_floor()
 			main._on_stairs_reached()
-			assert(not music.player.playing and main.floor_number == 4)
+			assert(not music.player.playing and main.floor_number == GameModeConfig.DEMO_FINAL_FLOOR - 1)
 			step(main.floor_introduction, 0.251)
-			assert(main.floor_number == 5 and not music.player.playing)
+			assert(main.floor_number == GameModeConfig.DEMO_FINAL_FLOOR and not music.player.playing)
 			step(main.floor_introduction, 1.501)
 			assert(main.floor_introduction.visible and not music.player.playing)
 			step(main.floor_introduction, 0.251)
@@ -54,7 +56,7 @@ func validate() -> void:
 			assert(main.victory and not music.player.playing)
 			main.start_new_run()
 			Helper.complete_introduction(main)
-			main.floor_number = 4
+			main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR - 1
 			main._on_stairs_reached()
 			step(main.floor_introduction, 0.251)
 			var stale: Tween = main.floor_introduction.animation
@@ -68,7 +70,7 @@ func validate() -> void:
 	var old = load("res://scenes/main/demo_main.tscn").instantiate()
 	root.add_child(old)
 	Helper.complete_introduction(old)
-	old.floor_number = 4
+	old.floor_number = GameModeConfig.DEMO_FINAL_FLOOR - 1
 	old._on_stairs_reached()
 	var newer = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(newer)

@@ -13,7 +13,7 @@ func capture() -> void:
 	var main = load("res://scenes/main/demo_main.tscn").instantiate()
 	root.add_child(main)
 	Helper.complete_introduction(main)
-	main.floor_number = 5
+	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	main.player.invincible = true
