@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/player_hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/ui/move_panel.gd" id="6_moves"]
 [ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="2_map"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/combat_dialogue.tscn" id="3_dialogue"]
@@ -102,6 +103,17 @@ mouse_filter = 2
 script = ExtResource("2_map")
 
 [node name="CombatDialogue" parent="Screen" instance=ExtResource("3_dialogue")]
+
+[node name="MovePanel" type="PanelContainer" parent="Screen"]
+layout_mode = 1
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 18.0
+offset_top = -88.0
+offset_right = 294.0
+offset_bottom = 88.0
+grow_vertical = 2
+script = ExtResource("6_moves")
 
 [node name="PerformanceOverlay" parent="Screen" instance=ExtResource("5_performance")]
 

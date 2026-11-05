@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+species_id = &"piplup"
+display_name = "Piplup"
+level = 20
+maximum_hp = 80
+attack = 40
+special_attack = 42
+defense = 36
+special_defense = 35

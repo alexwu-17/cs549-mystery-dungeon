@@ -1,5 +1,21 @@
 # Codex project handoff
 
+### Week 10 species stat configuration (2026-11-01)
+
+`PokemonSpeciesData` (`scripts/combat/pokemon_species_data.gd`) and `config/species/{chimchar,piplup,turtwig,stunky}.tres` store user-supplied fixed battle stats per species, separate from visual profiles. Starters are Chimchar, Piplup and Turtwig at level 20; Stunky is level 1. Values are authored final battle stats, not mainline base stats: no IV/EV/nature or level scaling is applied. Changing level alone does not recalculate stats. Shared resources contain no mutable current HP/PP/stages; future actors must own those separately. These resources are not yet bound to actors, so existing gameplay HP, fixed damage and placeholder levels remain active until combat integration. No stats were assumed for Drapion.
+
+### Week 10 move display foundation (2026-11-01)
+
+Presentation update: bracketed key labels below are superseded by Unicode boxed capitals 🆄 🅸 🅾 🅿 at 26px. Input bindings are unchanged. Focused validation PASS and refreshed 1080p capture inspected on Windows; glyph appearance uses platform font fallback.
+
+Move rows now begin with `[U]`, `[I]`, `[O]`, `[P]`, including empty slots. Labels read the project's `move_slot_1` through `move_slot_4` Input Map actions, bound to those physical keys. No player remapping UI or execution handlers exist yet. Focused move-panel validation PASS and updated normal 1080p capture inspected after adding the labels; import has no script errors, with existing certificate/editor-settings access warnings.
+
+Shared HUD now includes a left-side four-slot `MovePanel`. Rows show attribute icon, name and right-aligned current/max PP; hovering a populated row shows name, attribute/category icons and labels, supplied damage/power text and wrapped targeting description. There are no buttons or move execution handlers. Tooltip ignores mouse input and disappears on row exit or panel hide. Empty slots show a dash without a tooltip.
+
+`scripts/ui/move_display_data.gd` is a presentation-only Resource, separate from future authoritative move definitions/battle state. Supply a typed array through `hud.move_panel.set_moves(entries)` after move/PP changes; the panel neither spends PP nor calculates damage. Current gameplay supplies no moves, so all four slots remain empty. Ember in `validate_move_panel.gd` is a synthetic UI fixture, not a learned move. Built-in original SVG icons cover Normal/Fire/Water/Grass and Physical/Special/Status; custom textures override these, and other attributes currently use abbreviated text fallbacks. Damage text must distinguish move power from target-dependent calculated damage. No damage, PP, selection, unlock or combat rules shipped in this change.
+
+Godot 4.4.1 headless import completed without script compilation errors; focused move-panel and existing HUD validations PASS after fixing deferred tooltip attachment and the typed empty-array fixture. Normal Forward+ 1920x1080 synthetic HUD capture inspected: `.godot/move-panel-preview.png` (`validate_move_panel.gd -- --capture`). This checks layout/icons/wrapping, not dungeon-background readability or performance. Initial test launches crashed because the sandbox could not write default user logs; explicit workspace `--log-file` paths resolved launch. Existing certificate/editor-settings access warnings and HUD-test shutdown resource warnings remain. No full regression, exports, commits or pushes.
+
 Checkpoint 4 handoff updated **2026-10-28** for branch **Midterm**, commit message **Checkpoint 4. Most systems complete and replaced sprites with Pokemon. Cleared some bugs remaining from checkpoint 3 such as stairs collision.** This documents current source, not release certification. Actual scripts, resources, and scene overrides take precedence over historical discussion. Inspect the working tree before continuing; never reset/clean indiscriminately. Historical measurements below retain their original dates and scope.
 
 

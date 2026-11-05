@@ -79,6 +79,26 @@ Prioritize working, testable, maintainable changes. Pokémon gameplay is planned
 
 - Current Demo is two exploration floors followed by the boss on Floor 3 (`GameModeConfig.DEMO_FINAL_FLOOR=3`). This supersedes historical Floor-5 descriptions for this iteration. Infinite/Limit modes remain unchanged. Tests and capture helpers should use the shared final-floor constant; keep Demo subtitle keys consistent.
 
+## Assignment 5 — Week 10 framework progress (2026-11-05)
+
+This section supersedes undecided roster/input/stat assumptions in the plan below. Only the framework described here has shipped; move execution, typing, damage calculations, stat stages, PP spending, selection and unlocks remain pending.
+
+- **Confirmed starters:** Chimchar, Piplup and Turtwig. Original Piplup/Turtwig artwork is extracted into `assets/sprites/pokemon/{Piplup,Turtwig}/`, 103 source files per species, including XML, animation, offset and shadow sheets. Extracted files were byte-verified against the supplied ZIPs and imported on Godot 4.4.1. ZIPs remain local/ignored. New species have not yet been wired to playable characters or visual profiles; preserve original pixels and XML contracts when integrating them.
+- **Reusable stats:** `scripts/combat/pokemon_species_data.gd` defines `PokemonSpeciesData`; `config/species/{chimchar,piplup,turtwig,stunky}.tres` store shared species identity, fixed level and authored final battle stats. These are user-supplied PMD-style battle values, not mainline base stats requiring IV/EV/nature calculations. Changing level alone does not recalculate them. Keep current HP, remaining PP and temporary stat stages per actor, separate from shared Resources. No XP or leveling system is implemented.
+
+| Species | Level | HP | Atk | Sp Atk | Def | Sp Def |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Chimchar | 20 | 76 | 39 | 38 | 35 | 38 |
+| Piplup | 20 | 80 | 40 | 42 | 36 | 35 |
+| Turtwig | 20 | 67 | 43 | 43 | 41 | 41 |
+| Stunky | 1 | 42 | 21 | 20 | 18 | 22 |
+
+- **Integration boundary:** species resources load with the exact configured values but are not bound to live combat. Existing player/enemy HP, fixed damage and placeholder levels remain authoritative until deliberately replaced. Drapion has no new species stats yet. Plan the species/battle-state foundation, then starter selection, then one complete move path before expanding combat.
+- **Move HUD:** the shared HUD contains a left-side box with exactly four rows. Each begins with a boxed-letter Unicode key symbol (🆄 🅸 🅾 🅿), then type icon, move name and right-aligned current/max PP. Empty slots retain their key symbol and a dash. Labels derive from Input Map actions `move_slot_1` through `move_slot_4`, bound to physical U/I/O/P; there is no player remapping UI or execution handler. Boxed glyph appearance uses platform font fallback.
+- **Hover details:** populated rows show a small box containing move name, type/category icons and labels, supplied damage/power text and a wrapped description of range and affected tiles. Rows are not clickable buttons; the tooltip ignores mouse input and hides on exit/panel hide. Preserve keyboard-driven gameplay. Distinguish move power from target-dependent damage.
+- **Display ownership:** `scripts/ui/move_display_data.gd` is presentation data only; `move_panel.gd` accepts a typed array through `hud.move_panel.set_moves(entries)`. Combat must eventually supply updates; the panel never calculates hits, spends PP or schedules turns. No live moves are assigned yet, so gameplay shows empty slots. Ember in `tests/validate_move_panel.gd` is a synthetic display fixture, not an implemented move. Original SVG icons cover Normal/Fire/Water/Grass and Physical/Special/Status; explicit texture overrides are supported, other types use abbreviated text fallback.
+- **Validation:** Godot 4.4.1 headless imports, focused move-panel/HUD tests and exact species-resource checks passed during implementation. Normal Forward+ 1920x1080 synthetic HUD captures verified layout/icons/wrapping; capture via `validate_move_panel.gd -- --capture`. This does not certify dungeon-background readability, full new-species motion or performance. Existing certificate/editor-settings access and HUD shutdown warnings remain documented in the handoff. No fresh full-regression or sustained-60 claim is implied.
+
 ## Week 10 Pokémon systems plan (2026-10-30)
 
 This section records the current design and intended roadmap, **not implemented or validated behavior**. It authorizes the planned selection, moves, typing and stat systems beyond Checkpoint 4's presentation-only scope. Preserve existing gameplay contracts until their replacements are implemented and tested; do not treat proposals below as completed features.

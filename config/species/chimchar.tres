@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+species_id = &"chimchar"
+display_name = "Chimchar"
+level = 20
+maximum_hp = 76
+attack = 39
+special_attack = 38
+defense = 35
+special_defense = 38

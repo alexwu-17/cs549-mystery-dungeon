@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+species_id = &"turtwig"
+display_name = "Turtwig"
+level = 20
+maximum_hp = 67
+attack = 43
+special_attack = 43
+defense = 41
+special_defense = 41
