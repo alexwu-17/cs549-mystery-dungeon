@@ -21,6 +21,7 @@ func set_victory(enemy_name: String = "Boss") -> void:
 @onready var hp_label: Label = $Screen/TopBar/Row/HPLabel
 @onready var floor_label: Label = $Screen/TopBar/Row/FloorLabel
 @onready var minimap = $Screen/MinimapPanel/Minimap
+@onready var move_panel = $Screen/MovePanel
 
 var health: HealthScript
 

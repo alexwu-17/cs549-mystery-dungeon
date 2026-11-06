@@ -49,6 +49,15 @@ var terrain_fill_cells: Dictionary = {}
 @export var cave_continuous_ground_enabled: bool = true
 @export var cave_stone_mapping_enabled: bool = true
 @export var cave_weathered_edges_enabled: bool = true
+# --- FloorDetailOverlays (rendering-only; remove this block to revert) ---
+@export var floor_grime_enabled: bool = true
+@export_range(0.0, 1.0, 0.05) var floor_grime_strength: float = 0.9
+@export_range(0.1, 0.8, 0.02) var floor_grime_depth: float = 0.42
+@export var corridor_moss_enabled: bool = true
+@export_range(0.0, 1.0, 0.05) var corridor_moss_coverage: float = 0.45
+@export var corridor_moss_color: Color = Color(0.45, 0.76, 0.48)
+var floor_detail_overlays: FloorDetailOverlays
+# --- end FloorDetailOverlays ---
 var cave_background: CaveTerrainBackdrop
 var cave_fill_active: bool = false
 var _occlusion_frame: int = -1
@@ -159,6 +168,13 @@ func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure
 			push_error("Invalid bounded cave background: " + str(cave_background.diagnostics.violations))
 			return false
 		if geometry_diagnostics_enabled: print("CAVE BACKGROUND ", cave_background.diagnostics)
+	# --- FloorDetailOverlays (rendering-only; remove this block to revert) ---
+	floor_detail_overlays = null
+	if floor_grime_enabled or corridor_moss_enabled:
+		floor_detail_overlays = FloorDetailOverlays.new()
+		add_child(floor_detail_overlays)
+		floor_detail_overlays.setup(data, self)
+	# --- end FloorDetailOverlays ---
 	return true
 
 
