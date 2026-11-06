@@ -383,3 +383,14 @@ Four focused Godot 4.4.1 validations PASS: boss gameplay/61-anchor connectivity/
 ### Condensed presentation Demo (2026-10-28, uncommitted)
 
 For this iteration, Demo now contains **two procedural exploration floors and the boss arena on Floor 3**. `GameModeConfig.DEMO_FINAL_FLOOR=3`; Demo scene subtitle Cavern Depths moved to key 3. Existing mode checks automatically move the music handoff/final introduction to the 2->3 transition and keep the arena capped. Infinite and Limit Testing progression, generation settings, boss artwork/stats and all gameplay mechanics are unchanged. Tests/capture helpers now refer to the shared final-floor constant rather than hardcoded 5/4. To restore the previous five-floor Demo, set the constant back to 5 and move the Demo subtitle key back to 5. This supersedes earlier four-exploration/Floor-5 descriptions.
+
+## Floor detail overlays (2026-11-06)
+
+Rendering-only floor variety inspired by Hades/Stardew room framing. `FloorDetailOverlays` (`scripts/dungeon/floor_detail_overlays.gd`) is created at the end of `DungeonRenderer.render_dungeon` and freed with the renderer's children on every render.
+
+- **Room grime:** a soft, ragged dark band on lower room FLOOR tiles wherever a side faces WALL/VOID (the same rule that places wall meshes). It starts at the measured FLOOR_WALL inner face (`WALL_FACE = 0.42`) and extends `floor_grime_depth` into the room. Shader: `shaders/floor_grime_band.gdshader`.
+- **Corridor moss:** patchy green moss on every CORRIDOR tile except reserved ramp transitions, denser toward corridor edges. Shader: `shaders/corridor_moss.gdshader`.
+- Each overlay is one merged mesh with a multiply-blend unshaded shader. It only darkens, so floor lighting and fog dimming still apply. No collision, navigation, shadows or RNG; patterns use world position. Gameplay data, generation and floor materials are untouched.
+- Inspector toggles on DungeonRenderer: `floor_grime_enabled/strength/depth`, `corridor_moss_enabled/coverage/color`.
+- **Revert:** delete the new script, the two shaders and `tests/validate_floor_detail_overlays.gd`, and remove the two blocks marked `FloorDetailOverlays` in `dungeon_renderer.gd`. Or revert the single commit that added them.
+- Validation: `validate_floor_detail_overlays.gd` covers exact tile-rule counts, placement, determinism, a single rebuild per render, toggles, no collision/shadows and unchanged data/RNG. Visuals were checked only with Godot 4.4.1 Forward+ on a software renderer (lavapipe, 1920x1080). GPU appearance and frame time still need checking on real hardware. Corner-tile wall faces use the same inset as straight walls and were not separately measured.
