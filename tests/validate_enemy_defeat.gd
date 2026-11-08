@@ -18,7 +18,7 @@ func validate() -> void:
 	var done := [0]
 	visual.defeat_finished.connect(func(): done[0] += 1)
 	enemy.attack_leap.play(Vector2i.LEFT)
-	enemy.receive_damage(6)
+	enemy.receive_damage(enemy.health.current)
 	assert(enemy.health.current == 0 and not enemy.attack_leap.active and visual.defeating)
 	assert(visual.clip == "Faint" and visual.action == "Defeat" and visual.frame_index == 0)
 	assert(visual.sprite.texture.atlas.resource_path.ends_with("/Faint-Anim.png"))
@@ -51,6 +51,7 @@ func validate() -> void:
 
 	# Live bookkeeping and healing are immediate; only the old actor's visual lingers.
 	var main = load("res://scenes/main/demo_main.tscn").instantiate()
+	load("res://tests/round_test_helper.gd").use_legacy_battle_stats(main)
 	root.add_child(main)
 	Helper.complete_introduction(main)
 	data.player_spawn = Vector2i.ZERO

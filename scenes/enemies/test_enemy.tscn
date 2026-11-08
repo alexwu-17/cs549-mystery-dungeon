@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://cw5yyc67pnwhc"]
+[gd_scene load_steps=7 format=3 uid="uid://cw5yyc67pnwhc"]
 
 [ext_resource type="Script" uid="uid://duwrlsjn2sepb" path="res://scripts/enemies/skeleton.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://dj56fydcymhld" path="res://assets/sprites/skeleton/front.png" id="2"]
@@ -6,8 +6,10 @@
 [ext_resource type="Script" uid="uid://bh3y6aguitga" path="res://scripts/effects/attack_leap.gd" id="4"]
 
 [ext_resource type="Resource" path="res://config/pokemon_stunky.tres" id="pokemon"]
+[ext_resource type="Resource" path="res://config/species/stunky.tres" id="species"]
 [node name="TestEnemy" type="Node3D"]
 script = ExtResource("1")
+species_data = ExtResource("species")
 
 [node name="EnemyMesh" type="Sprite3D" parent="."]
 cast_shadow = 2

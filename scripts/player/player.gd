@@ -1,14 +1,15 @@
 class_name Player
 extends Node3D
 
-const HealthScript = preload("res://scripts/entities/health.gd")
-
 signal stairs_reached
 signal movement_speed_changed(speed: float)
 signal moved
 signal attack_requested(target: Vector2i)
 
-@export var maximum_hp: int = 20
+# Legacy/fallback HP remains editable when no species is assigned.
+@export var maximum_hp: int = 20:
+	get:
+		return species_data.maximum_hp if species_data != null else maximum_hp
 @export var attack_damage: int = 3
 
 const MOVE_INTERVAL: float = 0.24
@@ -18,9 +19,17 @@ var held_direction: Vector2i = Vector2i.ZERO
 var repeat_remaining: float = 0.0
 var movement_speed: float = 1.0
 
-var health: HealthScript = HealthScript.new()
+@export var species_data: PokemonSpeciesData
+var battle_state: PokemonBattleState = PokemonBattleState.new()
+var health: EntityHealth:
+	get:
+		return battle_state.health
 var invincible: bool = false
-var level: int = 5
+var level: int:
+	get:
+		return battle_state.level
+	set(value):
+		battle_state.level = value
 # Presentation reference stays at the departure level until leaving a ramp.
 var fog_elevation: int = 0
 var gameplay_enabled: bool = true
@@ -38,6 +47,7 @@ var is_tile_occupied: Callable
 
 
 func _ready() -> void:
+	reset_battle_state()
 	attack_leap.presentation_started.connect(character_visual.attack)
 	attack_leap.presentation_finished.connect(character_visual.standing)
 
@@ -198,3 +208,7 @@ func complete_action() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		stop_held_movement()
+
+
+func reset_battle_state() -> void:
+	battle_state.reset(species_data, maximum_hp, 5)

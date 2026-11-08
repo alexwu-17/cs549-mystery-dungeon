@@ -1,16 +1,25 @@
 class_name Skeleton
 extends Node3D
 
-const HealthScript = preload("res://scripts/entities/health.gd")
-
 const DIRECTIONS = [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]
 
 signal attack_requested(damage: int)
 
-@export var maximum_hp: int = 6
+# Legacy/fallback HP remains editable when no species is assigned.
+@export var maximum_hp: int = 6:
+	get:
+		return species_data.maximum_hp if species_data != null else maximum_hp
 @export var attack_damage: int = 2
-var health: HealthScript = HealthScript.new()
-var level: int = 5
+@export var species_data: PokemonSpeciesData
+var battle_state: PokemonBattleState = PokemonBattleState.new()
+var health: EntityHealth:
+	get:
+		return battle_state.health
+var level: int:
+	get:
+		return battle_state.level
+	set(value):
+		battle_state.level = value
 var facing: Vector2i = Vector2i.DOWN
 @onready var character_visual: CharacterVisual = $VisualController
 var damage_tween: Tween
@@ -31,7 +40,7 @@ func setup(start: Vector2i, data: DungeonData, renderer: DungeonRenderer) -> voi
 	character_visual.cancel()
 	facing = Vector2i.DOWN
 	character_visual.face(facing)
-	health.reset(maximum_hp)
+	reset_battle_state()
 	grid_position = start
 	dungeon_data = data
 	dungeon_renderer = renderer
@@ -113,3 +122,7 @@ func next_step_toward(goal: Vector2i, occupied: Dictionary) -> Vector2i:
 func complete_action() -> void:
 	if attack_leap.active:
 		await attack_leap.presentation_finished
+
+
+func reset_battle_state() -> void:
+	battle_state.reset(species_data, maximum_hp, 5)

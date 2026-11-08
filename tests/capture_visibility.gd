@@ -1,16 +1,19 @@
 extends SceneTree
-
+## Normal-render capture scenarios; use -- --list or -- --scenario=NAME/all.
+const Support = preload("res://tests/capture_support.gd")
 const Helper = preload("res://tests/round_test_helper.gd")
 
 func _initialize() -> void:
-	call_deferred("validate")
+	call_deferred("_run")
 
-func save_capture(name: String) -> void:
+func _run() -> void:
+	await Support.run(self, {"pokemon": pokemon_validate}, "pokemon")
+
+func pokemon_save_capture(name: String) -> void:
 	for frame in range(3): await process_frame
-	await RenderingServer.frame_post_draw
-	assert(root.get_texture().get_image().save_png("res://.godot/pokemon_validation/"+name+".png") == OK)
+	Support.save(self, "res://.godot/pokemon_validation/"+name+".png")
 
-func validate() -> void:
+func pokemon_validate() -> bool:
 	root.size = Vector2i(1920,1080)
 	var main = load("res://scenes/main/demo_main.tscn").instantiate()
 	root.add_child(main)
@@ -36,12 +39,12 @@ func validate() -> void:
 	main.refresh_fog()
 	assert(main.enemies[0].visible and not boss.visible)
 	assert(not boss.character_visual.sprite.is_visible_in_tree())
-	await save_capture("visibility_first_room")
+	await pokemon_save_capture("visibility_first_room")
 	main.player.setup(Vector2i(8,0),data,main.dungeon_renderer)
 	main.refresh_fog()
 	assert(not main.enemies[0].visible and boss.visible)
 	assert(not main.enemies[0].character_visual.sprite.is_visible_in_tree())
-	await save_capture("visibility_second_room")
+	await pokemon_save_capture("visibility_second_room")
 	# Every source frame's atlas/mask remains consistent with actual texture readback.
 	for actor in [main.player,main.enemies[0],boss]:
 		var visual = actor.character_visual
@@ -93,8 +96,8 @@ func validate() -> void:
 		main.dungeon_renderer.apply_fog()
 		for index in range(fog_before.size()):
 			assert(main.dungeon_renderer.fog_visuals[index].fog_state == fog_before[index])
-		await save_capture("occlusion_"+name)
+		await pokemon_save_capture("occlusion_"+name)
 	main.free()
 	await process_frame
 	print("PASS: rendered Pokémon fog visibility, atlas cropping/opaque masks, all source-frame dimensions, character shadows, real sprite occlusion and fog restoration")
-	quit()
+	return true

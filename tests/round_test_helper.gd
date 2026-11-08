@@ -43,3 +43,12 @@ static func complete_defeats(main: Node3D) -> void:
 	for enemy in main.retiring_enemies.duplicate():
 		if is_instance_valid(enemy): enemy.character_visual.finish_defeat()
 	if is_instance_valid(main.boss): main.boss.character_visual.finish_defeat()
+
+
+static func use_legacy_battle_stats(main: Node3D) -> void:
+	# Existing combat fixtures intentionally retain HP20/HP6 and level5.
+	# Production species binding is exercised by validate_battle_state.gd.
+	main.get_node("Player").species_data = null
+	main.get_node("Entities").child_entered_tree.connect(func(actor: Node):
+		if actor is Skeleton:
+			actor.species_data = null)

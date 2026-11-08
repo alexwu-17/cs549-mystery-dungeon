@@ -37,7 +37,7 @@ Prioritize working, testable, maintainable changes. Pokémon gameplay is planned
 
 - Inspect `git status` and relevant diffs first. Substantial uncommitted work may exist. Never reset, clean, overwrite user configurations, or delete assets assuming they are disposable.
 - Scope changes carefully. Do not destructively modify original art or imported source assets. Do not commit, push, publish, or regenerate exports unless requested.
-- Run headless import and focused tests; run full regressions for shared-system changes. Commands are in the handoff.
+- Run headless import and focused tests; run full regressions for shared-system changes. Use `tests/run_validations.py` (default: 12 gameplay checks; `--suite full`: all 48 scripts). Coverage ownership and commands are in `tests/README.md`; avoid repeating full combat scenarios in presentation tests.
 - Exit code zero is insufficient: check errors/assertions and require completion/PASS messages. Use deterministic presentation completion/cancellation in tests rather than sleeps.
 - Headless success proves neither GPU appearance nor 60 FPS. Use normal rendering for shadows, transparency, occlusion, colors, and actual MultiMesh readback.
 - Separate verified behavior, limitations, and assumptions. Update the handoff when architecture/startup/configuration changes materially.
@@ -98,6 +98,22 @@ This section supersedes undecided roster/input/stat assumptions in the plan belo
 - **Hover details:** populated rows show a small box containing move name, type/category icons and labels, supplied damage/power text and a wrapped description of range and affected tiles. Rows are not clickable buttons; the tooltip ignores mouse input and hides on exit/panel hide. Preserve keyboard-driven gameplay. Distinguish move power from target-dependent damage.
 - **Display ownership:** `scripts/ui/move_display_data.gd` is presentation data only; `move_panel.gd` accepts a typed array through `hud.move_panel.set_moves(entries)`. Combat must eventually supply updates; the panel never calculates hits, spends PP or schedules turns. No live moves are assigned yet, so gameplay shows empty slots. Ember in `tests/validate_move_panel.gd` is a synthetic display fixture, not an implemented move. Original SVG icons cover Normal/Fire/Water/Grass and Physical/Special/Status; explicit texture overrides are supported, other types use abbreviated text fallback.
 - **Validation:** Godot 4.4.1 headless imports, focused move-panel/HUD tests and exact species-resource checks passed during implementation. Normal Forward+ 1920x1080 synthetic HUD captures verified layout/icons/wrapping; capture via `validate_move_panel.gd -- --capture`. This does not certify dungeon-background readability, full new-species motion or performance. Existing certificate/editor-settings access and HUD shutdown warnings remain documented in the handoff. No fresh full-regression or sustained-60 claim is implied.
+
+## Assignment 5 — Per-actor battle state (2026-11-05)
+
+This supersedes the framework section's unbound-stat integration boundary. Only step 1 of the next implementation sequence is authorized/completed here; starter selection and subsequent systems await user direction.
+
+- `PokemonBattleState` owns per-actor health, runtime level, exact copied battle stats and independent empty PP/stage containers. Shared species resources remain read-only. Stat-changing moves and stage effects remain deferred.
+- Player and regular-enemy scenes now bind Chimchar (HP76/level20) and Stunky (HP42/level1). Existing `health` and `level` APIs delegate to battle state; health object identity stays stable for HUD/death subscriptions. `maximum_hp` reports species HP or the legacy exported fallback when species is absent.
+- Fresh runs reset player battle state from its configured species; floor setup preserves it. New enemies initialize their own state. Piplup/Turtwig stats are supported by the same resource path, but selection and new visual profiles are not implemented. Drapion retains fallback HP30/damage18 with no invented species stats.
+- Damage remains fixed (player3/enemy2/boss18), and lifesteal remains active pending later steps. Higher live HP intentionally changes fight length; this foundation is not a balanced combat release. PP spending, move execution, typing/damage formulas, selection, unlocks and recovery changes have not shipped.
+- Historical combat regressions explicitly select legacy HP/level fixtures; `validate_battle_state.gd` covers production stat binding, isolation, exact values, HUD, floor persistence and fresh reset. Consult the handoff for actual validation results and engine version.
+
+## Capture consolidation and pending asset cleanup (2026-11-05)
+
+- Sixteen capture scripts are now five scenario-driven entry points: `capture_characters.gd`, `capture_ramps.gd`, `capture_environment.gd`, `capture_atmosphere.gd`, `capture_visibility.gd`, with shared `capture_support.gd`. Commands/options and old-to-new scenario mapping are in `tests/README.md`. Historical capture filenames below/in the handoff refer to the superseded entry points; the scenarios remain available. Keep GPU readback assertions; headless checks cannot replace them.
+- Chimchar remains the configured runtime default, and the player scene now has an initial Chimchar Idle atlas texture instead of the swordsman texture. Starter selection remains pending. Legacy fallback art/loading remains until approved removal.
+- `docs/LEGACY_ASSET_CLEANUP_REVIEW.md` lists 68 legacy asset files and three extraction-related files proposed for deletion, plus dependent code/test updates. **Do not delete those assets until the user reviews/approves that list.** Active Midterm dungeon/boss music and all Pokémon source art stay. This user-requested review precedes any exception to the earlier fallback/source-preservation instructions.
 
 ## Week 10 Pokémon systems plan (2026-10-30)
 

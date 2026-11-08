@@ -7,6 +7,7 @@ func _initialize() -> void:
 
 func validate() -> void:
 	var main = load("res://scenes/main/main.tscn").instantiate()
+	load("res://tests/round_test_helper.gd").use_legacy_battle_stats(main)
 	main.use_elevation_test = true
 	root.add_child(main)
 	load("res://tests/round_test_helper.gd").complete_introduction(main)

@@ -84,9 +84,8 @@ func start_new_run() -> void:
 	resolving_turn = false
 	player.gameplay_enabled = true
 	player.facing = Vector2i.DOWN
-	player.level = 5
 	floor_number = 1
-	player.health.reset(player.maximum_hp)
+	player.reset_battle_state()
 	print("NEW RUN: PLAYER HP ", player.health.current, "/", player.health.maximum)
 	_begin_floor_introduction(false)
 

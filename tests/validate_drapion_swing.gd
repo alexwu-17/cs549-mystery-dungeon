@@ -5,6 +5,7 @@ func _initialize() -> void: call_deferred("validate")
 
 func validate() -> void:
 	var main = load("res://scenes/main/demo_main.tscn").instantiate()
+	load("res://tests/round_test_helper.gd").use_legacy_battle_stats(main)
 	root.add_child(main)
 	Helper.complete_introduction(main)
 	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR

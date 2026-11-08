@@ -22,6 +22,7 @@ func validate() -> void:
 	var original_cap := Engine.max_fps
 	Engine.max_fps = 144
 	var main = load("res://scenes/main/limit_testing_main.tscn").instantiate()
+	load("res://tests/round_test_helper.gd").use_legacy_battle_stats(main)
 	main.generation_config = DungeonGenerationConfig.new()
 	main.generation_config.invincible_player = true
 	root.add_child(main)

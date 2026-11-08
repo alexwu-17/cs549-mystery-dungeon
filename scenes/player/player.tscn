@@ -1,13 +1,19 @@
-[gd_scene load_steps=6 format=3 uid="uid://bpxt2riafgpm"]
+[gd_scene load_steps=8 format=3 uid="uid://bpxt2riafgpm"]
 
 [ext_resource type="Script" uid="uid://ci7xgb41cef20" path="res://scripts/player/player.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://c1ym0mkjppah8" path="res://assets/sprites/swordsman/front.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/pokemon/Chimchar/Idle-Anim.png" id="2"]
 [ext_resource type="Script" path="res://scripts/effects/pokemon_character_visual.gd" id="3"]
 [ext_resource type="Script" uid="uid://bh3y6aguitga" path="res://scripts/effects/attack_leap.gd" id="4"]
 
 [ext_resource type="Resource" path="res://config/pokemon_chimchar.tres" id="pokemon"]
+[ext_resource type="Resource" path="res://config/species/chimchar.tres" id="species"]
+[sub_resource type="AtlasTexture" id="ChimcharIdle"]
+atlas = ExtResource("2")
+region = Rect2(0, 0, 24, 40)
+
 [node name="Player" type="Node3D"]
 script = ExtResource("1")
+species_data = ExtResource("species")
 
 [node name="PlayerSprite" type="Sprite3D" parent="."]
 cast_shadow = 2
@@ -15,7 +21,7 @@ pixel_size = 0.0028
 billboard = 1
 alpha_cut = 2
 texture_filter = 0
-texture = ExtResource("2")
+texture = SubResource("ChimcharIdle")
 
 [node name="VisualController" type="Node" parent="."]
 script = ExtResource("3")

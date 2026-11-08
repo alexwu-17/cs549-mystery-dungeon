@@ -121,6 +121,7 @@ func validate() -> void:
 	renderer.free()
 	# Exercise real combat signals/round sequencing on adjacent ramp tiles.
 	var main = load("res://scenes/main/main.tscn").instantiate()
+	load("res://tests/round_test_helper.gd").use_legacy_battle_stats(main)
 	root.add_child(main)
 	Helper.complete_introduction(main)
 	var combat := DungeonData.new()

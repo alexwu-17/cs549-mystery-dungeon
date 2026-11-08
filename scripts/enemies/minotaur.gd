@@ -1,15 +1,26 @@
 class_name Minotaur
 extends Node3D
 
-const HealthScript = preload("res://scripts/entities/health.gd")
 const StatEffect = preload("res://scripts/effects/stat_change_effect.gd")
 enum State { HUNTING, CHARGING, COOLDOWN, DEAD }
 signal attack_requested(damage: int)
 signal defeated
 signal presentation_event(kind: StringName)
-@export var maximum_hp: int = 30
+# Legacy/fallback HP remains editable when no species is assigned.
+@export var maximum_hp: int = 30:
+	get:
+		return species_data.maximum_hp if species_data != null else maximum_hp
 @export var attack_damage: int = 18
-var health: HealthScript = HealthScript.new()
+@export var species_data: PokemonSpeciesData
+var battle_state: PokemonBattleState = PokemonBattleState.new()
+var health: EntityHealth:
+	get:
+		return battle_state.health
+var level: int:
+	get:
+		return battle_state.level
+	set(value):
+		battle_state.level = value
 var state: State = State.HUNTING
 var grid_position: Vector2i
 @onready var sprite_clearance: AttackLeap = $SpriteClearance
@@ -26,8 +37,9 @@ func setup(center: Vector2i, data: DungeonData, renderer: DungeonRenderer) -> vo
 	grid_position = center
 	dungeon_data = data
 	dungeon_renderer = renderer
-	health.reset(maximum_hp)
-	health.died.connect(_on_death)
+	reset_battle_state()
+	if not health.died.is_connected(_on_death):
+		health.died.connect(_on_death)
 	position = renderer.get_entity_world_position(center)
 
 func footprint() -> Array[Vector2i]:
@@ -165,3 +177,7 @@ func _on_death() -> void:
 
 func complete_action() -> void:
 	await character_visual.complete_action()
+
+
+func reset_battle_state() -> void:
+	battle_state.reset(species_data, maximum_hp, 5)

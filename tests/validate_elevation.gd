@@ -150,6 +150,7 @@ func check_orientation(direction: Vector2i) -> void:
 	assert(data.tiles == saved and data.elevations == saved_heights and data.ramp_segments == saved_segments)
 	# Both combat participants must reject a cliff, while a Space miss still acts.
 	var main: Node3D = load("res://scenes/main/main.tscn").instantiate()
+	load("res://tests/round_test_helper.gd").use_legacy_battle_stats(main)
 	root.add_child(main)
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	data.player_spawn = cliff

@@ -62,11 +62,13 @@ func validate() -> void:
 	var enemy: Skeleton = main.enemies[0]
 	var enemy_visual: Node3D = enemy.get_node("EnemyMesh")
 	player.facing = Vector2i.RIGHT
+	var enemy_hp: int = enemy.health.current
+	var player_hp: int = player.health.current
 	player.basic_attack()
-	assert(enemy.health.current == 3 and player.health.current == 20)
+	assert(enemy.health.current == enemy_hp - player.attack_damage and player.health.current == player_hp)
 	assert(leap.active and not enemy.attack_leap.active)
 	leap.finish()
-	assert(player.health.current == 18 and enemy.attack_leap.active)
+	assert(player.health.current == player_hp - enemy.attack_damage and enemy.attack_leap.active)
 	var enemy_transform := enemy.attack_leap.starting_transform
 	enemy.attack_leap.animation.pause()
 	enemy.attack_leap.animation.custom_step(0.12)
@@ -80,18 +82,6 @@ func validate() -> void:
 	assert(enemy.grid_position == Vector2i(2, 0) and not enemy.attack_leap.active)
 	enemy.take_turn(Vector2i(99, 99), {})
 	assert(enemy.grid_position == Vector2i(2, 0) and not enemy.attack_leap.active)
-	enemy.setup(Vector2i.RIGHT, data, main.dungeon_renderer)
-	# A lethal attack leaves only the killer's leap running beneath game over.
-	player.health.reset(2)
-	player.facing = Vector2i.UP
-	player.basic_attack()
-	leap.finish()
-	enemy = main.enemies[0]
-	assert(main.game_over and not leap.active and enemy.attack_leap.active)
-	var killer: WeakRef = weakref(enemy)
-	main.start_new_run()
-	load("res://tests/round_test_helper.gd").complete_introduction(main)
-	assert(killer.get_ref() == null and not leap.active and sprite.transform == original)
 	# Floor changes and setup cancel a partially played leap exactly.
 	leap.play(Vector2i.RIGHT)
 	leap.animation.pause()
@@ -101,5 +91,5 @@ func validate() -> void:
 	assert(not leap.active and sprite.transform == original)
 	main.free()
 	await process_frame
-	print("PASS: full-tile/0.15-hop/0.24s leap, exact restore, misses/walls/hits, input lock, skeleton occupancy/damage, lethal presentation/reset")
+	print("PASS: full-tile/0.15-hop/0.24s leap, exact restore, misses/walls/hits, input lock, enemy visual displacement/occupancy, floor cancellation")
 	quit()
