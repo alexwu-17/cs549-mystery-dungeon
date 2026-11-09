@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/player_hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/move_panel.gd" id="6_moves"]
+[ext_resource type="Script" path="res://scripts/ui/damage_numbers.gd" id="7_damage"]
 [ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="2_map"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/combat_dialogue.tscn" id="3_dialogue"]
@@ -116,6 +117,16 @@ grow_vertical = 2
 script = ExtResource("6_moves")
 
 [node name="PerformanceOverlay" parent="Screen" instance=ExtResource("5_performance")]
+
+[node name="DamageNumbers" type="Control" parent="Screen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_damage")
 
 [node name="FloorIntroduction" parent="Screen" instance=ExtResource("4_intro")]
 

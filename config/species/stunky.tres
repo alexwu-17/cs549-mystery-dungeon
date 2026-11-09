@@ -1,12 +1,16 @@
-[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=4 format=3 uid="uid://qkouuc3wm2jb"]
 
-[ext_resource type="Script" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://cxlqm507earwp" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="2_yf6xp"]
+[ext_resource type="Resource" uid="uid://csyhds8fh2d0a" path="res://config/moves/scratch.tres" id="scratch"]
 
 [resource]
 script = ExtResource("1")
 species_id = &"stunky"
 display_name = "Stunky"
-level = 1
+types = []
+starting_moves = Array[ExtResource("2_yf6xp")]([ExtResource("scratch")])
+level = 15
 maximum_hp = 42
 attack = 21
 special_attack = 20

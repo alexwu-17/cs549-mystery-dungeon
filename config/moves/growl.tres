@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3 uid="uid://j2v0k1gyo01y"]
+
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+move_id = &"growl"
+display_name = "Growl"
+move_type = "Normal"
+category = 2
+power = 0
+maximum_pp = 20
+range_tiles = 1
+targeting = 2
+animation_action = &"Growl"
+affected_stat = &"attack"
+stage_change = -1
+description = "Lowers the Attack stage of every enemy in the current room by 1. Has no targets in corridors. No direct damage. Lasts 5 turns; another stat-changing move on the same target refreshes the duration."

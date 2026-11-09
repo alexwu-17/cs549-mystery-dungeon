@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const HealthScript = preload("res://scripts/entities/health.gd")
+const MoveDisplayData = preload("res://scripts/ui/move_display_data.gd")
 @export_range(0.0, 1.0) var game_over_opacity: float = 0.7
 
 
@@ -22,8 +23,37 @@ func set_victory(enemy_name: String = "Boss") -> void:
 @onready var floor_label: Label = $Screen/TopBar/Row/FloorLabel
 @onready var minimap = $Screen/MinimapPanel/Minimap
 @onready var move_panel = $Screen/MovePanel
+@onready var damage_numbers: DamageNumbers = $Screen/DamageNumbers
 
 var health: HealthScript
+var battle_state: PokemonBattleState
+
+
+func bind_battle_state(source: PokemonBattleState) -> void:
+	if battle_state != null and battle_state.moves_changed.is_connected(refresh_moves):
+		battle_state.moves_changed.disconnect(refresh_moves)
+	battle_state = source
+	battle_state.moves_changed.connect(refresh_moves)
+	refresh_moves()
+
+
+func refresh_moves() -> void:
+	var entries: Array[MoveDisplayData] = []
+	for slot in range(battle_state.moves.size()):
+		var move := battle_state.moves[slot]
+		if move == null:
+			entries.append(null)
+			continue
+		var entry := MoveDisplayData.new()
+		entry.move_name = move.display_name
+		entry.attribute_name = move.move_type
+		entry.category = ["Physical", "Special", "Status"][move.category]
+		entry.current_pp = battle_state.remaining_pp[slot]
+		entry.maximum_pp = move.maximum_pp
+		entry.damage_text = "No direct damage" if move.category == PokemonMoveData.Category.STATUS else "Power: %d" % move.power
+		entry.description = move.description
+		entries.append(entry)
+	move_panel.set_moves(entries)
 
 
 func bind_health(source: HealthScript) -> void:

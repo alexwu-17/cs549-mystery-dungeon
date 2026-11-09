@@ -73,7 +73,7 @@ func validate() -> void:
 		assert(main.hud.minimap.dungeon == main.dungeon)
 		main.free()
 	await process_frame
-	assert(ProjectSettings.get_setting("application/run/main_scene.demo_build") == "res://scenes/main/demo_main.tscn")
+	assert(ProjectSettings.get_setting("application/run/main_scene.demo_build") == "res://scenes/ui/demo_start.tscn")
 	assert(ProjectSettings.get_setting("application/run/main_scene.limit_testing_build") == "res://scenes/main/limit_testing_main.tscn")
 	print("PASS: three entry modes, real stairs, infinite floor 6, demo arena/cap, HP/fog/HUD cleanup, death/R mode persistence, export settings")
 	quit()

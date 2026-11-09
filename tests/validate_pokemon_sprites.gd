@@ -9,7 +9,9 @@ func _initialize() -> void:
 
 func validate() -> void:
 	var expected := {
-		"Chimchar": {"Idle": Vector3i(24,40,5), "Walk": Vector3i(32,48,7), "Attack": Vector3i(64,80,10), "Hurt": Vector3i(32,48,2), "Faint": Vector3i(32,32,4)},
+		"Piplup": {"Shoot": Vector3i(32,40,12), "Idle": Vector3i(24,40,6), "Walk": Vector3i(24,32,4), "Attack": Vector3i(64,64,14), "Hurt": Vector3i(40,56,2), "Faint": Vector3i(32,32,4)},
+		"Turtwig": {"Withdraw": Vector3i(24,40,11), "Idle": Vector3i(24,32,4), "Walk": Vector3i(24,32,4), "Attack": Vector3i(72,72,11), "Hurt": Vector3i(32,48,2), "Faint": Vector3i(40,32,4)},
+		"Chimchar": {"Shoot": Vector3i(32,40,12), "Idle": Vector3i(24,40,5), "Walk": Vector3i(32,48,7), "Attack": Vector3i(64,80,10), "Hurt": Vector3i(32,48,2), "Faint": Vector3i(32,32,4), "Strike": Vector3i(64,72,10)},
 		"Stunky": {"Idle": Vector3i(32,48,6), "Walk": Vector3i(32,40,4), "Attack": Vector3i(72,80,11), "Hurt": Vector3i(40,56,2), "Faint": Vector3i(32,32,4)},
 		"Drapion": {"Idle": Vector3i(48,40,4), "Walk": Vector3i(48,40,4), "Attack": Vector3i(80,88,12), "Hurt": Vector3i(56,64,2), "Charge": Vector3i(48,40,10), "Strike": Vector3i(72,88,10)}
 	}
@@ -20,12 +22,14 @@ func validate() -> void:
 	var ground := DungeonData.new()
 	ground.set_tile(Vector2i.ZERO,DungeonData.TileType.FLOOR)
 	var paths := ["res://scenes/player/player.tscn", "res://scenes/enemies/test_enemy.tscn", "res://scenes/enemies/minotaur.tscn"]
-	for i in range(3):
-		var actor = load(paths[i]).instantiate()
+	for i in range(5):
+		var actor = load(paths[i] if i < 3 else paths[0]).instantiate()
+		var species: String = ["Chimchar","Stunky","Drapion","Piplup","Turtwig"][i]
+		if i >= 3:
+			actor.get_node("VisualController").profile = load("res://config/pokemon_%s.tres" % species.to_lower())
 		root.add_child(actor)
 		var visual = actor.character_visual
 		visual.set_process(false)
-		var species: String = ["Chimchar","Stunky","Drapion"][i]
 		assert(visual.profile.directory.ends_with(species))
 		assert(visual.clips.size() == expected[species].size())
 		assert(visual.clips == Library.load_species(visual.profile.directory,visual.profile.animations.values()))
@@ -34,6 +38,10 @@ func validate() -> void:
 		for name in expected[species]:
 			var spec: Vector3i = expected[species][name]
 			var info: Dictionary = visual.clips[name]
+			# Native pixel art must not be converted to lossy 3D textures/mipmaps.
+			var sheet: Texture2D = info.rows[0][0].texture.atlas
+			var image: Image = sheet.get_image()
+			assert(not image.is_compressed() and not image.has_mipmaps(), sheet.resource_path)
 			assert(info.durations.size() == spec.z)
 			for pair in [[Vector2i.DOWN,0],[Vector2i.RIGHT,2],[Vector2i.UP,4],[Vector2i.LEFT,6]]:
 				visual.facing = pair[0]
@@ -141,6 +149,15 @@ func validate() -> void:
 		visual.clips.erase("Hurt")
 		visual.play_clip("Hurt", true)
 		assert(visual.clip == "Idle")
+		if not actor is Minotaur:
+			var attack_clip: String = str(visual.profile.animations.get("Attack", "Attack"))
+			var saved_attack: Dictionary = visual.clips[attack_clip]
+			visual.clips.erase(attack_clip)
+			visual.standing()
+			visual.prepare_attack()
+			visual.attack()
+			assert(visual.clip == "Idle")
+			visual.clips[attack_clip] = saved_attack
 		visual.freeze_defeated()
 		visual.cancel()
 		assert(not visual.frozen and visual.clip == "Idle")

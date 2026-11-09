@@ -8,6 +8,14 @@ const ARROW_PIXEL_SIZE: float = 0.04 * 0.6
 var animation: Tween
 var arrow: Sprite3D
 
+static func play_above_actor(target: Node3D, is_increase: bool) -> StatChangeEffect:
+	var visual: CharacterVisual = target.get_node("VisualController")
+	var camera := target.get_viewport().get_camera_3d()
+	var offset := Vector3.ZERO
+	if camera != null:
+		offset = visual.damage_number_anchor(camera) - target.global_position
+	return play_stat_change(target, is_increase, offset)
+
 static func play_stat_change(target: Node3D, is_increase: bool, offset: Vector3 = Vector3.ZERO) -> StatChangeEffect:
 	var effect: StatChangeEffect = load("res://scenes/effects/stat_change_effect.tscn").instantiate()
 	target.add_child(effect)

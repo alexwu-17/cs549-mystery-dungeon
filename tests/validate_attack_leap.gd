@@ -64,11 +64,13 @@ func validate() -> void:
 	player.facing = Vector2i.RIGHT
 	var enemy_hp: int = enemy.health.current
 	var player_hp: int = player.health.current
+	var damage := PokemonDamage.basic_damage(player.battle_state, enemy.battle_state, player.attack_damage)
 	player.basic_attack()
-	assert(enemy.health.current == enemy_hp - player.attack_damage and player.health.current == player_hp)
+	assert(enemy.health.current == enemy_hp - damage and player.health.current == player_hp)
 	assert(leap.active and not enemy.attack_leap.active)
 	leap.finish()
-	assert(player.health.current == player_hp - enemy.attack_damage and enemy.attack_leap.active)
+	var enemy_damage := PokemonDamage.move_damage(enemy.battle_state, player.battle_state, enemy.active_attack_move) if enemy.active_attack_move != null else PokemonDamage.basic_damage(enemy.battle_state, player.battle_state, enemy.attack_damage)
+	assert(player.health.current == player_hp - enemy_damage and enemy.attack_leap.active)
 	var enemy_transform := enemy.attack_leap.starting_transform
 	enemy.attack_leap.animation.pause()
 	enemy.attack_leap.animation.custom_step(0.12)

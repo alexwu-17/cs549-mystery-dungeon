@@ -13,8 +13,10 @@ func validate() -> void:
 	camera.rotation.x = deg_to_rad(-35.0)
 	var cases := 0
 	var flat_approaches := 0
-	for scene in ["res://scenes/player/player.tscn","res://scenes/enemies/test_enemy.tscn"]:
+	for species in ["chimchar", "stunky", "piplup", "turtwig"]:
+		var scene := "res://scenes/enemies/test_enemy.tscn" if species == "stunky" else "res://scenes/player/player.tscn"
 		var actor = load(scene).instantiate()
+		actor.get_node("VisualController").profile = load("res://config/pokemon_%s.tres" % species)
 		root.add_child(actor)
 		for uphill: Vector2i in DungeonData.CARDINALS:
 			var data := DungeonData.new()

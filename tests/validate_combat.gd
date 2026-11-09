@@ -126,7 +126,12 @@ func validate_attack_input(main: Node3D) -> void:
 	assert(main.player.grid_position == Vector2i.ZERO and enemy.grid_position == Vector2i(5, 0))
 	# A deliberately two-hit enemy makes kill bookkeeping fast without replacing
 	# production species configuration or baking in old HP6/player HP20.
-	enemy.health.reset(main.player.attack_damage * 2)
+	# Keep its counterattack basic here; selection/PP has a dedicated owner.
+	enemy.attack_policy = enemy.attack_policy.duplicate()
+	enemy.attack_policy.move_probability = 0.0
+	var damage := PokemonDamage.basic_damage(main.player.battle_state, enemy.battle_state)
+	var enemy_damage := PokemonDamage.basic_damage(enemy.battle_state, main.player.battle_state)
+	enemy.health.reset(damage * 2)
 	var maximum: int = main.player.maximum_hp
 	var before_hit: int = enemy.health.current
 	var requests: Array[int] = [0]
@@ -165,15 +170,16 @@ func validate_attack_input(main: Node3D) -> void:
 	assert(enemy.grid_position == Vector2i(1, 0) and main.player.health.current == maximum)
 	main.player._unhandled_input(space)
 	Helper.complete(main)
-	assert(enemy.health.current == before_hit - main.player.attack_damage and main.player.health.current == maximum - enemy.attack_damage)
+	assert(enemy.health.current == before_hit - damage and main.player.health.current == maximum - enemy_damage)
 	main.player._unhandled_input(space)
 	Helper.complete(main)
 	assert(main.enemies.is_empty() and main.enemy_occupancy.is_empty())
-	assert(main.player.health.current == maximum and main.player.grid_position == Vector2i.ZERO)
+	var after_kill := mini(maximum, maximum - enemy_damage + main.healing_on_kill)
+	assert(main.player.health.current == after_kill and main.player.grid_position == Vector2i.ZERO)
 	main.loading_floor = true
 	main.player._unhandled_input(space)
 	Helper.complete(main)
-	assert(main.player.health.current == maximum and main.enemies.is_empty())
+	assert(main.player.health.current == after_kill and main.enemies.is_empty())
 	main.loading_floor = false
 	main.spawn_test_enemies()
 	var old_enemy: WeakRef = weakref(main.enemies[0])

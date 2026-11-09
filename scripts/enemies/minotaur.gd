@@ -13,6 +13,7 @@ signal presentation_event(kind: StringName)
 @export var attack_damage: int = 18
 @export var species_data: PokemonSpeciesData
 var battle_state: PokemonBattleState = PokemonBattleState.new()
+var active_attack_move: PokemonMoveData # Reserved for future data-driven boss moves.
 var health: EntityHealth:
 	get:
 		return battle_state.health
@@ -180,4 +181,5 @@ func complete_action() -> void:
 
 
 func reset_battle_state() -> void:
+	active_attack_move = null
 	battle_state.reset(species_data, maximum_hp, 5)

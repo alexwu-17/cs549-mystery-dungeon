@@ -7,6 +7,8 @@ extends Resource
 
 @export var species_id: StringName = &""
 @export var display_name: String = ""
+@export var types: PackedStringArray = []
+@export var starting_moves: Array[PokemonMoveData] = []
 @export_range(1, 100, 1) var level: int = 1
 @export_range(1, 9999, 1) var maximum_hp: int = 1
 @export_range(1, 9999, 1) var attack: int = 1

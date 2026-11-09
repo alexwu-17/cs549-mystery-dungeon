@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+move_id = &"pound"
+display_name = "Pound"
+move_type = "Normal"
+power = 6
+maximum_pp = 27

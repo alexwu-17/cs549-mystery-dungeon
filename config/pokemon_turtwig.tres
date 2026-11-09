@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PokemonSpriteProfile" load_steps=2 format=3 uid="uid://rdfrshlog8t"]
+
+[ext_resource type="Script" uid="uid://bju87ccdulvfo" path="res://scripts/effects/pokemon_sprite_profile.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Turtwig"
+directory = "res://assets/sprites/pokemon/Turtwig"
+pixel_size = 0.04
+body_to_ground = 8.0
+animations = {
+"Attack": "Attack",
+"Hurt": "Hurt",
+"Idle": "Idle",
+"Walk": "Walk",
+"Withdraw": "Withdraw"
+}
+defeat_minimum_duration = 0.8
+defeat_blink_interval = 0.075

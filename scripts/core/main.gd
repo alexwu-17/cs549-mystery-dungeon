@@ -38,20 +38,45 @@ var loading_floor: bool = false
 # Only the player/floor determines terrain fog; actors still refresh every action.
 var _fog_context: Array = []
 var floor_number: int = 1
-@export var healing_on_kill: int = 3
+@export var healing_on_kill: int = 0 # Legacy fixture override; production uses peaceful recovery.
+@export_range(1, 100) var recovery_turns_per_hp: int = 5
+@export_range(1, 100) var recovery_initial_turns: int = 15
+var peaceful_turns: int = 0
+var recovery_started: bool = false
+var recovery_damage_serial: int = 0
+@export var enemy_respawn_enabled: bool = true
+@export_range(1, 100) var enemy_respawn_delay: int = 30
+var repopulation := EnemyRepopulation.new()
 
 
 func _ready() -> void:
+	# Running the Demo scene directly must use the same entry flow as the project.
+	# A selected run is a child of the menu, so it never takes this redirect.
+	if game_mode == GameModeConfig.Mode.DEMO and get_tree().current_scene == self:
+		set_process(false)
+		set_process_unhandled_input(false)
+		player.gameplay_enabled = false
+		hud.hide()
+		get_tree().change_scene_to_file.call_deferred("res://scenes/ui/demo_start.tscn")
+		return
 	dialogue.character_name_provider = _player_display_name
 	dialogue.enemy_name_provider = _boss_display_name
 	turn_rng.randomize()
 	player.movement_speed_changed.connect(_set_action_speed)
 	player.stairs_reached.connect(_on_stairs_reached)
 	player.moved.connect(_on_player_moved)
+	player.waited.connect(_on_player_waited)
+	player.health.damaged.connect(_on_recovery_damage)
+	_watch_stat_changes(player)
 	player.attack_requested.connect(_on_player_attack)
+	player.move_requested.connect(_on_player_attack)
 	player.health.died.connect(_on_player_died)
 	player.is_tile_occupied = is_enemy_occupied
+	player.can_request_attack = _can_player_attack
+	player.can_request_wait = _can_player_wait
 	hud.bind_health(player.health)
+	hud.bind_battle_state(player.battle_state)
+	hud.damage_numbers.watch(player, player.character_visual, player.health)
 	if game_mode == GameModeConfig.Mode.LIMIT_TESTING:
 		LimitBenchmark.apply_cap(self)
 	if game_mode == GameModeConfig.Mode.LIMIT_TESTING and benchmark_enabled and not use_elevation_test:
@@ -69,6 +94,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func start_new_run() -> void:
+	hud.damage_numbers.clear()
 	cancel_introduction()
 	if benchmark != null:
 		benchmark.prepare()
@@ -109,6 +135,10 @@ func update_presentation() -> void:
 
 
 func load_test_floor() -> void:
+	player.battle_state.reset_stages()
+	for child in player.get_children():
+		if child is StatChangeEffect: child.free()
+	hud.damage_numbers.clear()
 	cancel_round()
 	player.invincible = game_mode == GameModeConfig.Mode.LIMIT_TESTING and generation_config != null and generation_config.invincible_player
 	loading_floor = true
@@ -162,6 +192,7 @@ func _on_stairs_reached() -> void:
 	_begin_floor_introduction(true)
 
 func spawn_test_enemies() -> void:
+	repopulation.reset()
 	# Remove enemies from the previous floor.
 	if is_instance_valid(boss):
 		boss.free()
@@ -172,21 +203,67 @@ func spawn_test_enemies() -> void:
 	enemies.clear()
 
 	for spawn_position: Vector2i in dungeon.enemy_spawns:
-		var enemy: Skeleton = TEST_ENEMY_SCENE.instantiate()
-		enemy.add_to_group("test_enemies")
-		entities.add_child(enemy)
-
-		enemy.setup(spawn_position, dungeon, dungeon_renderer)
-		enemy.attack_requested.connect(_on_enemy_attack.bind(enemy))
-		enemies.append(enemy)
-		enemy_occupancy[spawn_position] = enemy
+		_spawn_regular_enemy(spawn_position)
 	if game_mode == GameModeConfig.Mode.DEMO and floor_number == GameModeConfig.DEMO_FINAL_FLOOR and not use_elevation_test:
 		boss = BOSS_SCENE.instantiate()
 		entities.add_child(boss)
 		boss.setup(DemoArenaFactory.BOSS_CENTER, dungeon, dungeon_renderer)
 		boss.attack_requested.connect(_on_enemy_attack.bind(boss))
+		hud.damage_numbers.watch(boss, boss.character_visual, boss.health)
 		boss.presentation_event.connect(_on_boss_message)
 		boss.defeated.connect(_on_boss_defeated)
+		_watch_stat_changes(boss)
+
+
+func _spawn_regular_enemy(tile: Vector2i) -> void:
+	var enemy: Skeleton = TEST_ENEMY_SCENE.instantiate()
+	enemy.add_to_group("test_enemies")
+	entities.add_child(enemy)
+	enemy.setup(tile, dungeon, dungeon_renderer)
+	enemy.attack_requested.connect(_on_enemy_attack.bind(enemy))
+	hud.damage_numbers.watch(enemy, enemy.character_visual, enemy.health)
+	enemies.append(enemy)
+	enemy_occupancy[tile] = enemy
+	_watch_stat_changes(enemy)
+
+
+func _watch_stat_changes(actor: Node3D) -> void:
+	actor.battle_state.stage_changed.connect(_on_stage_changed.bind(weakref(actor)))
+	actor.battle_state.stats_restored.connect(_on_stats_restored.bind(weakref(actor)))
+	actor.battle_state.stage_duration_refreshed.connect(_on_stats_refreshed.bind(weakref(actor)))
+
+
+func _on_stats_refreshed(actor_ref: WeakRef) -> void:
+	var actor: Node3D = actor_ref.get_ref()
+	if actor != null and actor.is_inside_tree():
+		dialogue.append_event(&"stats_refreshed", {"actor": actor.character_visual.get_display_name()})
+
+
+func _on_stage_changed(stat: StringName, amount: int, actor_ref: WeakRef) -> void:
+	var actor: Node3D = actor_ref.get_ref()
+	if actor != null and actor.is_inside_tree():
+		StatChangeEffect.play_above_actor(actor, amount > 0)
+		var names := {&"attack": "Attack", &"defense": "Defense", &"special_attack": "Special Attack", &"special_defense": "Special Defense"}
+		dialogue.append_event(&"stat_changed", {"actor": actor.character_visual.get_display_name(), "stat": names[stat], "direction": "increased" if amount > 0 else "reduced"})
+
+
+func _on_stats_restored(actor_ref: WeakRef) -> void:
+	var actor: Node3D = actor_ref.get_ref()
+	if actor != null and actor.is_inside_tree() and actor.health.current > 0:
+		dialogue.append_event(&"stats_restored", {"actor": actor.character_visual.get_display_name()})
+
+
+func _advance_repopulation() -> void:
+	if not enemy_respawn_enabled or use_elevation_test or benchmark != null or GameModeConfig.is_arena(game_mode, floor_number):
+		return
+	if not repopulation.advance(not enemies.is_empty() or is_instance_valid(boss), enemy_respawn_delay):
+		return
+	var tile: Variant = repopulation.choose(dungeon, player.grid_position, enemy_occupancy)
+	if tile == null:
+		push_warning("Enemy respawn deferred: no hidden reachable room outside the player's area; retry in %d turns." % enemy_respawn_delay)
+		return
+	_spawn_regular_enemy(tile)
+	refresh_entity_visibility()
 
 
 func is_enemy_occupied(tile: Vector2i) -> bool:
@@ -194,19 +271,70 @@ func is_enemy_occupied(tile: Vector2i) -> bool:
 
 
 func _on_player_moved() -> void:
-	run_enemy_turn()
+	run_enemy_turn(true)
 
 
-func _on_player_attack(target: Vector2i) -> void:
-	if player.transition_locked or game_over or victory or resolving_turn or loading_floor:
+func _on_player_waited() -> void:
+	run_enemy_turn(true)
+
+
+func _on_recovery_damage(_amount: int) -> void:
+	_reset_recovery()
+	recovery_damage_serial += 1
+	if player.held_action == &"wait_turn": player.stop_held_movement()
+
+
+func _reset_recovery() -> void:
+	peaceful_turns = 0
+	recovery_started = false
+
+
+func _can_player_wait() -> bool:
+	# Round locks are checked by Player; this predicate also runs during enemy phases.
+	if player.transition_locked or game_over or victory or loading_floor:
+		return false
+	for enemy in enemies:
+		if is_instance_valid(enemy) and enemy.health.current > 0 and dungeon.is_bright(enemy.grid_position):
+			return false
+	if is_instance_valid(boss) and boss.health.current > 0:
+		for tile in boss.footprint():
+			if dungeon.is_bright(tile): return false
+	return true
+
+
+func _can_player_attack() -> bool:
+	return not (player.transition_locked or game_over or victory or resolving_turn or loading_floor)
+
+
+func _player_attack_damage(defender: PokemonBattleState, move: PokemonMoveData) -> int:
+	if move != null:
+		return PokemonDamage.move_damage(player.battle_state, defender, move)
+	return PokemonDamage.basic_damage(player.battle_state, defender, player.attack_damage)
+
+
+func _on_player_attack(target: Vector2i, move: PokemonMoveData = null) -> void:
+	if not _can_player_attack():
+		return
+	_reset_recovery()
+	if move != null:
+		dialogue.append_event(&"move_used", {"actor": _player_display_name(), "move": move.display_name})
+	if move != null and move.category == PokemonMoveData.Category.STATUS:
+		var actors: Array[Node3D] = []
+		actors.assign(enemies)
+		if is_instance_valid(boss): actors.append(boss)
+		var previous_sequence: int = dialogue.sequence
+		if PokemonStatusMoves.apply(player, dungeon, target, actors, move).is_empty() and dialogue.sequence == previous_sequence:
+			dialogue.append_event(&"no_effect")
+		run_enemy_turn()
 		return
 	var delta := target - player.grid_position
 	if absi(delta.x) + absi(delta.y) != 1:
 		return
 	if dungeon.can_traverse(player.grid_position, target) and is_instance_valid(boss) and boss.occupies(target):
 		print("PLAYER ATTACK MINOTAUR at ", target)
-		dialogue.append_event(&"attack", {"actor": _player_display_name(), "target": _boss_display_name(), "amount": mini(player.attack_damage, boss.health.current)})
-		boss.receive_damage(player.attack_damage)
+		var damage := _player_attack_damage(boss.battle_state, move)
+		dialogue.append_event(&"damage" if move != null else &"attack", {"actor": _player_display_name(), "target": _boss_display_name(), "amount": mini(damage, boss.health.current)})
+		boss.receive_damage(damage)
 		if not victory:
 			run_enemy_turn()
 		else:
@@ -214,17 +342,20 @@ func _on_player_attack(target: Vector2i) -> void:
 		return
 	if not dungeon.can_traverse(player.grid_position, target) or not enemy_occupancy.has(target):
 		print("PLAYER ATTACK MISSED at ", target)
+		if move != null: dialogue.append_event(&"no_effect")
 		run_enemy_turn()
 		return
 	var enemy: Skeleton = enemy_occupancy[target]
-	print("PLAYER ATTACK at ", target, ": ", player.attack_damage)
-	dialogue.append_event(&"attack", {"actor": _player_display_name(), "target": enemy.character_visual.get_display_name(), "amount": mini(player.attack_damage, enemy.health.current)})
-	enemy.receive_damage(player.attack_damage)
+	var damage := _player_attack_damage(enemy.battle_state, move)
+	print("PLAYER ATTACK at ", target, ": ", damage)
+	dialogue.append_event(&"damage" if move != null else &"attack", {"actor": _player_display_name(), "target": enemy.character_visual.get_display_name(), "amount": mini(damage, enemy.health.current)})
+	enemy.receive_damage(damage)
 	if enemy.health.current == 0:
 		dialogue.append_event(&"defeat", {"target": enemy.character_visual.get_display_name()})
 		print("SKELETON DIED at ", target)
 		enemy_occupancy.erase(target)
 		enemies.erase(enemy)
+		if enemies.is_empty(): repopulation.cleared()
 		_retire_enemy(enemy)
 		var healed: int = player.health.heal(healing_on_kill)
 		if healed > 0:
@@ -279,6 +410,8 @@ func _on_boss_defeated() -> void:
 
 
 func cancel_round(preserve_player_presentation: bool = false) -> void:
+	_reset_recovery()
+	repopulation.reset()
 	_clear_retiring_enemies()
 	player.stop_held_movement()
 	# Invalidate before emitting completion signals: old continuations must stop.
@@ -302,10 +435,12 @@ func _exit_tree() -> void:
 	cancel_round()
 
 
-func run_enemy_turn() -> void:
+func run_enemy_turn(peaceful: bool = false) -> void:
 	if player.transition_locked or game_over or victory or resolving_turn or loading_floor:
 		return
 	resolving_turn = true
+	if not peaceful: _reset_recovery()
+	var damage_serial := recovery_damage_serial
 	player.round_locked = true
 	var token := round_generation
 	refresh_turn_visibility()
@@ -352,6 +487,24 @@ func run_enemy_turn() -> void:
 			return
 	if token != round_generation:
 		return
+	if peaceful and damage_serial == recovery_damage_serial and not game_over and not victory and not loading_floor:
+		peaceful_turns += 1
+		var threshold := recovery_turns_per_hp if recovery_started else recovery_initial_turns
+		if peaceful_turns >= threshold:
+			peaceful_turns = 0
+			recovery_started = true
+			var healed := player.health.heal(1)
+			if healed > 0: dialogue.append_event(&"heal", {"amount": healed})
+	if not game_over and not victory and not loading_floor:
+		player.battle_state.finish_stage_turn()
+		if token != round_generation: return
+		for enemy in enemies.duplicate():
+			if is_instance_valid(enemy) and enemy.health.current > 0: enemy.battle_state.finish_stage_turn()
+			if token != round_generation: return
+		if is_instance_valid(boss) and boss.health.current > 0: boss.battle_state.finish_stage_turn()
+		if token != round_generation: return
+		_advance_repopulation()
+	if token != round_generation: return
 	resolving_turn = false
 	player.round_locked = false
 	if not game_over and not victory:
@@ -384,11 +537,17 @@ func refresh_entity_visibility() -> void:
 		boss.refresh_visibility()
 	hud.refresh_map(dungeon, player.grid_position, enemies, floor_number)
 	hud.minimap.refresh_boss(boss)
+	if player.held_action == &"wait_turn" and not _can_player_wait():
+		player.stop_held_movement()
 
 
 func _on_enemy_attack(amount: int, actor: Node3D) -> void:
+	var move: PokemonMoveData = actor.active_attack_move
+	amount = PokemonDamage.move_damage(actor.battle_state, player.battle_state, move) if move != null else PokemonDamage.basic_damage(actor.battle_state, player.battle_state, amount)
 	var visual: CharacterVisual = actor.get("character_visual")
-	dialogue.append_event(&"attack", {"actor": visual.get_display_name(), "target": _player_display_name(), "amount": 0 if player.invincible else mini(amount, player.health.current)})
+	if move != null:
+		dialogue.append_event(&"move_used", {"actor": visual.get_display_name(), "move": move.display_name})
+	dialogue.append_event(&"damage" if move != null else &"attack", {"actor": visual.get_display_name(), "target": _player_display_name(), "amount": 0 if player.invincible else mini(amount, player.health.current)})
 	player.receive_damage(amount)
 
 

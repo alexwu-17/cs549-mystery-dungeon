@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3 uid="uid://eldu7u1yitbm"]
+
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+move_id = &"withdraw"
+display_name = "Withdraw"
+move_type = "Water"
+category = 2
+power = 0
+maximum_pp = 16
+range_tiles = 1
+targeting = 3
+animation_action = &"Withdraw"
+affected_stat = &"defense"
+stage_change = 1
+description = "Raises the user's Defense stage by 1. Does not require an enemy target. No direct damage. Lasts 5 turns; another stat-changing move on the same target refreshes the duration."

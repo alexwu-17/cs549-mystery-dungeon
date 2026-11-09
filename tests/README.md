@@ -10,8 +10,8 @@ python tests/run_validations.py --godot "$GODOT_BIN"
 python tests/run_validations.py --godot "$GODOT_BIN" --suite full
 ```
 
-The default `gameplay` group contains 12 checks. `full` discovers every
-`validate_*.gd` script (currently 48). Logs default to `.godot/validation/`;
+The default `gameplay` group contains 20 checks. `full` discovers every
+`validate_*.gd` script (currently 56). Logs default to `.godot/validation/`;
 `--log-dir` selects another folder. The runner requires a zero exit, a `PASS:`
 message, and no script/parse/assertion errors. It stops failed scripts promptly
 and returns nonzero if any check fails. Engine cleanup/certificate warnings are
@@ -24,7 +24,15 @@ appearance, shadows, transparency, GPU readback or frame rates.
 | Change | Primary checks |
 | --- | --- |
 | Species stats or actor initialization | `validate_battle_state`, `validate_hud` |
-| Combat/input/targeting | `validate_combat`, `validate_sequential_rounds`; add move checks as moves ship |
+| Demo startup, starter choice or player profiles | `validate_starter_selection`, `validate_pokemon_sprites`, `validate_modes` |
+| Damage formula, move data, PP and move input | `validate_pokemon_moves`, `validate_battle_state`, `validate_starter_selection` |
+| Five-turn stage expiry/refresh and move/stat/damage messages | `validate_status_duration`, `validate_status_moves`, `validate_dialogue`, `validate_sequential_rounds` |
+| Stat stages, status move targeting/PP and stat arrows | `validate_status_moves`, `validate_stat_effect`, `validate_pokemon_moves`, `validate_battle_state`; normal-render inspection |
+| Move-specific clips and floating damage | `validate_pokemon_moves`, `validate_pokemon_sprites`, `validate_damage_numbers`; normal-render captures |
+| Enemy move selection, per-instance PP and attack-only randomness | `validate_enemy_moves`, `validate_pokemon_moves`, `validate_sequential_rounds` |
+| Combat/input/targeting | `validate_combat`, `validate_sequential_rounds`, `validate_pokemon_moves` |
+| Floor repopulation, hidden pursuit and spawn safety | `validate_repopulation`, `validate_sequential_rounds`, `validate_visibility_refresh` |
+| J waiting, visibility interruption and peaceful healing | `validate_recovery`, `validate_sequential_rounds`, `validate_held_movement` |
 | Held movement | `validate_held_movement` |
 | Move display | `validate_move_panel`, `validate_hud` |
 | Boss/defeat | `validate_boss`, `validate_drapion_swing`, `validate_enemy_defeat` |

@@ -13,15 +13,15 @@ func validate() -> void:
 	second.reset(chimchar)
 	assert(first.health != second.health and first.species == second.species)
 	first.health.damage(12)
-	first.remaining_pp.append(3)
+	assert(first.spend_pp(0))
 	first.stat_stages[&"attack"] = -1
 	first.level = 99
-	assert(second.health.current == 76 and second.remaining_pp.is_empty() and second.stat_stages.is_empty())
+	assert(second.health.current == 76 and second.remaining_pp == [28, 27] and second.stat_stages.is_empty())
 	assert(chimchar.maximum_hp == 76 and chimchar.level == 20 and chimchar.attack == 39)
 	var identity := first.health
 	first.reset(chimchar)
 	assert(first.health == identity and first.health.current == 76 and first.level == 20)
-	assert(first.remaining_pp.is_empty() and first.stat_stages.is_empty())
+	assert(first.remaining_pp == [28, 27] and first.stat_stages.is_empty())
 	# Every authored final stat is copied exactly, without level scaling.
 	for species_name in ["chimchar", "piplup", "turtwig", "stunky"]:
 		var species: PokemonSpeciesData = load("res://config/species/%s.tres" % species_name)
@@ -42,25 +42,26 @@ func validate() -> void:
 	assert(main.hud.hp_label.text == "76 / 76 HP")
 	assert(main.player.attack_damage == 3)
 	var enemy: Skeleton = main.enemies[0]
-	assert(enemy.health.current == 42 and enemy.maximum_hp == 42 and enemy.level == 1)
+	assert(enemy.health.current == 42 and enemy.maximum_hp == 42 and enemy.level == 15)
+	assert(enemy.battle_state.moves[0].move_id == &"scratch" and enemy.battle_state.remaining_pp == [28])
 	assert(enemy.battle_state.attack == 21 and enemy.attack_damage == 2)
 	var other: Skeleton = main.enemies[1]
-	enemy.health.damage(7)
-	assert(other.health.current == 42 and enemy.species_data.maximum_hp == 42)
+	enemy.health.damage(1)
+	assert(enemy.health.current == 41 and other.health.current == 42 and enemy.species_data.maximum_hp == 42)
 	main.player.health.damage(10)
-	main.player.battle_state.remaining_pp.append(4)
+	assert(main.player.battle_state.spend_pp(0))
 	main.player.battle_state.stat_stages[&"defense"] = -1
 	# Actual stair transition preserves mutable player state, while new enemies reset.
 	main._on_stairs_reached()
 	Helper.complete_introduction(main)
 	assert(main.floor_number == 2 and main.player.health.current == 66)
-	assert(main.player.battle_state.remaining_pp == [4])
-	assert(main.player.battle_state.stat_stages[&"defense"] == -1)
+	assert(main.player.battle_state.remaining_pp == [27, 27])
+	assert(main.player.battle_state.get_stage(&"defense") == 0)
 	assert(main.enemies[0].health.current == 42)
 	main.start_new_run()
 	Helper.complete_introduction(main)
 	assert(main.player.health.current == 76 and main.player.level == 20)
-	assert(main.player.battle_state.remaining_pp.is_empty() and main.player.battle_state.stat_stages.is_empty())
+	assert(main.player.battle_state.remaining_pp == [28, 27] and main.player.battle_state.stat_stages.is_empty())
 	assert(main.hud.hp_label.text == "76 / 76 HP")
 	# A future selected species can use the same reset path; no selection UI added.
 	main.player.species_data = load("res://config/species/piplup.tres")

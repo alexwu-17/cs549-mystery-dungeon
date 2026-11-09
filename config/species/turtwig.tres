@@ -1,11 +1,16 @@
-[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=5 format=3 uid="uid://c6w6u43vonyec"]
 
-[ext_resource type="Script" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://cxlqm507earwp" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="2_f8wqh"]
+[ext_resource type="Resource" path="res://config/moves/tackle.tres" id="move"]
+[ext_resource type="Resource" path="res://config/moves/withdraw.tres" id="status"]
 
 [resource]
 script = ExtResource("1")
 species_id = &"turtwig"
 display_name = "Turtwig"
+types = []
+starting_moves = Array[ExtResource("2_f8wqh")]([ExtResource("move"), ExtResource("status")])
 level = 20
 maximum_hp = 67
 attack = 43

@@ -1,11 +1,16 @@
-[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=5 format=3 uid="uid://bmo8jwmcbev0q"]
 
-[ext_resource type="Script" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://cxlqm507earwp" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="2_qjxgg"]
+[ext_resource type="Resource" path="res://config/moves/pound.tres" id="move"]
+[ext_resource type="Resource" path="res://config/moves/growl.tres" id="status"]
 
 [resource]
 script = ExtResource("1")
 species_id = &"piplup"
 display_name = "Piplup"
+types = []
+starting_moves = Array[ExtResource("2_qjxgg")]([ExtResource("move"), ExtResource("status")])
 level = 20
 maximum_hp = 80
 attack = 40

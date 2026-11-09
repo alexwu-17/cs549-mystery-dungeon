@@ -11,7 +11,9 @@ import time
 
 ROOT = Path(__file__).resolve().parent.parent
 GAMEPLAY = (
-    "battle_state", "combat", "sequential_rounds", "held_movement", "hud",
+    "status_moves", "status_duration",
+    "recovery", "repopulation",
+    "enemy_moves", "damage_numbers", "pokemon_moves", "starter_selection", "battle_state", "combat", "sequential_rounds", "held_movement", "hud",
     "move_panel", "boss", "drapion_swing", "enemy_defeat", "modes",
     "floor_introduction", "invincibility",
 )

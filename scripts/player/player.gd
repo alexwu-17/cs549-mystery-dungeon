@@ -4,16 +4,20 @@ extends Node3D
 signal stairs_reached
 signal movement_speed_changed(speed: float)
 signal moved
+signal waited
 signal attack_requested(target: Vector2i)
+signal move_requested(target: Vector2i, move: PokemonMoveData)
+const MOVE_ACTIONS := [&"move_slot_1", &"move_slot_2", &"move_slot_3", &"move_slot_4"]
 
 # Legacy/fallback HP remains editable when no species is assigned.
 @export var maximum_hp: int = 20:
 	get:
 		return species_data.maximum_hp if species_data != null else maximum_hp
-@export var attack_damage: int = 3
+@export var attack_damage: int = 3 ## Legacy damage only when no species stats are assigned.
 
 const MOVE_INTERVAL: float = 0.24
 const HELD_SPEED: float = 3.0
+const WAIT_SPEED: float = 5.0
 var held_action: StringName = &""
 var held_direction: Vector2i = Vector2i.ZERO
 var repeat_remaining: float = 0.0
@@ -44,6 +48,8 @@ var grid_position: Vector2i = Vector2i.ZERO ## The player's real position on a 2
 var dungeon_data: DungeonData
 var dungeon_renderer: DungeonRenderer
 var is_tile_occupied: Callable
+var can_request_attack: Callable
+var can_request_wait: Callable
 
 
 func _ready() -> void:
@@ -78,10 +84,24 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	if dungeon_data == null:
 		return
+	if event.is_action_released("wait_turn") and held_action == &"wait_turn":
+		stop_held_movement()
+	elif event.is_action_pressed("wait_turn"):
+		stop_held_movement()
+		held_action = &"wait_turn"
+		repeat_remaining = MOVE_INTERVAL
+		if not wait_turn(): stop_held_movement()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("basic_attack"):
 		basic_attack()
 		get_viewport().set_input_as_handled()
 		return
+	for slot in range(MOVE_ACTIONS.size()):
+		if event.is_action_pressed(MOVE_ACTIONS[slot]):
+			use_move(slot)
+			get_viewport().set_input_as_handled()
+			return
 
 	var actions := [&"move_up", &"move_down", &"move_left", &"move_right"]
 	var directions := [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
@@ -123,13 +143,28 @@ func _process(delta: float) -> void:
 	if not Input.is_action_pressed(held_action) or transition_locked or not gameplay_enabled or health.current == 0:
 		stop_held_movement()
 		return
+	if held_action == &"wait_turn" and can_request_wait.is_valid() and not can_request_wait.call():
+		stop_held_movement()
+		return
 	repeat_remaining = maxf(0.0, repeat_remaining - delta)
 	if repeat_remaining > 0.0:
 		return
-	_set_movement_speed(HELD_SPEED)
+	var speed := WAIT_SPEED if held_action == &"wait_turn" else HELD_SPEED
+	_set_movement_speed(speed)
 	if can_accept_movement():
-		repeat_remaining = MOVE_INTERVAL / HELD_SPEED
-		try_move(held_direction)
+		repeat_remaining = MOVE_INTERVAL / speed
+		if held_action == &"wait_turn":
+			wait_turn()
+		else:
+			try_move(held_direction)
+
+
+func wait_turn() -> bool:
+	if not _can_attack() or (can_request_wait.is_valid() and not can_request_wait.call()):
+		return false
+	character_visual.standing()
+	waited.emit()
+	return true
 
 ## Movement functions below
 
@@ -173,12 +208,35 @@ func try_move(direction: Vector2i) -> void:
 
 
 func basic_attack() -> void:
-	if transition_locked or round_locked or attack_leap.active or not gameplay_enabled or health.current == 0 or dungeon_data == null:
+	if not _can_attack():
 		return
 	stop_held_movement()
 	character_visual.face(facing)
+	character_visual.prepare_attack()
 	attack_leap.play(facing)
 	attack_requested.emit(grid_position + facing)
+
+
+func _can_attack() -> bool:
+	return can_accept_movement() and (not can_request_attack.is_valid() or can_request_attack.call())
+
+
+func use_move(slot: int) -> bool:
+	if not _can_attack() or not battle_state.can_use_move(slot):
+		return false
+	var move := battle_state.moves[slot]
+	if move.category == PokemonMoveData.Category.STATUS:
+		if not PokemonBattleState.STATS.has(move.affected_stat) or move.stage_change == 0 or move.targeting == PokemonMoveData.Targeting.STRAIGHT_PROJECTILE:
+			return false
+	elif move.targeting != PokemonMoveData.Targeting.ADJACENT or move.range_tiles != 1:
+		return false
+	stop_held_movement()
+	character_visual.face(facing)
+	character_visual.prepare_attack(move.animation_action)
+	attack_leap.play(facing)
+	battle_state.spend_pp(slot)
+	move_requested.emit(grid_position + facing, move)
+	return true
 
 
 func receive_damage(amount: int) -> void:

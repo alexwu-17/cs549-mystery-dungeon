@@ -1,6 +1,12 @@
 extends RefCounted
 
 const TEMPLATES := {
+	&"move_used": "{actor} used {move}.",
+	&"damage": "{target} took {amount} damage.",
+	&"stat_changed": "{actor}'s {stat} was {direction}.",
+	&"stats_restored": "{actor}'s stats returned to normal.",
+	&"stats_refreshed": "{actor}'s stat changes were refreshed.",
+	&"no_effect": "But it had no effect.",
 	&"attack": "{actor} attacks {target} for {amount} damage.",
 	&"defeat": "{target} was defeated.",
 	&"heal": "{character} recovered {amount} HP.",

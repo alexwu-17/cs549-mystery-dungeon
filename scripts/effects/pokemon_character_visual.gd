@@ -15,6 +15,7 @@ var ground_reference: Vector2 = Vector2.ZERO
 var rest_action: String = "Idle"
 var defeat_uses_faint: bool = false
 var surface_driver: AttackLeap
+var attack_action: StringName = &"Attack"
 
 func _ready() -> void:
 	# Keep all original placeholder resources and behavior available when unconfigured.
@@ -46,13 +47,13 @@ func row() -> int:
 	if facing == Vector2i.LEFT: return 6
 	return 0
 
-func play_clip(name: String, restart: bool = false) -> void:
+func play_clip(name: String, restart: bool = false, semantic_action: String = "") -> void:
 	var selected: String = str(profile.animations.get(name, name))
 	if not clips.has(selected):
 		selected = str(profile.animations.get("Idle", "Idle"))
 		name = "Idle"
 	if not clips.has(selected): return
-	action = name
+	action = name if semantic_action.is_empty() else semantic_action
 	if selected != clip or restart:
 		clip = selected
 		clip_time = 0.0
@@ -155,6 +156,11 @@ func standing() -> void:
 	if defeating: return
 	super.standing()
 	if clips.is_empty(): return
+	if surface_driver == null or not surface_driver.active:
+		attack_action = &"Attack"
+		var ordinary := str(profile.animations.get("Attack", "Attack"))
+		if surface_driver != null and clips.has(ordinary):
+			surface_driver.duration = float(clips[ordinary].total)
 	if hurt_remaining > 0.0: play_clip("Hurt")
 	elif walk_remaining > 0.0: play_clip("Walk")
 	else: play_clip(rest_action)
@@ -163,14 +169,30 @@ func attack() -> void:
 	if defeating: return
 	super.attack()
 	if clips.is_empty(): return
+	var selected := _attack_clip_name()
+	if surface_driver != null and clips.has(selected):
+		surface_driver.duration = float(clips[selected].total)
 	walk_remaining = 0.0
 	hurt_remaining = 0.0
 	action = "Attack"
 	_configure_ramp_attack()
-	play_clip("Attack", true)
+	play_clip(str(attack_action), true, "Attack")
+
+
+func prepare_attack(requested: StringName = &"Attack") -> void:
+	attack_action = requested
+	if not clips.is_empty() and not clips.has(_attack_clip_name(false)):
+		attack_action = &"Attack"
+
+
+func _attack_clip_name(fallback: bool = true) -> String:
+	var selected := str(profile.animations.get(str(attack_action), str(attack_action)))
+	if fallback and not clips.has(selected):
+		return str(profile.animations.get("Attack", "Attack"))
+	return selected
 
 func _configure_ramp_attack() -> void:
-	var attack_name: String = str(profile.animations.get("Attack", "Attack"))
+	var attack_name := _attack_clip_name()
 	if surface_driver == null or not surface_driver.active or not clips.has(attack_name): return
 	var info: Dictionary = clips[attack_name]
 	var times: Array[float] = [0.0]
@@ -192,6 +214,7 @@ func show_frame(name: String) -> void:
 	elif name == "spin_01": play_clip("Attack", true)
 
 func cancel() -> void:
+	attack_action = &"Attack"
 	rest_action = "Idle"
 	walk_remaining = 0.0
 	hurt_remaining = 0.0

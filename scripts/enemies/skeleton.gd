@@ -9,8 +9,11 @@ signal attack_requested(damage: int)
 @export var maximum_hp: int = 6:
 	get:
 		return species_data.maximum_hp if species_data != null else maximum_hp
-@export var attack_damage: int = 2
+@export var attack_damage: int = 2 ## Legacy signal/fallback; Main resolves authored stat damage.
 @export var species_data: PokemonSpeciesData
+@export var attack_policy: EnemyAttackPolicy
+var attack_rng := RandomNumberGenerator.new()
+var active_attack_move: PokemonMoveData
 var battle_state: PokemonBattleState = PokemonBattleState.new()
 var health: EntityHealth:
 	get:
@@ -31,8 +34,10 @@ var dungeon_renderer: DungeonRenderer
 
 
 func _ready() -> void:
+	attack_rng.randomize() # Independent of generation and Main's shuffle RNG.
 	attack_leap.presentation_started.connect(character_visual.attack)
 	attack_leap.presentation_finished.connect(character_visual.standing)
+	attack_leap.presentation_finished.connect(_clear_attack_move)
 
 
 func setup(start: Vector2i, data: DungeonData, renderer: DungeonRenderer) -> void:
@@ -53,10 +58,12 @@ func take_turn(player_position: Vector2i, occupied: Dictionary) -> void:
 	var difference := player_position - grid_position
 	if difference == Vector2i.ZERO or dungeon_data.can_traverse(grid_position, player_position):
 		if difference != Vector2i.ZERO:
-			print("SKELETON ATTACK at ", grid_position, ": ", attack_damage)
 			attack_leap.finish()
+			active_attack_move = attack_policy.choose_and_spend(battle_state, attack_rng, _supports_move) if attack_policy != null else null
+			print("SKELETON ATTACK at ", grid_position, ": ", active_attack_move.display_name if active_attack_move != null else "Basic")
 			facing = difference
 			character_visual.face(facing)
+			character_visual.prepare_attack(active_attack_move.animation_action if active_attack_move != null else &"Attack")
 			attack_leap.play(difference)
 			attack_requested.emit(attack_damage)
 		return
@@ -70,6 +77,14 @@ func take_turn(player_position: Vector2i, occupied: Dictionary) -> void:
 	character_visual.walk()
 	grid_position = next
 	position = dungeon_renderer.get_entity_world_position(grid_position)
+
+
+func _supports_move(move: PokemonMoveData) -> bool:
+	return move.targeting == PokemonMoveData.Targeting.ADJACENT and move.range_tiles == 1 and move.category != PokemonMoveData.Category.STATUS
+
+
+func _clear_attack_move() -> void:
+	active_attack_move = null
 
 
 func receive_damage(amount: int) -> void:
@@ -125,4 +140,5 @@ func complete_action() -> void:
 
 
 func reset_battle_state() -> void:
+	active_attack_move = null
 	battle_state.reset(species_data, maximum_hp, 5)

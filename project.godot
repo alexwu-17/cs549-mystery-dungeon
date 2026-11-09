@@ -15,10 +15,10 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="cs549 mystery dungeon"
-run/main_scene="uid://wdld06klqson"
+run/main_scene="res://scenes/ui/demo_start.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
-run/main_scene.demo_build="res://scenes/main/demo_main.tscn"
+run/main_scene.demo_build="res://scenes/ui/demo_start.tscn"
 run/main_scene.limit_testing_build="res://scenes/main/limit_testing_main.tscn"
 
 [autoload]
@@ -32,21 +32,30 @@ window/size/viewport_height=1080
 
 [input]
 
+wait_turn={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":74)]
+}
+
 move_slot_1={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":85)]
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":85,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
 }
 move_slot_2={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":73)]
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":73,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
 }
 move_slot_3={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":79)]
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":79,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
 }
 move_slot_4={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":80)]
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":80,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
 }
 basic_attack={
 "deadzone": 0.2,

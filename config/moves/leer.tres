@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3 uid="uid://cavhynvig3bbd"]
+
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+move_id = &"leer"
+display_name = "Leer"
+move_type = "Normal"
+category = 2
+power = 0
+maximum_pp = 27
+range_tiles = 1
+targeting = 0
+animation_action = &"Leer"
+affected_stat = &"defense"
+stage_change = -1
+description = "Lowers the Defense stage of one enemy on the adjacent tile directly ahead by 1. No direct damage. Lasts 5 turns; another stat-changing move on the same target refreshes the duration."

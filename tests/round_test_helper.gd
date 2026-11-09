@@ -49,6 +49,7 @@ static func use_legacy_battle_stats(main: Node3D) -> void:
 	# Existing combat fixtures intentionally retain HP20/HP6 and level5.
 	# Production species binding is exercised by validate_battle_state.gd.
 	main.get_node("Player").species_data = null
+	main.healing_on_kill = 3
 	main.get_node("Entities").child_entered_tree.connect(func(actor: Node):
 		if actor is Skeleton:
 			actor.species_data = null)

@@ -117,6 +117,20 @@ func attack() -> void:
 	attacking = true
 	show_frame("attack_" + direction_name())
 
+
+func prepare_attack(_action: StringName = &"Attack") -> void:
+	pass # Placeholder visuals retain their existing attack.
+
+
+func damage_number_anchor(camera: Camera3D) -> Vector3:
+	var rect := sprite.get_item_rect()
+	var bounds := Rect2i(Vector2i.ZERO, Vector2i(sprite.texture.get_size()))
+	if sprite.texture.has_meta("pokemon_opaque_rect"):
+		bounds = sprite.texture.get_meta("pokemon_opaque_rect")
+	var x := rect.position.x + bounds.position.x + bounds.size.x / 2.0
+	var y := rect.end.y - bounds.position.y
+	return sprite.global_position + camera.global_basis.x * x * sprite.pixel_size * sprite.global_basis.x.length() + camera.global_basis.y * y * sprite.pixel_size * sprite.global_basis.y.length()
+
 func spin() -> void:
 	cancel()
 	active = true

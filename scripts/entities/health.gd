@@ -3,6 +3,7 @@ extends RefCounted
 
 signal changed(current: int, maximum: int)
 signal died
+signal damaged(amount: int)
 
 var maximum: int = 1
 var current: int = 1
@@ -17,8 +18,10 @@ func reset(maximum_hp: int) -> void:
 func damage(amount: int) -> void:
 	if current == 0 or amount <= 0:
 		return
-	current = maxi(0, current - amount)
+	var lost := mini(current, amount)
+	current -= lost
 	changed.emit(current, maximum)
+	damaged.emit(lost)
 	if current == 0:
 		died.emit()
 
