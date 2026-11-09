@@ -45,7 +45,7 @@ var peaceful_turns: int = 0
 var recovery_started: bool = false
 var recovery_damage_serial: int = 0
 @export var enemy_respawn_enabled: bool = true
-@export_range(1, 100) var enemy_respawn_delay: int = 30
+@export_range(1, 100) var enemy_respawn_delay: int = 100
 var repopulation := EnemyRepopulation.new()
 
 
@@ -131,7 +131,14 @@ func update_presentation() -> void:
 			enemy.character_visual.clear_ramp_intersection(presentation_camera, enemy.dungeon_data, enemy.grid_position, enemy.attack_leap)
 	if is_instance_valid(boss):
 		boss.character_visual.clear_ramp_intersection(presentation_camera, boss.dungeon_data, boss.grid_position, boss.sprite_clearance)
-	dungeon_renderer.update_occlusion(presentation_camera, player.grid_position, presentation_camera.sprite_samples(player.get_node("PlayerSprite")))
+	var visibility_anchor := dungeon_renderer.get_entity_world_position(player.grid_position)
+	dungeon_renderer.update_visibility_center(visibility_anchor)
+	# Attack frames may lunge through walls: retain the resting occlusion state.
+	if not player.attack_leap.active:
+		var points: Array[Vector3] = presentation_camera.sprite_samples(player.get_node("PlayerSprite"))
+		for index in range(points.size()):
+			points[index] += visibility_anchor - player.global_position
+		dungeon_renderer.update_occlusion(presentation_camera, player.grid_position, points, true)
 
 
 func load_test_floor() -> void:
@@ -545,13 +552,16 @@ func _on_enemy_attack(amount: int, actor: Node3D) -> void:
 	var move: PokemonMoveData = actor.active_attack_move
 	amount = PokemonDamage.move_damage(actor.battle_state, player.battle_state, move) if move != null else PokemonDamage.basic_damage(actor.battle_state, player.battle_state, amount)
 	var visual: CharacterVisual = actor.get("character_visual")
-	if move != null:
+	if move != null and not actor is Minotaur:
 		dialogue.append_event(&"move_used", {"actor": visual.get_display_name(), "move": move.display_name})
 	dialogue.append_event(&"damage" if move != null else &"attack", {"actor": visual.get_display_name(), "target": _player_display_name(), "amount": 0 if player.invincible else mini(amount, player.health.current)})
 	player.receive_damage(amount)
 
 
 func _on_boss_message(kind: StringName) -> void:
+	if kind == &"move_used":
+		dialogue.append_event(kind, {"actor": _boss_display_name(), "move": boss.active_attack_move.display_name})
+		return
 	dialogue.append_event(kind)
 
 

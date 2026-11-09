@@ -4,8 +4,8 @@ const Helper = preload("res://tests/round_test_helper.gd")
 const SPECIES = preload("res://config/species/stunky.tres")
 const POLICY = preload("res://config/enemy_melee_attack_policy.tres")
 const NAMES := ["chimchar", "piplup", "turtwig"]
-const MOVE_DAMAGE := [10, 10, 7]
-const BASIC_DAMAGE := [4, 3, 2]
+const MOVE_DAMAGE := [6, 5, 2]
+const BASIC_DAMAGE := [2, 1, 1]
 
 
 func _initialize() -> void:
@@ -24,7 +24,7 @@ func seed_for_move(use_move: bool) -> int:
 
 func validate_policy() -> void:
 	assert(is_equal_approx(POLICY.move_probability, 0.95))
-	assert(SPECIES.level == 15 and SPECIES.maximum_hp == 42)
+	assert(SPECIES.level == 10 and SPECIES.maximum_hp == 42)
 	assert(SPECIES.attack == 21 and SPECIES.defense == 18 and SPECIES.special_attack == 20 and SPECIES.special_defense == 22)
 	assert(SPECIES.starting_moves.size() == 1)
 	assert(SPECIES.starting_moves[0].move_id == &"scratch" and SPECIES.starting_moves[0].maximum_pp == 28)
@@ -163,7 +163,7 @@ func validate() -> void:
 		assert(enemy.attack_rng.state == before)
 		main.start_new_run()
 		Helper.complete_introduction(main)
-		assert(main.enemies[0].level == 15 and main.enemies[0].battle_state.remaining_pp == [28])
+		assert(main.enemies[0].level == 10 and main.enemies[0].battle_state.remaining_pp == [28])
 		main.free()
 		await process_frame
 	# Explicitly blocked pursuit has no attack selection.
@@ -175,5 +175,5 @@ func validate() -> void:
 	assert(enemy.battle_state.remaining_pp == [28])
 	main.free()
 	await process_frame
-	print("PASS: level15 Stunky stats, exact shared damage, 95/5 attack-only RNG, independent PP/exhaustion, single-action turns and reusable boss policy")
+	print("PASS: level10 Stunky stats, exact shared damage, 95/5 attack-only RNG, independent PP/exhaustion, single-action turns and reusable boss policy")
 	quit()

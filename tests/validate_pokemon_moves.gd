@@ -38,7 +38,7 @@ func validate_damage() -> void:
 		assert(PokemonDamage.basic_damage(attacker, defender) == BASIC_DAMAGE[index])
 		assert(PokemonDamage.move_damage(attacker, defender, move) == MOVE_DAMAGE[index])
 		assert(ceili(42.0 / BASIC_DAMAGE[index]) == 3 and ceili(42.0 / MOVE_DAMAGE[index]) == 2)
-		assert(PokemonDamage.basic_damage(defender, attacker) == [4, 3, 2][index])
+		assert(PokemonDamage.basic_damage(defender, attacker) == [2, 1, 1][index])
 		var other := state(NAMES[index])
 		assert(attacker.spend_pp(0))
 		assert(attacker.remaining_pp == [PP[index] - 1, STATUS_PP[index]] and other.remaining_pp == [PP[index], STATUS_PP[index]])
@@ -155,7 +155,7 @@ func validate() -> void:
 		player._unhandled_input(key(KEY_U)) # Locked presentation cannot double-spend.
 		assert(player.battle_state.remaining_pp == [PP[index] - 1, STATUS_PP[index]])
 		Helper.complete(main)
-		assert(rounds[0] == 1 and player.health.current == hp - [4, 3, 2][index])
+		assert(rounds[0] == 1 and player.health.current == hp - [2, 1, 1][index])
 		var echo := key(KEY_U)
 		echo.echo = true
 		player._unhandled_input(echo)
@@ -274,6 +274,7 @@ func validate() -> void:
 				main.load_test_floor()
 				player.setup(main.boss.grid_position - Vector2i.RIGHT, main.dungeon, main.dungeon_renderer)
 				player.facing = Vector2i.RIGHT
+				main.boss.health.reset(1) # Presentation/cancellation fixture, not boss balance.
 				assert(player.use_move(0) and main.victory and main.boss.health.current == 0)
 				assert(not main.hud.get_node("Screen/GameOver").visible)
 				if restart_during_defeat:

@@ -7,7 +7,7 @@ proposed 0.6/0.7 multipliers. Stat-changing moves and projectiles remain deferre
 
 ## Current species resources
 
-Read directly from `config/species/{chimchar,piplup,turtwig,stunky}.tres`.
+Read directly from `config/species/{chimchar,piplup,turtwig,stunky,drapion}.tres`.
 These are authored battle stats, not mainline base stats.
 
 | Species | Level | HP | Attack | Defense | Sp. Atk | Sp. Def |
@@ -16,6 +16,7 @@ These are authored battle stats, not mainline base stats.
 | Piplup | 20 | 80 | 40 | 36 | 42 | 35 |
 | Turtwig | 20 | 67 | 43 | 41 | 43 | 41 |
 | Stunky | 15 | 42 | 21 | 18 | 20 | 22 |
+| Drapion | 30 | 92 | 50 | 43 | 47 | 43 |
 
 ## Confirmed initial moves
 
@@ -104,7 +105,7 @@ J is blocked whenever an enemy is currently revealed by fog, and a reveal
 interrupts held 5x waiting immediately. PP is never restored. See the handoff
 for repeat/cancellation contracts and tests.
 
-Exploration floors retain their initial three enemies. Once cleared, thirty full
+Exploration floors retain their initial three enemies. Once cleared, one hundred full
 enemy-free turns spawn one Stunky in a hidden reachable room outside the
 player's room/corridor. The clearing turn is excluded; this repeats after each
 clear. Boss arena and diagnostic fixtures are exempt.
@@ -123,3 +124,25 @@ One Leer gives Stunky Defense12; Growl gives Attack16; Withdraw gives Turtwig
 Defense53. All authored physical/special/basic damage uses this shared accessor.
 Drapion still uses its existing fixed18 scripted-charge fallback pending authored
 boss stats; no new boss stats or replacement damage formula were introduced.
+
+## Authored Drapion combat (2026-11-09)
+
+Supersedes the historical HP30/fixed18 fallback above. Drapion is Poison/Dark,
+level30, HP92, Attack50, Defense43, Sp. Atk47, Sp. Def43. At an actual attack
+decision, choose95% Bug/Physical X-Scissor (power40, PP10) or5% neutral basic
+(power1, multiplier0.5). X-Scissor keeps the existing frozen two-tile lane,
+charge and mandatory one-turn recharge, spending PP only on execution whether
+hit or miss. Basic uses the same lane immediately without charge/recharge.
+Exhaustion always selects basic. Both use shared effective stats/formula.
+
+| Starter | Boss basic damage | X-Scissor damage | Player move damage | Hits to defeat HP92 |
+| --- | ---: | ---: | ---: | ---: |
+| Chimchar | 19 | 61 | 22 | 5 |
+| Piplup | 18 | 60 | 22 | 5 |
+| Turtwig | 17 | 57 | 24 | 4 |
+
+These are neutral, unstaged, no-healing values. There is no type-chart lookup
+yet; Bug gives no STAB to Poison/Dark Drapion. A full-health starter survives
+one X-Scissor with15/20/10 HP, but two are lethal. Dodging/recharge windows are
+critical; basics have no telegraph and become the sole attack after10 executed
+X-Scissors. No coefficients, starter/Stunky stats or boss timing were rebalanced.

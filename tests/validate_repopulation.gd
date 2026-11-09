@@ -65,23 +65,23 @@ func validate() -> void:
 	main.player.setup(main.dungeon.player_spawn, main.dungeon, main.dungeon_renderer)
 	main.use_elevation_test = false
 	main.refresh_fog()
-	assert(main.enemy_respawn_delay == 30)
+	assert(main.enemy_respawn_delay == 100)
 	main.repopulation.rng.seed = 10
-	for index in range(29):
+	for index in range(99):
 		finish_wait(main)
 		assert(main.enemies.is_empty() and main.repopulation.empty_turns == index + 1)
 	finish_wait(main)
 	assert(main.enemies.size() == 1 and main.repopulation.empty_turns == 0)
 	var enemy: Skeleton = main.enemies[0]
 	assert(main.dungeon.get_room_id(enemy.grid_position) == 1 and not enemy.visible)
-	assert(enemy.health.current == 42 and enemy.level == 15 and enemy.battle_state.remaining_pp == [28])
+	assert(enemy.health.current == 42 and enemy.level == 10 and enemy.battle_state.remaining_pp == [28])
 	assert(main.enemy_occupancy.get(enemy.grid_position) == enemy)
 	var initial := enemy.grid_position
 	finish_wait(main)
 	assert(enemy.grid_position != initial and not enemy.visible)
 	assert(main.repopulation.empty_turns == 0 and main.enemies.size() == 1)
 	defeat_last(main)
-	for index in range(29):
+	for index in range(99):
 		finish_wait(main)
 		assert(main.enemies.is_empty())
 	finish_wait(main)
@@ -90,7 +90,7 @@ func validate() -> void:
 	# No safe area: bounded retry, no spawn into the player's room or corridors.
 	defeat_last(main)
 	main.dungeon.rooms.resize(1)
-	for index in range(30): finish_wait(main)
+	for index in range(100): finish_wait(main)
 	assert(main.enemies.is_empty() and main.repopulation.empty_turns == 0)
 	finish_wait(main)
 	assert(main.repopulation.empty_turns == 1)
@@ -104,7 +104,7 @@ func validate() -> void:
 	assert(main.repopulation.empty_turns == 0)
 	main.game_mode = GameModeConfig.Mode.DEMO
 	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
-	for index in range(30): main._advance_repopulation()
+	for index in range(100): main._advance_repopulation()
 	assert(main.enemies.is_empty() and main.repopulation.empty_turns == 0)
 	main.game_mode = GameModeConfig.Mode.INFINITE
 	main.start_new_run()
@@ -112,5 +112,5 @@ func validate() -> void:
 	assert(main.enemies.size() == 3 and main.repopulation.empty_turns == 0)
 	main.free()
 	await process_frame
-	print("PASS: hidden pursuit, 30 enemy-free turns/repeated single respawn, independent state, safe room/reachable/fog/occupancy selection, bounded fallback and floor/arena reset")
+	print("PASS: hidden pursuit, 100 enemy-free turns/repeated single respawn, independent state, safe room/reachable/fog/occupancy selection, bounded fallback and floor/arena reset")
 	quit()

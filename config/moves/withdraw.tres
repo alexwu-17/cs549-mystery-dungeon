@@ -15,4 +15,4 @@ targeting = 3
 animation_action = &"Withdraw"
 affected_stat = &"defense"
 stage_change = 1
-description = "Raises the user's Defense stage by 1. Does not require an enemy target. No direct damage. Lasts 5 turns; another stat-changing move on the same target refreshes the duration."
+description = "Raises the user's Defense by 1 stage."

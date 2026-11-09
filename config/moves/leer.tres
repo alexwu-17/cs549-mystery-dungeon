@@ -15,4 +15,4 @@ targeting = 0
 animation_action = &"Leer"
 affected_stat = &"defense"
 stage_change = -1
-description = "Lowers the Defense stage of one enemy on the adjacent tile directly ahead by 1. No direct damage. Lasts 5 turns; another stat-changing move on the same target refreshes the duration."
+description = "Lowers the Defense of one enemy in front of the user by 1 stage."

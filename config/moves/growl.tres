@@ -15,4 +15,4 @@ targeting = 2
 animation_action = &"Growl"
 affected_stat = &"attack"
 stage_change = -1
-description = "Lowers the Attack stage of every enemy in the current room by 1. Has no targets in corridors. No direct damage. Lasts 5 turns; another stat-changing move on the same target refreshes the duration."
+description = "Lowers the Attack of every enemy in the current room by 1 stage."

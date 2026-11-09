@@ -10,7 +10,6 @@ signal presentation_finished
 signal frame_changed(name: String)
 @export var display_name: String = "Character"
 @export var sprite_path: NodePath
-@export_dir var asset_directory: String
 @export var foot_anchor: Vector2
 var facing: Vector2i = Vector2i.DOWN
 var active: bool = false
@@ -31,10 +30,6 @@ var original_pixel_size: float
 
 func _ready() -> void:
 	original_pixel_size = sprite.pixel_size
-	for name in ["front", "back", "left", "right", "attack_front", "attack_back", "attack_left", "attack_right", "charge", "spin_01", "spin_02", "spin_03", "spin_04", "spin_05", "spin_06", "spin_07", "spin_08"]:
-		var path := asset_directory.path_join(name + ".png")
-		if ResourceLoader.exists(path):
-			textures[name] = load(path)
 	standing()
 	# Pixel-space offset anchors feet on the logical visual origin.
 	var dimensions := sprite.texture.get_size()
@@ -119,7 +114,7 @@ func attack() -> void:
 
 
 func prepare_attack(_action: StringName = &"Attack") -> void:
-	pass # Placeholder visuals retain their existing attack.
+	pass # Native controllers override action selection.
 
 
 func damage_number_anchor(camera: Camera3D) -> Vector3:

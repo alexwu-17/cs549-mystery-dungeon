@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=4 format=3]
+[ext_resource type="Script" path="res://scripts/combat/pokemon_species_data.gd" id="species"]
+[ext_resource type="Script" path="res://scripts/combat/pokemon_move_data.gd" id="moves"]
+[ext_resource type="Resource" path="res://config/moves/x_scissor.tres" id="x_scissor"]
+[resource]
+script = ExtResource("species")
+species_id = &"drapion"
+display_name = "Drapion"
+types = PackedStringArray("Poison", "Dark")
+starting_moves = Array[ExtResource("moves")]([ExtResource("x_scissor")])
+level = 30
+maximum_hp = 92
+attack = 50
+special_attack = 47
+defense = 43
+special_defense = 43

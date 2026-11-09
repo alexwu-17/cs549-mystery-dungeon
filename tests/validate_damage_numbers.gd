@@ -112,7 +112,7 @@ func validate() -> void:
 	main.boss.visible = true
 	main.boss.receive_damage(100)
 	feedback.set_process(false)
-	assert(main.victory and feedback.popups.size() == 1 and feedback.popups[0].label.text == "-30")
+	assert(main.victory and feedback.popups.size() == 1 and feedback.popups[0].label.text == "-92")
 	main.start_new_run()
 	Helper.complete_introduction(main)
 	assert(feedback.popups.is_empty() and not main.victory)

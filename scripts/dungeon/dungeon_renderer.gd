@@ -5,6 +5,12 @@ extends Node3D
 const TILE_SIZE: float = DungeonData.TILE_SIZE
 const ELEVATION_HEIGHT: float = DungeonData.ELEVATION_HEIGHT
 const FLOOR_THICKNESS: float = 0.2
+const OCCLUSION_CLEAR_FRACTION: float = 0.75
+const ROUNDED_LIGHT = preload("res://shaders/rounded_visibility_light.gdshader")
+const ROUNDED_WALL = preload("res://shaders/rounded_visibility_wall.gdshader")
+var _rounded_light: ShaderMaterial
+var _rounded_wall_materials: Dictionary = {}
+var _visibility_center := Vector3.ZERO
 const STAIRS_VISUAL: PackedScene = preload("res://scenes/environment/stairs_placeholder.tscn")
 const RAMP_VISUAL: PackedScene = preload("res://scenes/environment/up_stairs.tscn")
 
@@ -59,6 +65,7 @@ var _rock_meshes: Dictionary = {}
 
 
 func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure_only: bool = false) -> bool:
+	_rounded_wall_materials.clear()
 	_occlusion_context.clear()
 	_stone_variants.clear()
 	cave_rock_profiles.clear()
@@ -528,11 +535,60 @@ func apply_fog(reference_elevation: int = 0) -> void:
 			mesh.material_override = null
 			for index in range(visual.materials.size()):
 				mesh.set_surface_override_material(index, visual.materials[index][visual.fog_state])
+		# Whole current rooms remain bright; nearby corridor/entrance tiles round off.
+		if _rounded_light == null:
+			_rounded_light = ShaderMaterial.new()
+			_rounded_light.shader = ROUNDED_LIGHT
+			_rounded_light.set_shader_parameter("dim_color", Vector3(dim_material.albedo_color.r, dim_material.albedo_color.g, dim_material.albedo_color.b))
+		var current_room := dungeon_data.get_room_id(_fog_player_tile())
+		var overlay: Material = _rounded_light if bright and not (current_room >= 0 and visual.room == current_room) else null
+		# Dummy rendering cannot query overlay instance uniforms on removal.
+		# Gameplay/fog remain testable headlessly; GPU captures own this mask.
+		if DisplayServer.get_name() != "headless" and mesh.material_overlay != overlay:
+			mesh.material_overlay = overlay
+		_apply_rounded_wall(visual)
 	if is_instance_valid(cave_background):
 		cave_background.apply_fog(dungeon_data, reference_elevation, dim_material.albedo_color, other_elevation_material.albedo_color)
 
 
-func update_occlusion(camera: Camera3D, player_tile: Vector2i, sprite_points: Array[Vector3]) -> void:
+func _fog_player_tile() -> Vector2i:
+	return dungeon_data.visibility_origin
+
+func update_visibility_center(position: Vector3) -> void:
+	_visibility_center = position
+	var center := Vector2(position.x, position.z)
+	if _rounded_light != null:
+		_rounded_light.set_shader_parameter("visibility_center", center)
+	for material: ShaderMaterial in _rounded_wall_materials.values():
+		material.set_shader_parameter("visibility_center", center)
+
+func _apply_rounded_wall(visual: Dictionary) -> void:
+	var mesh: MeshInstance3D = visual.mesh
+	if not visual.get("round_occluded", false):
+		if mesh.material_override is ShaderMaterial and mesh.material_override.shader == ROUNDED_WALL:
+			mesh.material_override = null if visual.asset else [normal_material, dim_material, other_elevation_material][visual.fog_state]
+		return
+	var source: StandardMaterial3D = visual.materials[0][visual.fog_state] if visual.asset else [normal_material, dim_material, other_elevation_material][visual.fog_state]
+	if source == null: return
+	var wall: bool = visual.wall or visual.get("filler", false)
+	var key := "%d:%s" % [source.get_instance_id(), wall]
+	if not _rounded_wall_materials.has(key):
+		var material := ShaderMaterial.new()
+		material.shader = ROUNDED_WALL
+		material.set_shader_parameter("wall_color", source.albedo_color)
+		material.set_shader_parameter("roughness_value", source.roughness)
+		material.set_shader_parameter("use_texture", source.albedo_texture != null)
+		if source.albedo_texture != null:
+			material.set_shader_parameter("wall_texture", source.albedo_texture)
+		_rounded_wall_materials[key] = material
+	var material: ShaderMaterial = _rounded_wall_materials[key]
+	material.set_shader_parameter("visibility_center", Vector2(_visibility_center.x, _visibility_center.z))
+	material.set_shader_parameter("visibility_height", _visibility_center.y + 0.6 * TILE_SIZE)
+	material.set_shader_parameter("wall_opacity", obstructing_wall_opacity if wall else 0.0)
+	mesh.material_override = material
+	mesh.transparency = 0.0
+
+func update_occlusion(camera: Camera3D, player_tile: Vector2i, sprite_points: Array[Vector3], neighborhood: bool = false) -> void:
 	if dungeon_data == null:
 		return
 	# Coalesce identical requests within a frame, never across animation frames.
@@ -540,7 +596,7 @@ func update_occlusion(camera: Camera3D, player_tile: Vector2i, sprite_points: Ar
 	var frame := Engine.get_process_frames()
 	var context: Array = [camera.get_instance_id(), camera.get_camera_transform(),
 		camera.get_camera_projection(), camera.get_viewport().get_visible_rect(),
-		global_transform, player_tile, obstructing_wall_opacity, sprite_points]
+		global_transform, player_tile, obstructing_wall_opacity, sprite_points, neighborhood]
 	if _occlusion_frame == frame and _occlusion_context == context:
 		return
 	_occlusion_frame = frame
@@ -550,9 +606,39 @@ func update_occlusion(camera: Camera3D, player_tile: Vector2i, sprite_points: Ar
 	var ray_origins: Array[Vector3] = []
 	for target in sprite_points:
 		ray_origins.append(camera.project_ray_origin(camera.unproject_position(target)))
+	var sample_groups: Array = [{"points": sprite_points, "origins": ray_origins, "tile": player_tile}]
+	# Only the actual player can open the circle. Union samples across meshes so
+	# two partial obstructions cannot each fall below the coverage threshold.
+	var player_blocked := not neighborhood
+	if neighborhood and not sprite_points.is_empty():
+		var blocked_rays: Dictionary = {}
+		for visual in fog_visuals:
+			if not _circle_occluder(visual, player_tile): continue
+			var mesh: MeshInstance3D = visual.mesh
+			var inverse := mesh.global_transform.affine_inverse()
+			var bounds := mesh.get_aabb()
+			for index in range(sprite_points.size()):
+				if bounds.intersects_segment(inverse * ray_origins[index], inverse * sprite_points[index]) != null:
+					blocked_rays[index] = true
+		player_blocked = blocked_rays.size() > sprite_points.size() * (1.0 - OCCLUSION_CLEAR_FRACTION)
+	if neighborhood:
+		for y in range(-1, 2):
+			for x in range(-1, 2):
+				var offset := Vector2i(x, y)
+				if offset == Vector2i.ZERO or not dungeon_data.is_walkable(player_tile + offset) or not dungeon_data.is_bright(player_tile + offset): continue
+				var shift := Vector3(x, 0, y) * TILE_SIZE
+				shift.y = (dungeon_data.surface_elevation(player_tile + offset) - dungeon_data.surface_elevation(player_tile)) * ELEVATION_HEIGHT
+				var targets: Array[Vector3] = []
+				var origins: Array[Vector3] = []
+				for point in sprite_points:
+					var target := point + shift
+					targets.append(target)
+					origins.append(camera.project_ray_origin(camera.unproject_position(target)))
+				sample_groups.append({"points": targets, "origins": origins, "tile": player_tile + offset})
 	for visual in fog_visuals:
 		var mesh: MeshInstance3D = visual.mesh
 		visual.occluded = false
+		visual.round_occluded = false
 		var tile: Vector2i = visual.tiles[0]
 		# A slope extends above its stored lower elevation. Buffers retain their
 		# own flat heights and remain independently hideable.
@@ -569,26 +655,40 @@ func update_occlusion(camera: Camera3D, player_tile: Vector2i, sprite_points: Ar
 			var toward_camera := camera.global_position - player_world
 			toward_camera.y = 0.0
 			# Rear walls stay solid even when the billboard leans behind the feet.
-			foreground = (center - player_world).dot(toward_camera) > 0.001
+			foreground = neighborhood or (center - player_world).dot(toward_camera) > 0.001
 			if visual.get("filler", false):
 				# Distant filler outside the viewing stripe cannot cover the sprite.
 				var side := Vector3(-toward_camera.z, 0, toward_camera.x).normalized()
 				foreground = foreground and absf((center - player_world).dot(side)) <= TILE_SIZE * 2.0
-		if foreground and visual.candidate and (higher_terrain or fade_visual) and (not own_room or fade_visual) and (not visual.tiles.has(player_tile) or fade_visual) and visual.fog_visible:
+		var eligible: bool = _circle_occluder(visual, player_tile) if neighborhood else (foreground and visual.candidate and (higher_terrain or fade_visual) and (not own_room or fade_visual) and (not visual.tiles.has(player_tile) or fade_visual) and visual.fog_visible)
+		if player_blocked and eligible:
 			# Transform the segment into the mesh's local frame. This tests its
 			# actual oriented bounds rather than an inflated world-space AABB.
 			var inverse := mesh.global_transform.affine_inverse()
 			var bounds := mesh.get_aabb()
-			for index in range(sprite_points.size()):
-				if bounds.intersects_segment(inverse * ray_origins[index], inverse * sprite_points[index]) != null:
+			for group: Dictionary in sample_groups:
+				var blocked_samples := 0
+				for index in range(sprite_points.size()):
+					if bounds.intersects_segment(inverse * group.origins[index], inverse * group.points[index]) != null:
+						blocked_samples += 1
+				if blocked_samples > (0.0 if neighborhood else sprite_points.size() * (1.0 - OCCLUSION_CLEAR_FRACTION)):
 					visual.occluded = true
 					break
+			visual.round_occluded = neighborhood and visual.occluded
 		apply_occlusion_state(visual)
+		_apply_rounded_wall(visual)
+
+func _circle_occluder(visual: Dictionary, player_tile: Vector2i) -> bool:
+	if not visual.candidate or not visual.fog_visible or visual.stairs or visual.get("support", false): return false
+	# Never cut a stair/ramp mesh or the player's supporting floor.
+	for tile: Vector2i in visual.tiles:
+		if dungeon_data.get_tile(tile) in [DungeonData.TileType.RAMP, DungeonData.TileType.STAIRS]: return false
+	return not visual.tiles.has(player_tile) or visual.wall or visual.get("filler", false)
 
 
 func apply_occlusion_state(visual: Dictionary) -> void:
 	var mesh: MeshInstance3D = visual.mesh
-	var fade_visual: bool = visual.wall or visual.get("filler", false)
+	var fade_visual: bool = visual.wall or visual.get("filler", false) or visual.get("round_occluded", false)
 	mesh.visible = visual.fog_visible and (fade_visual or not visual.occluded)
 	mesh.transparency = 1.0 - obstructing_wall_opacity if fade_visual and visual.occluded else 0.0
 	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if fade_visual and visual.occluded else GeometryInstance3D.SHADOW_CASTING_SETTING_ON

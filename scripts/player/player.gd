@@ -50,12 +50,28 @@ var dungeon_renderer: DungeonRenderer
 var is_tile_occupied: Callable
 var can_request_attack: Callable
 var can_request_wait: Callable
+var _attack_depth_test_disabled: bool = false
+var _attack_render_priority: int = 0
 
 
 func _ready() -> void:
 	reset_battle_state()
 	attack_leap.presentation_started.connect(character_visual.attack)
 	attack_leap.presentation_finished.connect(character_visual.standing)
+	attack_leap.presentation_started.connect(_begin_attack_visibility)
+	attack_leap.presentation_finished.connect(_end_attack_visibility)
+
+func _begin_attack_visibility() -> void:
+	var sprite: Sprite3D = $PlayerSprite
+	_attack_depth_test_disabled = sprite.no_depth_test
+	_attack_render_priority = sprite.render_priority
+	sprite.no_depth_test = true
+	sprite.render_priority = 127
+
+func _end_attack_visibility() -> void:
+	var sprite: Sprite3D = $PlayerSprite
+	sprite.no_depth_test = _attack_depth_test_disabled
+	sprite.render_priority = _attack_render_priority
 
 
 func setup(

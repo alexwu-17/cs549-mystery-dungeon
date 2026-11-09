@@ -33,6 +33,7 @@ var routing_attempts: int = 0
 var used_fallback: bool = false
 var discovered_tiles: Dictionary = {}
 var bright_tiles: Dictionary = {}
+var visibility_origin := Vector2i.ZERO
 
 var player_spawn: Vector2i = Vector2i.ZERO
 var enemy_spawns: Array[Vector2i] = []
@@ -127,6 +128,7 @@ func get_room_id(tile: Vector2i) -> int:
 
 
 func update_fog(player_tile: Vector2i) -> void:
+	visibility_origin = player_tile
 	# Port of revealAt(): discovery deliberately differs from bright visibility.
 	var room_id := get_room_id(player_tile)
 	if room_id >= 0:
@@ -149,7 +151,7 @@ func update_fog(player_tile: Vector2i) -> void:
 				bright_tiles[tile] = true
 		elif room_id == CORRIDOR_VAL and tile_room < 0 and nearby:
 			bright_tiles[tile] = true
-		elif room_id == CORRIDOR_VAL and tile_room >= 0 and absi(tile.x - player_tile.x) + absi(tile.y - player_tile.y) == 1:
+		elif room_id == CORRIDOR_VAL and tile_room >= 0 and nearby:
 			bright_tiles[tile] = true
 
 

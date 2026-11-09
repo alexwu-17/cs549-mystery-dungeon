@@ -67,7 +67,36 @@ func validate() -> void:
 	renderer.update_occlusion(camera, Vector2i.ZERO, points)
 	assert(blocked.occluded and not mesh.visible)
 	assert(blocked.fog_state == 2)
+	# Partial overlap: 1/8 and exactly 2/8 blocked stay solid, 3/8 fades.
+	var hit_point := points[0]
+	var clear_point := hit_point + camera.global_basis.x * 20
+	for hit_count in [0, 1, 2, 3, 8]:
+		var coverage: Array[Vector3] = []
+		for index in range(8):
+			coverage.append(hit_point if index < hit_count else clear_point)
+		renderer.update_occlusion(camera, Vector2i.ZERO, coverage)
+		assert(blocked.occluded == (hit_count > 2))
+		assert(mesh.visible == (hit_count <= 2))
+	renderer.update_occlusion(camera, Vector2i.ZERO, [])
+	assert(not blocked.occluded and mesh.visible)
+	renderer.update_occlusion(camera, Vector2i.ZERO, points)
 	# Fog refresh must not undo occlusion or expose hidden stairs.
+	# A blocked neighbor cannot trigger the circle while the player is clear.
+	data.set_tile(Vector2i(-1, 0), DungeonData.TileType.CORRIDOR)
+	data.bright_tiles[Vector2i(-1, 0)] = true
+	var adjacent_points: Array[Vector3] = [center + sight * 0.1 + Vector3.RIGHT]
+	renderer.update_occlusion(camera, Vector2i.ZERO, adjacent_points)
+	assert(not blocked.occluded)
+	renderer.update_visibility_center(Vector3.ZERO)
+	renderer.update_occlusion(camera, Vector2i.ZERO, adjacent_points, true)
+	assert(not blocked.occluded and mesh.visible)
+	# Actual player obstruction activates the circular treatment.
+	renderer.update_occlusion(camera, Vector2i.ZERO, points, true)
+	assert(blocked.occluded and mesh.visible and mesh.material_override is ShaderMaterial)
+	for visual in renderer.fog_visuals:
+		if visual.stairs or data.get_tile(visual.tiles[0]) == DungeonData.TileType.RAMP:
+			assert(not visual.occluded and not visual.get("round_occluded", false))
+	renderer.update_occlusion(camera, Vector2i.ZERO, points)
 	renderer.apply_fog()
 	assert(not mesh.visible)
 	for visual in renderer.fog_visuals:

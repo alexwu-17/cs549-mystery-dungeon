@@ -42,7 +42,7 @@ func validate() -> void:
 	assert(main.hud.hp_label.text == "76 / 76 HP")
 	assert(main.player.attack_damage == 3)
 	var enemy: Skeleton = main.enemies[0]
-	assert(enemy.health.current == 42 and enemy.maximum_hp == 42 and enemy.level == 15)
+	assert(enemy.health.current == 42 and enemy.maximum_hp == 42 and enemy.level == 10)
 	assert(enemy.battle_state.moves[0].move_id == &"scratch" and enemy.battle_state.remaining_pp == [28])
 	assert(enemy.battle_state.attack == 21 and enemy.attack_damage == 2)
 	var other: Skeleton = main.enemies[1]
@@ -79,10 +79,10 @@ func validate() -> void:
 	Helper.complete_introduction(main)
 	main._on_stairs_reached()
 	Helper.complete_introduction(main)
-	assert(main.boss != null and main.boss.species_data == null)
-	assert(main.boss.health == main.boss.battle_state.health and main.boss.health.current == 30)
+	assert(main.boss != null and main.boss.species_data.species_id == &"drapion")
+	assert(main.boss.health == main.boss.battle_state.health and main.boss.health.current == 92)
 	assert(main.boss.attack_damage == 18 and main.boss.footprint().size() == 1)
 	main.free()
 	await process_frame
-	print("PASS: isolated battle state, exact species stats, live HP/levels/HUD, floor persistence, fresh reset and boss fallback")
+	print("PASS: isolated battle state, exact species stats, live HP/levels/HUD, floor persistence, fresh reset and authored boss stats")
 	quit()

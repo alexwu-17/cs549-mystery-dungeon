@@ -36,7 +36,7 @@ func validate() -> void:
 	assert(not data.discovered_tiles.has(Vector2i(4, 2)))
 	data.update_fog(Vector2i(4, 1))
 	assert(data.is_bright(Vector2i(5, 1))) # One-tile peek into the room entrance.
-	assert(not data.is_bright(Vector2i(5, 2))) # No diagonal room reveal.
+	assert(data.is_bright(Vector2i(5, 2))) # Diagonal entrance actors remain fully visible.
 	assert(not data.is_bright(Vector2i(6, 1))) # No deeper room reveal.
 	assert(data.discovered_tiles.has(Vector2i(5, 1))) # Cardinal discovery includes room.
 	assert(not data.discovered_tiles.has(Vector2i(5, 2)))

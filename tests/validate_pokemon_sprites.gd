@@ -162,15 +162,23 @@ func validate() -> void:
 		visual.cancel()
 		assert(not visual.frozen and visual.clip == "Idle")
 		actor.free()
-	# Explicit profile rollback keeps the original artwork and anchor implementation.
-	var fallback = load(paths[0]).instantiate()
-	fallback.get_node("VisualController").profile = null
-	root.add_child(fallback)
-	assert(fallback.character_visual.clips.is_empty())
-	assert(fallback.attack_leap.procedural_motion and is_equal_approx(fallback.attack_leap.duration,0.24))
-	assert(fallback.character_visual.sprite.texture.resource_path.ends_with("swordsman/front.png"))
-	fallback.free()
+	# Missing/invalid custom profiles recover to each scene's native role default.
+	for index in range(3):
+		for invalid in [false, true]:
+			var fallback = load(paths[index]).instantiate()
+			var controller = fallback.get_node("VisualController")
+			controller.profile = PokemonSpriteProfile.new() if invalid else null
+			root.add_child(fallback)
+			var species: String = ["Chimchar", "Stunky", "Drapion"][index]
+			assert(controller.profile.directory.ends_with(species) and controller.clips.has("Idle"))
+			assert(controller.sprite.texture.atlas.resource_path.ends_with(species + "/Idle-Anim.png"))
+			controller.face(Vector2i.RIGHT)
+			controller.attack()
+			assert(controller.clip == "Attack")
+			controller.cancel()
+			assert(controller.clip == "Idle")
+			fallback.free()
 	camera.free()
 	await process_frame
-	print("PASS: species XML dimensions/counts/timing, exact cardinal atlas rows, shared caches, fixed ground/native bob, screen-preserving clearance, XML attack completion, walk continuity, hurt HP, attack without extra damage, missing-action/placeholder fallback and reset")
+	print("PASS: species XML dimensions/counts/timing, exact cardinal atlas rows, shared caches, fixed ground/native bob, screen-preserving clearance, XML attack completion, walk continuity, hurt HP, attack without extra damage, missing-action/native role-default fallback and reset")
 	quit()

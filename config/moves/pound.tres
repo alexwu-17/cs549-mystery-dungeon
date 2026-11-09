@@ -1,9 +1,18 @@
-[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3]
-[ext_resource type="Script" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3 uid="uid://c47robtsu1aqh"]
+
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+
 [resource]
 script = ExtResource("1")
 move_id = &"pound"
 display_name = "Pound"
 move_type = "Normal"
+category = 0
 power = 6
 maximum_pp = 27
+range_tiles = 1
+targeting = 0
+animation_action = &"Attack"
+affected_stat = &""
+stage_change = 0
+description = "Hits one tile in front of the user."

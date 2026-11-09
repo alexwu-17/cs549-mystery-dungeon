@@ -2,6 +2,7 @@ extends CharacterVisual
 
 const Library = preload("res://scripts/effects/pokemon_sprite_library.gd")
 @export var profile: PokemonSpriteProfile
+@export var fallback_profile: PokemonSpriteProfile = preload("res://config/pokemon_chimchar.tres")
 var clips: Dictionary = {}
 var clip: String = ""
 var action: String = "Idle"
@@ -18,14 +19,16 @@ var surface_driver: AttackLeap
 var attack_action: StringName = &"Attack"
 
 func _ready() -> void:
-	# Keep all original placeholder resources and behavior available when unconfigured.
 	super._ready()
-	if profile == null: return
-	clips = Library.load_species(profile.directory, profile.animations.values())
+	if profile == null: profile = fallback_profile
+	clips = _load_profile(profile)
 	if not clips.has(str(profile.animations.get("Idle", "Idle"))):
-		clips = {}
-		push_warning("Pokémon Idle unavailable; preserving placeholder: " + profile.directory)
-		return
+		push_warning("Pokemon Idle unavailable; using role default: " + profile.directory)
+		profile = fallback_profile
+		clips = _load_profile(profile)
+		if not clips.has(str(profile.animations.get("Idle", "Idle"))):
+			push_error("Role default Pokemon Idle unavailable: " + profile.directory)
+			return
 	original_pixel_size = profile.pixel_size
 	sprite.pixel_size = original_pixel_size
 	var idle: Dictionary = clips[str(profile.animations.get("Idle", "Idle"))]
@@ -40,6 +43,11 @@ func _ready() -> void:
 		leap.duration = float(clips[attack_name].total)
 		leap.presentation_progressed.connect(_sample_attack_time)
 	standing()
+
+func _load_profile(candidate: PokemonSpriteProfile) -> Dictionary:
+	if candidate == null or not FileAccess.file_exists(candidate.directory.path_join("AnimData.xml")):
+		return {}
+	return Library.load_species(candidate.directory, candidate.animations.values())
 
 func row() -> int:
 	if facing == Vector2i.RIGHT: return 2

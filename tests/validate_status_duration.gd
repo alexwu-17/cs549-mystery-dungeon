@@ -97,13 +97,19 @@ func validate() -> void:
 		await process_frame
 	# A reset triggered by expiry listeners cannot unlock/finish the outgoing round.
 	var main := make_main(0)
+	# Pending-attack cancellation is covered above. Isolate expiry reentrancy here
+	# so the fixture does not free a node from inside that node's own action signal.
+	main.dungeon.enemy_spawns.clear()
+	main.spawn_test_enemies()
+	var finished := [0]
+	main.round_finished.connect(func(): finished[0] += 1)
 	main.player.battle_state.change_stage(&"defense", 1)
 	main.player.battle_state.stage_duration_fresh = false
 	main.player.battle_state.stage_turns_remaining = 1
 	main.player.battle_state.stats_restored.connect(main.start_new_run, CONNECT_ONE_SHOT)
 	main.run_enemy_turn()
 	Helper.complete(main)
-	assert(main.player.transition_locked and main.dialogue.history.is_empty())
+	assert(main.player.transition_locked and main.dialogue.history.is_empty() and finished[0] == 0)
 	Helper.complete_introduction(main)
 	assert(not main.player.transition_locked and main.player.battle_state.stage_turns_remaining == 0)
 	main.free()

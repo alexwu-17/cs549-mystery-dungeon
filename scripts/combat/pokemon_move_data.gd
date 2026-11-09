@@ -2,7 +2,7 @@ class_name PokemonMoveData
 extends Resource
 ## Shared immutable definition; remaining PP belongs to each actor's battle state.
 enum Category { PHYSICAL, SPECIAL, STATUS }
-enum Targeting { ADJACENT, STRAIGHT_PROJECTILE, SAME_ROOM, SELF }
+enum Targeting { ADJACENT, STRAIGHT_PROJECTILE, SAME_ROOM, SELF, FORWARD_LANE }
 
 @export var move_id: StringName
 @export var display_name: String

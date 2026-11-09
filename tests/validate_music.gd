@@ -13,12 +13,19 @@ func step(intro: FloorIntroduction, seconds: float) -> void:
 func validate() -> void:
 	music = root.get_node("MusicManager")
 	assert(music.get_child_count() == 1 and music.player.bus == &"Master")
-	assert(music.dungeon_track is AudioStreamMP3 and music.boss_track is AudioStreamMP3)
+	assert(music.dungeon_track is AudioStreamOggVorbis and music.boss_track is AudioStreamOggVorbis)
 	assert(music.dungeon_track.get_length() > 30 and music.boss_track.get_length() > 0)
-	assert(music.dungeon_track.resource_path.ends_with("mtcoronet_midterm.mp3"))
-	assert(music.boss_track.resource_path.ends_with("pmd_bosstheme_midterm.mp3"))
+	assert(music.dungeon_track.resource_path.ends_with("temporal_tower_dungeon.ogg"))
+	assert(music.boss_track.resource_path.ends_with("Boss_Battle_Orchestral.ogg"))
 	assert(music.dungeon_track.loop and music.boss_track.loop)
-	assert(music.dungeon_track.loop_offset == 0 and music.boss_track.loop_offset == 0)
+	assert(is_equal_approx(music.dungeon_track.loop_offset, 17.450) and is_equal_approx(music.boss_track.loop_offset, 22.540))
+	var imported := ConfigFile.new()
+	assert(imported.load("res://assets/audio/music/temporal_tower_dungeon.ogg.import") == OK)
+	assert(imported.get_value("params", "loop") == true)
+	assert(is_equal_approx(imported.get_value("params", "loop_offset"), 17.450))
+	assert(imported.load("res://assets/audio/music/Boss_Battle_Orchestral.ogg.import") == OK)
+	assert(imported.get_value("params", "loop") == true)
+	assert(is_equal_approx(imported.get_value("params", "loop_offset"), 22.540))
 	for mode in ["main", "limit_testing_main", "demo_main"]:
 		var main = load("res://scenes/main/%s.tscn" % mode).instantiate()
 		main.benchmark_enabled = false # Music floor progression uses procedural fixtures.
@@ -83,5 +90,5 @@ func validate() -> void:
 	assert(not music.player.playing)
 	await process_frame
 	await process_frame
-	print("PASS: MP3 loading/looping, single player, continuous floors, silent boss intro/completion, death/victory/restart, stale ownership")
+	print("PASS: Ogg dungeon loop17.450/boss loop22.540, import settings, single player, continuous floors, silent boss intro/completion, death/victory/restart, stale ownership")
 	quit()

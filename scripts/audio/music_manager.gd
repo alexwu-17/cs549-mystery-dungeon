@@ -1,17 +1,17 @@
 extends Node
 
-var dungeon_track: AudioStreamMP3 = preload("res://assets/audio/music/mtcoronet_midterm.mp3")
-var boss_track: AudioStreamMP3 = preload("res://assets/audio/music/pmd_bosstheme_midterm.mp3")
+var dungeon_track: AudioStreamOggVorbis = preload("res://assets/audio/music/temporal_tower_dungeon.ogg")
+var boss_track: AudioStreamOggVorbis = preload("res://assets/audio/music/Boss_Battle_Orchestral.ogg")
 
 var player: AudioStreamPlayer
 var playback_owner: WeakRef
 
 func _ready() -> void:
-	# Runtime loop settings leave the source MP3s and import settings unchanged.
+	# Match the authored Ogg import; begin fresh playback at zero, then loop here.
 	dungeon_track.loop = true
-	dungeon_track.loop_offset = 0.0
+	dungeon_track.loop_offset = 17.450
 	boss_track.loop = true
-	boss_track.loop_offset = 0.0
+	boss_track.loop_offset = 22.540
 	player = AudioStreamPlayer.new()
 	player.name = "MusicPlayer"
 	player.bus = &"Master"
@@ -31,7 +31,7 @@ func play_dungeon(requester: Node, restart: bool = false) -> void:
 func play_boss(requester: Node) -> void:
 	_play(requester, boss_track, false)
 
-func _play(requester: Node, stream: AudioStreamMP3, restart: bool) -> void:
+func _play(requester: Node, stream: AudioStream, restart: bool) -> void:
 	if not owns_playback(requester):
 		return
 	if not restart and player.stream == stream and player.playing:

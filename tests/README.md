@@ -10,8 +10,8 @@ python tests/run_validations.py --godot "$GODOT_BIN"
 python tests/run_validations.py --godot "$GODOT_BIN" --suite full
 ```
 
-The default `gameplay` group contains 20 checks. `full` discovers every
-`validate_*.gd` script (currently 56). Logs default to `.godot/validation/`;
+The default `gameplay` group contains 21 checks. `full` discovers every
+`validate_*.gd` script (currently 57). Logs default to `.godot/validation/`;
 `--log-dir` selects another folder. The runner requires a zero exit, a `PASS:`
 message, and no script/parse/assertion errors. It stops failed scripts promptly
 and returns nonzero if any check fails. Engine cleanup/certificate warnings are
@@ -34,7 +34,9 @@ appearance, shadows, transparency, GPU readback or frame rates.
 | Floor repopulation, hidden pursuit and spawn safety | `validate_repopulation`, `validate_sequential_rounds`, `validate_visibility_refresh` |
 | J waiting, visibility interruption and peaceful healing | `validate_recovery`, `validate_sequential_rounds`, `validate_held_movement` |
 | Held movement | `validate_held_movement` |
+| Attack rendering priority, rounded3x3 occlusion, fog and doorway diagonals | `validate_visibility_refresh`, `validate_presentation`, `validate_fog`, `validate_continuous_terrain`; normal-render corridor/doorway/attack captures (headless skips the visual light overlay) |
 | Move display | `validate_move_panel`, `validate_hud` |
+| Drapion species, charged move/basic selection, deferred PP and balance | `validate_drapion_moves`, `validate_enemy_moves`, `validate_battle_state`, `validate_boss`, `validate_drapion_swing` |
 | Boss/defeat | `validate_boss`, `validate_drapion_swing`, `validate_enemy_defeat` |
 | Floors, modes, reset or input locks | `validate_battle_state`, `validate_modes`, `validate_floor_introduction`, full regression for shared lifecycle changes |
 | Character animation | `validate_attack_leap`, `validate_character_sprites`, `validate_pokemon_sprites`, relevant ramp tests and normal-render inspection |
@@ -61,7 +63,8 @@ termination and cancellation. `validate_battle_state.gd` owns production stat
 binding, isolated mutable state, cross-floor persistence and fresh reset.
 `validate_attack_leap.gd` retains exact transform/timing and cancellation checks;
 its repeated lethal/restart scenario was removed because lifecycle tests own it.
-Placeholder sprite fallback tests remain while fallback assets are supported.
+Default-profile recovery is native Pokemon. Generic procedural transform tests
+use static Pokemon atlas fixtures, without requiring retired artwork.
 
 ## Normal-render captures
 
@@ -92,3 +95,11 @@ explicitly enables the retained batched backing path for real MultiMesh readback
 terrain covers the current continuous mesh. Keep shader/frame statistics separate
 from any claim of sustained performance; these screenshot runs are not certified
 benchmarks. `profile_pokemon_sprites.gd` remains a separate profiling tool.
+
+## Native role-default fallback
+
+Player/enemy/boss default to Chimchar/Stunky/Drapion when their configured
+profile is missing or invalid. `validate_pokemon_sprites` and
+`validate_ramp_sprites` cover the defaults. `profile_pokemon_sprites.gd --
+--defaults` profiles role defaults; the retired `--placeholder` comparison and
+legacy sprite-extraction Python test/tool no longer exist.

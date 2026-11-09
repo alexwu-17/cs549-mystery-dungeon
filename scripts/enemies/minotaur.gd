@@ -12,8 +12,11 @@ signal presentation_event(kind: StringName)
 		return species_data.maximum_hp if species_data != null else maximum_hp
 @export var attack_damage: int = 18
 @export var species_data: PokemonSpeciesData
+@export var attack_policy: EnemyAttackPolicy
+var attack_rng := RandomNumberGenerator.new()
+var committed_move_slot: int = -1
 var battle_state: PokemonBattleState = PokemonBattleState.new()
-var active_attack_move: PokemonMoveData # Reserved for future data-driven boss moves.
+var active_attack_move: PokemonMoveData
 var health: EntityHealth:
 	get:
 		return battle_state.health
@@ -31,6 +34,9 @@ var threatened_tiles: Array[Vector2i] = []
 var markers: Array[MeshInstance3D] = []
 var dungeon_data: DungeonData
 var dungeon_renderer: DungeonRenderer
+
+func _ready() -> void:
+	attack_rng.randomize() # Independent of dungeon generation and round shuffling.
 
 func setup(center: Vector2i, data: DungeonData, renderer: DungeonRenderer) -> void:
 	character_visual.cancel()
@@ -86,11 +92,16 @@ func face_player(player_tile: Vector2i) -> void:
 func take_turn(player_tile: Vector2i) -> void:
 	if state == State.DEAD:
 		return
+	active_attack_move = null
 	if state == State.CHARGING:
 		var hit := threatened_tiles.has(player_tile)
+		if committed_move_slot >= 0 and battle_state.spend_pp(committed_move_slot):
+			active_attack_move = battle_state.moves[committed_move_slot]
+		committed_move_slot = -1
 		clear_charge()
 		state = State.COOLDOWN
 		character_visual.swing()
+		if active_attack_move != null: presentation_event.emit(&"move_used")
 		print("MINOTAUR CHARGE: ", "HIT" if hit else "MISSED")
 		if hit:
 			attack_requested.emit(attack_damage)
@@ -106,6 +117,13 @@ func take_turn(player_tile: Vector2i) -> void:
 		return
 	face_player(player_tile)
 	if attack_tiles().has(player_tile):
+		# Legacy fixtures retain their deterministic charged attack and fallback damage.
+		if battle_state.species != null:
+			committed_move_slot = attack_policy.choose_slot(battle_state, attack_rng, _supports_move) if attack_policy != null else -1
+			if committed_move_slot < 0:
+				character_visual.swing()
+				attack_requested.emit(attack_damage)
+				return # Basic: no telegraph, charge or recharge state.
 		state = State.CHARGING
 		threatened_tiles = attack_tiles()
 		character_visual.charge()
@@ -130,6 +148,9 @@ func take_turn(player_tile: Vector2i) -> void:
 			position = dungeon_renderer.get_entity_world_position(grid_position)
 			print("MINOTAUR MOVE: ", grid_position)
 			return
+
+func _supports_move(move: PokemonMoveData) -> bool:
+	return move.category == PokemonMoveData.Category.PHYSICAL and move.targeting == PokemonMoveData.Targeting.FORWARD_LANE and move.range_tiles == 2
 
 func show_charge() -> void:
 	StatEffect.play_stat_change(self, true)
@@ -167,6 +188,8 @@ func receive_damage(amount: int) -> void:
 	print("MINOTAUR HP: ", health.current, "/", health.maximum)
 
 func _on_death() -> void:
+	committed_move_slot = -1
+	active_attack_move = null
 	state = State.DEAD
 	character_visual.cancel()
 	clear_charge()
@@ -182,4 +205,5 @@ func complete_action() -> void:
 
 func reset_battle_state() -> void:
 	active_attack_move = null
+	committed_move_slot = -1
 	battle_state.reset(species_data, maximum_hp, 5)

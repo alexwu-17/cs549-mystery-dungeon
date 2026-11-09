@@ -108,6 +108,7 @@ func validate() -> void:
 			# Restore fixture fog for subsequent stages.
 			data.bright_tiles = before.bright_tiles.duplicate()
 			data.discovered_tiles = before.discovered_tiles.duplicate()
+			data.visibility_origin = before.visibility_origin
 		# Reverting all switches leaves no shader/chunk state in the old renderer.
 		renderer.cave_continuous_ground_enabled = false
 		renderer.cave_stone_mapping_enabled = true

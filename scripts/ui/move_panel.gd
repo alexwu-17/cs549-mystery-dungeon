@@ -114,7 +114,8 @@ func _show_details(index: int) -> void:
 	attributes.add_child(_icon(move.category_icon, move.category))
 	attributes.add_child(_label(move.category))
 	detail_body.add_child(attributes)
-	detail_body.add_child(_label(move.damage_text))
+	if not move.damage_text.is_empty():
+		detail_body.add_child(_label(move.damage_text))
 	var description := _label(move.description)
 	description.custom_minimum_size.x = 280
 	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

@@ -50,7 +50,7 @@ func refresh_moves() -> void:
 		entry.category = ["Physical", "Special", "Status"][move.category]
 		entry.current_pp = battle_state.remaining_pp[slot]
 		entry.maximum_pp = move.maximum_pp
-		entry.damage_text = "No direct damage" if move.category == PokemonMoveData.Category.STATUS else "Power: %d" % move.power
+		entry.damage_text = "" if move.category == PokemonMoveData.Category.STATUS else "Power: %d" % move.power
 		entry.description = move.description
 		entries.append(entry)
 	move_panel.set_moves(entries)

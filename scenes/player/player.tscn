@@ -17,7 +17,7 @@ species_data = ExtResource("species")
 
 [node name="PlayerSprite" type="Sprite3D" parent="."]
 cast_shadow = 2
-pixel_size = 0.0028
+pixel_size = 0.04
 billboard = 1
 alpha_cut = 2
 texture_filter = 0
@@ -28,8 +28,7 @@ script = ExtResource("3")
 profile = ExtResource("pokemon")
 display_name = "Player"
 sprite_path = NodePath("../PlayerSprite")
-asset_directory = "res://assets/sprites/swordsman"
-foot_anchor = Vector2(286, 450)
+foot_anchor = Vector2(12, 40)
 
 [node name="AttackLeap" type="Node" parent="."]
 script = ExtResource("4")

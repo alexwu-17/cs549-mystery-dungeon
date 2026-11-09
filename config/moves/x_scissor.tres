@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+move_id = &"x_scissor"
+display_name = "X-Scissor"
+move_type = "Bug"
+category = 0
+power = 40
+maximum_pp = 10
+range_tiles = 2
+targeting = 4
+animation_action = &"Swing"
+description = "Charges for one turn, then strikes the two tiles straight ahead. Uses 1 PP on execution, hit or miss, followed by one recharge turn."

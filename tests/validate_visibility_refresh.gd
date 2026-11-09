@@ -102,6 +102,29 @@ func validate() -> void:
 	renderer.state_writes = 0
 	renderer.update_occlusion(camera,main.player.grid_position,points)
 	assert(renderer.state_writes > 0)
+	# Attack presentation has sprite priority and freezes terrain occlusion.
+	renderer.apply_fog()
+	var player_sprite: Sprite3D = main.player.get_node("PlayerSprite")
+	var depth_before := player_sprite.no_depth_test
+	var priority_before := player_sprite.render_priority
+	main.update_presentation()
+	var wall_states: Array = []
+	for visual in renderer.fog_visuals: wall_states.append(visual.occluded)
+	main.player.attack_leap.play(Vector2i.DOWN)
+	assert(player_sprite.no_depth_test and player_sprite.render_priority == 127)
+	main.player.attack_leap._sample(0.5)
+	main.update_presentation()
+	for index in range(wall_states.size()):
+		assert(renderer.fog_visuals[index].occluded == wall_states[index])
+	main.player.attack_leap.finish()
+	assert(player_sprite.no_depth_test == depth_before and player_sprite.render_priority == priority_before)
+	main.player.attack_leap.play(Vector2i.LEFT)
+	main.cancel_round()
+	assert(not main.player.attack_leap.active and player_sprite.no_depth_test == depth_before)
+	# Rounded terrain masks never partially hide a character in a bright tile.
+	for actor in main.enemies:
+		assert(actor.visible == data.is_bright(actor.grid_position))
+	assert(renderer.dungeon_data.visibility_origin == main.player.grid_position)
 	main.start_new_run()
 	Helper.complete_introduction(main)
 	assert(main.dungeon != data and main.dungeon.is_bright(main.player.grid_position))

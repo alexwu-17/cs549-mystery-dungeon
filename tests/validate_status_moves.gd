@@ -35,6 +35,9 @@ func unit_stages() -> void:
 	player.reset_stages()
 	var neutral := PokemonBattleState.new()
 	neutral.reset(state.species)
+	# Keep this stage-math fixture above the minimum-damage floor.
+	state.level = 20
+	neutral.level = 20
 	assert(PokemonDamage.basic_damage(state, player) < PokemonDamage.basic_damage(neutral, player))
 	assert(PokemonDamage.move_damage(state, player, state.moves[0]) < PokemonDamage.move_damage(neutral, player, neutral.moves[0]))
 	var physical := player.moves[0]
@@ -97,7 +100,7 @@ func validate() -> void:
 		var rounds := [0]
 		main.round_finished.connect(func(): rounds[0] += 1)
 		assert(player.battle_state.moves[1].move_id == STATUS[index])
-		assert(main.hud.move_panel.moves[1].category == "Status" and main.hud.move_panel.moves[1].damage_text == "No direct damage")
+		assert(main.hud.move_panel.moves[1].category == "Status" and main.hud.move_panel.moves[1].damage_text.is_empty())
 		var initial_pp: int = player.battle_state.remaining_pp[0]
 		press_i(player)
 		var expected_clip := "Withdraw" if index == 2 else "Shoot"

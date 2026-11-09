@@ -33,7 +33,7 @@ static func load_species(directory: String, names: Array = ["Idle", "Walk", "Att
 	# Load only configured actions, including optional boss clips; retain source files untouched.
 	for name: String in requested:
 		if not records.has(name):
-			push_warning(directory + ": missing " + name + "; using Idle/placeholder fallback")
+			push_warning(directory + ": missing " + name + "; using native Idle fallback")
 			continue
 		var info: Dictionary = records[name]
 		var source: String = str(info.get("CopyOf", name))

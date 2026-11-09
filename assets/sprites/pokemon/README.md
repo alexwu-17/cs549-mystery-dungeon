@@ -4,10 +4,16 @@ The user-supplied `chimchar.zip`, `stunky.zip` and `drapion.zip` were extracted
 without changing any member bytes, directly into `Chimchar/`, `Stunky/`, and
 `Drapion/`. All original animation, offset and shadow PNGs and `AnimData.xml`
 are preserved. Local ZIPs are ignored by Git to avoid duplicate committed data.
-Older AI artwork remains in `assets/sprites/source/` and the existing placeholder
-frame directories.
+The old AI artwork and extraction tooling have been retired. All five Pokemon
+species source PNG/XML/offset/shadow files are preserved.
 
-Roles are visual only: Chimchar = Player, Stunky = Skeleton, Drapion = Minotaur.
+Default visual roles: Chimchar = Player, Stunky = Skeleton, Drapion = Minotaur.
+Missing/invalid custom profiles use each scene's native `fallback_profile`.
+Piplup/Turtwig remain selectable player overrides. Gameplay uses authored
+species stats/moves; see the current handoff.
+
+Earlier checkpoint sections below include historical placeholder comparisons;
+they do not authorize restoring removed assets or extraction commands.
 Internal gameplay class names and mechanics intentionally remain unchanged.
 
 ## Animation data
@@ -98,8 +104,8 @@ its logical 1×2 footprint / sprite Z offset remain unchanged.
    or independent per-species animator is needed.
 
 Missing actions warn and use Idle. An unconfigured/unavailable species keeps the
-original placeholder controller/artwork. Clear the profile on a VisualController
-before scene startup to restore its original placeholder visuals. Imported PNGs
+native role defaults. Clearing the profile before scene startup selects
+Chimchar/Stunky/Drapion for player/enemy/boss respectively. Imported PNGs
 remain lossless with no mipmaps. The existing export preset now includes Pokémon
 XML metadata; no exports were regenerated and Web compatibility is not certified.
 
@@ -124,7 +130,7 @@ cardinal direction for every actor.
 `profile_pokemon_sprites.gd` runs normal rendering at 1920×1080 with seed 4,
 120-frame warmup and 600 measured frames per workload. Movement uses actual
 sequential enemy presentations, a requested 3× action speed and an 80 ms minimum
-movement interval; the test player is invincible. `-- --placeholder` runs the
+movement interval; the test player is invincible. `-- --defaults` runs the
 preserved artwork through the same harness (profiles cleared before actor ready).
 No production settings or mechanics are changed by the profiler.
 

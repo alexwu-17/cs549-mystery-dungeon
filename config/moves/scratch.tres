@@ -13,4 +13,6 @@ maximum_pp = 28
 range_tiles = 1
 targeting = 0
 animation_action = &"Scratch"
-description = "Hits the adjacent tile directly ahead. Damages one enemy."
+affected_stat = &""
+stage_change = 0
+description = "Hits one tile in front of the user."

@@ -32,18 +32,15 @@ func validate() -> void:
 								var normal := Vector3(0, 1, 1).normalized()
 								var height := (visual.sprite.get_item_rect().end.y - visual.opaque_top) * visual.sprite.pixel_size
 								assert(normal.dot(visual.sprite.global_position + camera.global_basis.y * height - actor.global_position) > 0)
-							elif fallback:
-								assert(leap.surface_offset == Vector3.ZERO and visual.sprite.transform.is_equal_approx(baseline))
-							if not fallback:
-								var bounds: Rect2i = visual.sprite.texture.get_meta("pokemon_opaque_rect")
-								var rect := visual.sprite.get_item_rect()
-								var normal := Vector3(-direction.x,1,-direction.y).normalized()
-								for x in [bounds.position.x,bounds.end.x]:
-									for y in [bounds.position.y,bounds.end.y]:
-										var point: Vector3 = visual.sprite.global_position + camera.global_basis.x*(rect.position.x+x)*visual.sprite.pixel_size
-										point += camera.global_basis.y*(rect.end.y-y)*visual.sprite.pixel_size
-										var required := normal.y * ModularDungeonVisuals.ramp_clearance_height(3) if direction == Vector2i.UP else 0.0
-										assert(normal.dot(point-actor.global_position) >= required - 0.001)
+							var bounds: Rect2i = visual.sprite.texture.get_meta("pokemon_opaque_rect")
+							var rect := visual.sprite.get_item_rect()
+							var normal := Vector3(-direction.x,1,-direction.y).normalized()
+							for x in [bounds.position.x,bounds.end.x]:
+								for y in [bounds.position.y,bounds.end.y]:
+									var point: Vector3 = visual.sprite.global_position + camera.global_basis.x*(rect.position.x+x)*visual.sprite.pixel_size
+									point += camera.global_basis.y*(rect.end.y-y)*visual.sprite.pixel_size
+									var required := normal.y * ModularDungeonVisuals.ramp_clearance_height(3) if direction == Vector2i.UP else 0.0
+									assert(normal.dot(point-actor.global_position) >= required - 0.001)
 							var corrected := visual.sprite.transform
 							visual.clear_ramp_intersection(camera, data, tile, leap)
 							assert(visual.sprite.transform.is_equal_approx(corrected)) # No accumulation.
@@ -56,34 +53,33 @@ func validate() -> void:
 							visual.clear_ramp_intersection(camera, data, tile, leap)
 							assert(actor.position == logical)
 						# Neutral resting pose returns to the exact flat baseline.
-						if not fallback: visual.face(Vector2i.DOWN)
+						visual.face(Vector2i.DOWN)
 						visual.clear_ramp_intersection(camera, data, Vector2i.ZERO, leap)
 						assert(leap.surface_offset == Vector3.ZERO and visual.sprite.transform.is_equal_approx(baseline))
-				if not fallback:
-					for direction: Vector2i in [Vector2i.UP]:
-						var data := DungeonData.new()
-						data.add_ramp(Vector2i.ZERO,direction,0)
-						for index in [1,2,3]:
-							var tile: Vector2i = direction*index
-							actor.position = Vector3(tile.x,data.surface_elevation(tile)*DungeonData.ELEVATION_HEIGHT+0.1,tile.y)
-							camera.position = actor.position + Vector3(0,sin(deg_to_rad(pitch)),cos(deg_to_rad(pitch)))*12.8
-							for facing: Vector2i in DungeonData.CARDINALS:
-								visual.facing = facing
-								for clip in ["Idle","Walk","Hurt","Faint"]:
-									visual.play_clip(clip,true)
-									for duration in visual.clips[clip].durations:
-										visual.apply_frame()
-										visual.clear_ramp_intersection(camera,data,tile,leap)
-										var bounds: Rect2i = visual.sprite.texture.get_meta("pokemon_opaque_rect")
-										var rect := visual.sprite.get_item_rect()
-										var normal := Vector3(-direction.x,1,-direction.y).normalized()
-										for x in [bounds.position.x,bounds.end.x]:
-											for y in [bounds.position.y,bounds.end.y]:
-												var point: Vector3 = visual.sprite.global_position + camera.global_basis.x*(rect.position.x+x)*visual.sprite.pixel_size
-												point += camera.global_basis.y*(rect.end.y-y)*visual.sprite.pixel_size
-												assert(normal.dot(point-actor.global_position) >= normal.y*ModularDungeonVisuals.ramp_clearance_height(3)-0.001)
-										visual.clip_time += duration + 0.000001
+				for direction: Vector2i in [Vector2i.UP]:
+					var data := DungeonData.new()
+					data.add_ramp(Vector2i.ZERO,direction,0)
+					for index in [1,2,3]:
+						var tile: Vector2i = direction*index
+						actor.position = Vector3(tile.x,data.surface_elevation(tile)*DungeonData.ELEVATION_HEIGHT+0.1,tile.y)
+						camera.position = actor.position + Vector3(0,sin(deg_to_rad(pitch)),cos(deg_to_rad(pitch)))*12.8
+						for facing: Vector2i in DungeonData.CARDINALS:
+							visual.facing = facing
+							for clip in ["Idle","Walk","Hurt","Faint"]:
+								visual.play_clip(clip,true)
+								for duration in visual.clips[clip].durations:
+									visual.apply_frame()
+									visual.clear_ramp_intersection(camera,data,tile,leap)
+									var bounds: Rect2i = visual.sprite.texture.get_meta("pokemon_opaque_rect")
+									var rect := visual.sprite.get_item_rect()
+									var normal := Vector3(-direction.x,1,-direction.y).normalized()
+									for x in [bounds.position.x,bounds.end.x]:
+										for y in [bounds.position.y,bounds.end.y]:
+											var point: Vector3 = visual.sprite.global_position + camera.global_basis.x*(rect.position.x+x)*visual.sprite.pixel_size
+											point += camera.global_basis.y*(rect.end.y-y)*visual.sprite.pixel_size
+											assert(normal.dot(point-actor.global_position) >= normal.y*ModularDungeonVisuals.ramp_clearance_height(3)-0.001)
+									visual.clip_time += duration + 0.000001
 				actor.free()
 	camera.free()
-	print("PASS: native/placeholder player/enemy ramp clearance, four orientations, both levels/directions, no drift, leap integration, flat restoration; all native Idle/Walk/Hurt/Faint frames clear front treads")
+	print("PASS: configured/default native player/enemy ramp clearance, four orientations, both levels/directions, no drift, leap integration, flat restoration; all native Idle/Walk/Hurt/Faint frames clear front treads")
 	quit()

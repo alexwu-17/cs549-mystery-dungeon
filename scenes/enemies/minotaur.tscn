@@ -1,27 +1,35 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=9 format=3]
 [ext_resource type="Script" path="res://scripts/enemies/minotaur.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/minotaur/front.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/pokemon/Drapion/Idle-Anim.png" id="2"]
 [ext_resource type="Script" path="res://scripts/effects/pokemon_character_visual.gd" id="3"]
 [ext_resource type="Resource" path="res://config/pokemon_drapion.tres" id="pokemon"]
 [ext_resource type="Script" path="res://scripts/effects/attack_leap.gd" id="clearance"]
+[ext_resource type="Resource" path="res://config/species/drapion.tres" id="species"]
+[ext_resource type="Resource" path="res://config/boss_attack_policy.tres" id="policy"]
+[sub_resource type="AtlasTexture" id="NativeIdle"]
+atlas = ExtResource("2")
+region = Rect2(0, 0, 48, 40)
+
 [node name="Minotaur" type="Node3D"]
 script = ExtResource("1")
+species_data = ExtResource("species")
+attack_policy = ExtResource("policy")
 [node name="BossSprite" type="Sprite3D" parent="."]
 position = Vector3(0, 0, 0.5)
-pixel_size = 0.00746268656716
+pixel_size = 0.0540540540540541
 cast_shadow = 2
 alpha_cut = 2
 shaded = false
 billboard = 1
 texture_filter = 0
-texture = ExtResource("2")
+texture = SubResource("NativeIdle")
 [node name="VisualController" type="Node" parent="."]
 script = ExtResource("3")
 profile = ExtResource("pokemon")
+fallback_profile = ExtResource("pokemon")
 display_name = "Boss"
 sprite_path = NodePath("../BossSprite")
-asset_directory = "res://assets/sprites/minotaur"
-foot_anchor = Vector2(465, 296)
+foot_anchor = Vector2(24, 40)
 
 [node name="SpriteClearance" type="Node" parent="."]
 script = ExtResource("clearance")

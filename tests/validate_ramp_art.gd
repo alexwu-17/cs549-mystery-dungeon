@@ -87,6 +87,12 @@ func validate() -> void:
 	for point: Vector3 in camera.sprite_samples(sprite):
 		assert(not rear.mesh.get_aabb().has_point(inverse * point))
 	renderer.update_occlusion(camera, Vector2i.ZERO, camera.sprite_samples(main.player.get_node("PlayerSprite")))
+	# This corrected native pose only grazes the foreground wall.
+	assert(not front.occluded and front.mesh.transparency == 0.0)
+	# Exercise fog/shadow composition with a genuinely obstructed sight line.
+	var wall_center: Vector3 = front.mesh.global_transform * front.mesh.get_aabb().get_center()
+	var obstructed: Array[Vector3] = [wall_center + (wall_center - camera.global_position).normalized() * 0.1]
+	renderer.update_occlusion(camera, Vector2i.ZERO, obstructed)
 	assert(front.occluded and front.mesh.visible and is_equal_approx(front.mesh.transparency, 0.8))
 	assert(not rear.occluded and rear.mesh.visible and rear.mesh.transparency == 0.0)
 	assert(front.mesh.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF)
