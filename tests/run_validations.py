@@ -11,7 +11,7 @@ import time
 
 ROOT = Path(__file__).resolve().parent.parent
 GAMEPLAY = (
-    "drapion_moves",
+    "drapion_moves", "terrain_visibility",
     "status_moves", "status_duration",
     "recovery", "repopulation",
     "enemy_moves", "damage_numbers", "pokemon_moves", "starter_selection", "battle_state", "combat", "sequential_rounds", "held_movement", "hud",

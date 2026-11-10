@@ -88,11 +88,14 @@ func validate() -> void:
 	renderer.update_occlusion(camera, Vector2i.ZERO, adjacent_points)
 	assert(not blocked.occluded)
 	renderer.update_visibility_center(Vector3.ZERO)
-	renderer.update_occlusion(camera, Vector2i.ZERO, adjacent_points, true)
+	renderer.update_occlusion(camera, Vector2i.ZERO, [camera.global_position + camera.global_basis.x * 20] as Array[Vector3], true)
 	assert(not blocked.occluded and mesh.visible)
 	# Actual player obstruction activates the circular treatment.
-	renderer.update_occlusion(camera, Vector2i.ZERO, points, true)
-	assert(blocked.occluded and mesh.visible and mesh.material_override is ShaderMaterial)
+	var faces := mesh.mesh.get_faces()
+	var surface := mesh.global_transform * ((faces[0] + faces[1] + faces[2]) / 3.0)
+	var real_points: Array[Vector3] = [surface + (surface-camera.global_position).normalized()*0.01]
+	renderer.update_occlusion(camera, Vector2i.ZERO, real_points, true)
+	assert(blocked.occluded and mesh.visible and mesh.get_surface_override_material(0) is ShaderMaterial)
 	for visual in renderer.fog_visuals:
 		if visual.stairs or data.get_tile(visual.tiles[0]) == DungeonData.TileType.RAMP:
 			assert(not visual.occluded and not visual.get("round_occluded", false))

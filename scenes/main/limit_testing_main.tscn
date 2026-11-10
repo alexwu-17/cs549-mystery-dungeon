@@ -7,3 +7,6 @@
 game_mode = 2
 generation_config = ExtResource("2")
 benchmark_enabled = true
+
+[node name="Player" parent="." index="5"]
+species_data = null

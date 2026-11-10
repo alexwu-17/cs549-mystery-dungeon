@@ -7,7 +7,7 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	await Support.run(self, {"pokemon": pokemon_validate}, "pokemon")
+	await Support.run(self, {"pokemon": pokemon_validate, "terrain": terrain_validate}, "pokemon")
 
 func pokemon_save_capture(name: String) -> void:
 	for frame in range(3): await process_frame
@@ -100,4 +100,44 @@ func pokemon_validate() -> bool:
 	main.free()
 	await process_frame
 	print("PASS: rendered Pokémon fog visibility, atlas cropping/opaque masks, all source-frame dimensions, character shadows, real sprite occlusion and fog restoration")
+	return true
+
+
+func terrain_validate() -> bool:
+	root.size = Vector2i(1920,1080)
+	var main = load("res://scenes/main/demo_main.tscn").instantiate()
+	main.get_node("Player").species_data = load("res://config/species/piplup.tres")
+	main.get_node("Player/VisualController").profile = load("res://config/pokemon_piplup.tres")
+	root.add_child(main)
+	Helper.complete_introduction(main)
+	main.cancel_round()
+	main.set_process(false)
+	for kind in ["corridor", "ramp", "landing"]:
+		var data := DungeonData.new()
+		data.rooms = [Rect2i(-3,-2,7,3)]
+		data.room_elevations = [0]
+		for y in range(-2,1):
+			for x in range(-3,4): data.set_tile(Vector2i(x,y),DungeonData.TileType.FLOOR)
+		var player_tile := Vector2i.ZERO
+		if kind == "corridor":
+			for x in range(-3,4):
+				data.set_tile(Vector2i(x,1),DungeonData.TileType.CORRIDOR,0)
+				data.set_tile(Vector2i(x,2),DungeonData.TileType.CORRIDOR,1)
+		else:
+			data.add_ramp(Vector2i(-2,1 if kind == "ramp" else 2),Vector2i.RIGHT,0)
+			player_tile = Vector2i(1 if kind == "ramp" else 2,0)
+		main.dungeon = data
+		assert(main.dungeon_renderer.render_dungeon(data))
+		main.spawn_test_enemies()
+		main.player.setup(player_tile,data,main.dungeon_renderer)
+		main.refresh_fog()
+		await process_frame
+		main.update_presentation()
+		var helper: TerrainOcclusion = main.dungeon_renderer._terrain_occlusion
+		print("TERRAIN ",kind,": ",helper.stats," faded=",helper.active.size())
+		assert(helper.stats.blocked > helper.stats.rays*0.25 and not helper.active.is_empty())
+		Support.save(self,"res://.godot/terrain-visibility-"+kind+".png")
+	main.cancel_round()
+	main.free()
+	print("PASS: actual raised corridor, stair and upper landing reveal captures")
 	return true

@@ -7,3 +7,6 @@ floor_subtitles = {
 3: "Cavern Depths"
 }
 game_mode = 1
+
+[node name="Player" parent="." index="5"]
+species_data = null
