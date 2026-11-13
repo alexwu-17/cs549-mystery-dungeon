@@ -25,10 +25,15 @@ func validate() -> void:
 		Helper.complete_introduction(main)
 		var lighting: DungeonLighting = main.get_node("LightingPresets")
 		var light: DirectionalLight3D = lighting.sun
-		assert(lighting.selected_preset == 0)
+		# Demo starts on the Spring HD-2D preset; the shared scene and Limit Testing keep the exact baseline.
+		assert(lighting.selected_preset == (3 if path == "demo_main" else 0))
 		var original_scene = load("res://scenes/main/main.tscn").instantiate()
+		if path == "demo_main":
+			assert(lighting.world.environment.glow_enabled and lighting.world.environment.fog_enabled and lighting.world.camera_attributes is CameraAttributesPractical)
+			lighting.apply_preset(0)
 		assert(light.transform == original_scene.get_node("DirectionalLight3D").transform)
 		assert(environment_values(lighting.world.environment) == environment_values(original_scene.get_node("WorldEnvironment").environment))
+		assert(lighting.world.camera_attributes == original_scene.get_node("WorldEnvironment").camera_attributes)
 		original_scene.free()
 		var before := Snapshots.snapshot(main.dungeon)
 		var rng_state: int = TestDungeonFactory.rng.state
@@ -36,14 +41,25 @@ func validate() -> void:
 		var camera: Transform3D = main.presentation_camera.transform
 		var visuals := visual_values(main)
 		var environment := environment_values(lighting.world.environment)
-		for index in [1,2,0,2,1,0]:
+		for index in [1,2,3,0,3,2,1,0]:
 			lighting.apply_preset(index)
 			assert(main.find_children("*","DirectionalLight3D",true,false).size() == 1)
 			assert(light.shadow_enabled and light.directional_shadow_max_distance == 40.0)
 			assert((-light.global_basis.z).y < -0.5)
 			var settings := lighting.world.environment
-			assert(settings.ssao_enabled == (index == 2))
-			assert(not settings.sdfgi_enabled and not settings.ssil_enabled and not settings.volumetric_fog_enabled and not settings.glow_enabled and not settings.ssr_enabled)
+			assert(settings.ssao_enabled == (index >= 2))
+			assert(not settings.sdfgi_enabled and not settings.ssil_enabled and not settings.volumetric_fog_enabled and not settings.ssr_enabled)
+			# Only D enables the screen-space HD-2D stack: glow, depth fog, adjustments, filmic, far blur.
+			assert(settings.glow_enabled == (index == 3) and settings.fog_enabled == (index == 3) and settings.adjustment_enabled == (index == 3))
+			assert(settings.tonemap_mode == (Environment.TONE_MAPPER_FILMIC if index == 3 else Environment.TONE_MAPPER_LINEAR))
+			if index == 3:
+				var attributes := lighting.world.camera_attributes as CameraAttributesPractical
+				assert(attributes != null and attributes.dof_blur_far_enabled and not attributes.dof_blur_near_enabled)
+				# Engine properties store 32-bit floats; exported preset values are doubles.
+				assert(is_equal_approx(attributes.dof_blur_far_distance, lighting.preset_d.far_blur_distance) and is_equal_approx(attributes.dof_blur_amount, lighting.preset_d.far_blur_amount))
+				assert(is_equal_approx(settings.fog_density, lighting.preset_d.fog_density) and is_equal_approx(settings.glow_intensity, lighting.preset_d.glow_intensity))
+			else:
+				assert(lighting.world.camera_attributes == lighting.baseline_camera_attributes)
 			assert(settings.reflected_light_source == lighting.baseline_environment.reflected_light_source)
 			assert(Snapshots.snapshot(main.dungeon) == before and TestDungeonFactory.rng.state == rng_state and main.turn_rng.state == turn_state)
 			assert(main.presentation_camera.transform == camera and visual_values(main) == visuals)
@@ -66,5 +82,5 @@ func validate() -> void:
 		assert(environment_values(other.get_node("WorldEnvironment").environment) == environment)
 		other.free()
 		main.free()
-	print("PASS: three inherited modes, exact baseline roundtrip, isolated resources, F4/no echo/no turn, restart persistence, unchanged fog/materials/camera/data/RNG, bounded effects")
+	print("PASS: three inherited modes, four presets with Demo Spring HD-2D default, exact baseline roundtrip, isolated resources, F4/no echo/no turn, restart persistence, unchanged fog/materials/camera/data/RNG, bounded effects")
 	quit()

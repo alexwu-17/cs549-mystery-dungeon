@@ -54,7 +54,20 @@ var terrain_fill_cells: Dictionary = {}
 @export var cave_continuous_ground_enabled: bool = true
 @export var cave_stone_mapping_enabled: bool = true
 @export var cave_weathered_edges_enabled: bool = true
+@export_group("Out-of-bounds scenery")
+## Decorative ridge models beyond the logical map, over the scenery border and apron.
+@export var out_of_bounds_scenery_enabled: bool = true
+@export_range(0.5, 3.0, 0.05) var out_of_bounds_height_scale: float = 2.2
+@export_range(0.0, 1.0, 0.05) var out_of_bounds_far_density: float = 0.6
+## Share of the border fog palette lifted toward white for the sky-lit ridges.
+@export_range(0.0, 1.0, 0.05) var out_of_bounds_shade_lift: float = 0.65
+## Keep the band south of the map flat so ridges never stand between the camera and play.
+@export var out_of_bounds_foreground_clear: bool = true
+## Far ridges reach at most this many cells beyond the detailed border, whatever the apron size.
+@export_range(0, 48, 1) var out_of_bounds_far_extent: int = 16
+@export_group("")
 var cave_background: CaveTerrainBackdrop
+var out_of_bounds_scenery: OutOfBoundsScenery
 var cave_fill_active: bool = false
 var _occlusion_frame: int = -1
 var _occlusion_context: Array = []
@@ -76,6 +89,7 @@ func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure
 	terrain_metrics.clear()
 	geometry_plan = {}
 	cave_background = null
+	out_of_bounds_scenery = null
 	geometry_diagnostics = {"active": false, "repairs": [], "unresolved": [], "fallback": structure_only}
 	validated_geometry_active = geometry_validation_enabled and terrain_fill_enabled and upper_elevation_open_platforms and upper_terrain_mode != UpperTerrainVisuals.Mode.UNLIMITED and not preserve_terrain and not data.legacy_ramp and data.room_elevations.has(1) and not data.room_elevations.has(-1)
 	var flat_ground := geometry_validation_enabled and terrain_fill_enabled and upper_elevation_open_platforms and upper_terrain_mode != UpperTerrainVisuals.Mode.UNLIMITED and not preserve_terrain and not data.legacy_ramp and not data.room_elevations.has(1) and not data.room_elevations.has(-1)
@@ -166,6 +180,13 @@ func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure
 			push_error("Invalid bounded cave background: " + str(cave_background.diagnostics.violations))
 			return false
 		if geometry_diagnostics_enabled: print("CAVE BACKGROUND ", cave_background.diagnostics)
+		if out_of_bounds_scenery_enabled and cave_scenery_border_width > 0 and not cave_background.records.is_empty():
+			out_of_bounds_scenery = OutOfBoundsScenery.new()
+			out_of_bounds_scenery.name = "OutOfBoundsScenery"
+			add_child(out_of_bounds_scenery)
+			out_of_bounds_scenery.setup(data, cave_background, self)
+			out_of_bounds_scenery.apply_shade(dim_material.albedo_color)
+			geometry_diagnostics["out_of_bounds"] = out_of_bounds_scenery.diagnostics
 	_terrain_occlusion.setup(fog_visuals)
 	_visibility_materials.warm_up(self, fog_visuals)
 	return true
@@ -542,6 +563,8 @@ func apply_fog(reference_elevation: int = 0) -> void:
 			_apply_rounded_wall(visual)
 	if is_instance_valid(cave_background):
 		cave_background.apply_fog(dungeon_data, reference_elevation, dim_material.albedo_color, other_elevation_material.albedo_color)
+	if is_instance_valid(out_of_bounds_scenery):
+		out_of_bounds_scenery.apply_shade(dim_material.albedo_color if reference_elevation == 0 else other_elevation_material.albedo_color)
 
 
 func _fog_player_tile() -> Vector2i:

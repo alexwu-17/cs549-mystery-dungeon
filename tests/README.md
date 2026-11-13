@@ -11,7 +11,7 @@ python tests/run_validations.py --godot "$GODOT_BIN" --suite full
 ```
 
 The default `gameplay` group contains 22 checks. `full` discovers every
-`validate_*.gd` script (currently 59). Logs default to `.godot/validation/`;
+`validate_*.gd` script (currently 60). Logs default to `.godot/validation/`;
 `--log-dir` selects another folder. The runner requires a zero exit, a `PASS:`
 message, and no script/parse/assertion errors. It stops failed scripts promptly
 and returns nonzero if any check fails. Engine cleanup/certificate warnings are
@@ -41,6 +41,7 @@ appearance, shadows, transparency, GPU readback or frame rates.
 | Boss/defeat | `validate_boss`, `validate_drapion_swing`, `validate_enemy_defeat` |
 | Floors, modes, reset or input locks | `validate_battle_state`, `validate_modes`, `validate_floor_introduction`, full regression for shared lifecycle changes |
 | Character animation | `validate_attack_leap`, `validate_character_sprites`, `validate_pokemon_sprites`, relevant ramp tests and normal-render inspection |
+| Out-of-bounds ridge scenery, lighting presets or HD-2D post-processing | `validate_out_of_bounds_scenery`, `validate_lighting_presets`, `validate_cave_scenery`, `validate_sunlight_atmosphere`; normal-render inspection by the user |
 | Terrain, generation, atmosphere or rendering | Relevant subsystem checks; full regression when shared data/rendering contracts change |
 
 ## Consolidated combat coverage

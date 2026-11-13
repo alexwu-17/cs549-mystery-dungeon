@@ -1,0 +1,12 @@
+# Blender 5.2.3 LTS MTL File: 'MysteryDungeon_Assets.blend'
+# www.blender.org
+
+newmtl Material.014
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.341936 0.282181 0.273416
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1

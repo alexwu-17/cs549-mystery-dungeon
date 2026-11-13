@@ -17,7 +17,10 @@ func validate() -> void:
 		assert((-light.global_basis.z).y < 0.0)
 		var environment: Environment = main.get_node("WorldEnvironment").environment
 		assert(environment.ambient_light_source == Environment.AMBIENT_SOURCE_COLOR)
-		assert(is_equal_approx(environment.ambient_light_energy, 0.25))
+		# Demo starts on the Spring HD-2D preset; other scenes keep the scene's 0.25 baseline.
+		var lighting = main.get_node("LightingPresets") # Untyped: a typed class reference here changes script load order and detaches preset scripts.
+		var expected_ambient: float = 0.25 if lighting.selected_preset == 0 else lighting.presets()[lighting.selected_preset].ambient_energy
+		assert(is_equal_approx(environment.ambient_light_energy, expected_ambient))
 		assert(main.get_node("Camera3D").projection == Camera3D.PROJECTION_PERSPECTIVE)
 		for visual in main.dungeon_renderer.fog_visuals:
 			var mesh: MeshInstance3D = visual.mesh

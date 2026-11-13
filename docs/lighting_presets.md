@@ -11,6 +11,7 @@ Editable resources:
 - `config/lighting/baseline.tres`
 - `config/lighting/natural_sunlight.tres`
 - `config/lighting/atmospheric.tres`
+- `config/lighting/spring_hd2d.tres` (D, 2026-11-13)
 
 A captures the actual scene light and environment at startup rather than approximating them with new constants. Every selection restores that capture before applying its overrides. Environment resources are duplicated so editing a live preset cannot change the original scene or another game instance. Switching changes no fog materials, sprite configuration, mesh, camera, visibility cache or gameplay state. The controller has no process callback.
 
@@ -92,3 +93,20 @@ For interactive pass attribution in Godot 4.4.1: run the shared scene from the e
 `scenes/main/main.tscn` adds only the controller node/script. New helpers: `scripts/core/dungeon_lighting.gd` and `dungeon_lighting_preset.gd`; three `config/lighting/*.tres` resources; `tests/validate_lighting_presets.gd` and `capture_lighting_presets.gd`; generated script UID companions; this report and the handoff. No renderer, material, generation or gameplay code was edited in this lighting pass.
 
 Godot references: [Environment / SSAO](https://docs.godotengine.org/en/4.4/classes/class_environment.html#class-environment-property-ssao-enabled), [DirectionalLight3D shadow range and cascades](https://docs.godotengine.org/en/4.4/classes/class_directionallight3d.html#class-directionallight3d-property-directional-shadow-max-distance).
+
+## D - Spring HD-2D (2026-11-13)
+
+`config/lighting/spring_hd2d.tres` is the fourth preset and the **Demo scene default** (`LightingPresets.selected_preset = 3` in `demo_main.tscn`); the shared `main.tscn` and Limit Testing keep A. F4 now cycles A -> B -> C -> D. `DungeonLightingPreset` gained an "HD-2D post-processing" group whose defaults are off, so A/B/C behave exactly as before.
+
+| Setting | D value |
+| --- | --- |
+| Sun | (-48, -32, 0) degrees, RGB (1.00, 0.96, 0.86), energy 1.05, angular 0.75 |
+| Ambient | RGB (0.80, 0.90, 0.80), energy 0.38 |
+| SSAO | On, same values as C |
+| Glow | On, intensity 0.5, bloom 0.1, HDR threshold 1.0, soft-light blend |
+| Depth fog | On, exponential, light RGB (0.80, 0.88, 0.76), density 0.016, aerial perspective 0.6, no sky/height fog |
+| Far blur | `CameraAttributesPractical` on the WorldEnvironment: far distance 19, transition 14, amount 0.06, near blur off |
+| Adjustments | Brightness 1.02, contrast 1.04, saturation 1.12 |
+| Tonemap | Filmic, exposure 1.0 |
+
+Volumetric fog remains owned by `SunlightAtmosphere`; presets never touch it. The baseline capture now includes `WorldEnvironment.camera_attributes`, restored on every selection. Tune the look in the preset resource: `far_blur_distance` governs how far past the player the background softens, `fog_density` how quickly out-of-bounds ridges fade toward the fog color.

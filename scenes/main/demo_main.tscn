@@ -8,5 +8,8 @@ floor_subtitles = {
 }
 game_mode = 1
 
+[node name="LightingPresets" parent="." index="3"]
+selected_preset = 3
+
 [node name="Player" parent="." index="5"]
 species_data = null

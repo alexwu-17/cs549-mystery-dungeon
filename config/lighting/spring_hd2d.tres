@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="DungeonLightingPreset" load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://bamyilxtqecw3" path="res://scripts/core/dungeon_lighting_preset.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "D - Spring HD-2D"
+restore_scene_baseline = false
+sun_rotation_degrees = Vector3(-48, -32, 0)
+sun_color = Color(1, 0.96, 0.86, 1)
+sun_energy = 1.05
+sun_angular_distance = 0.75
+ambient_color = Color(0.8, 0.9, 0.8, 1)
+ambient_energy = 0.38
+shadow_bias = 0.025
+shadow_normal_bias = 0.12
+ssao_enabled = true
+ssao_radius = 0.65
+ssao_intensity = 0.55
+ssao_power = 1.15
+ssao_detail = 0.35
+glow_enabled = true
+glow_intensity = 0.5
+glow_bloom = 0.1
+glow_hdr_threshold = 1.0
+glow_blend_mode = 2
+depth_fog_enabled = true
+fog_light_color = Color(0.8, 0.88, 0.76, 1)
+fog_light_energy = 1.0
+fog_density = 0.016
+fog_aerial_perspective = 0.6
+far_blur_enabled = true
+far_blur_distance = 19.0
+far_blur_transition = 14.0
+far_blur_amount = 0.06
+adjustments_enabled = true
+adjustment_brightness = 1.02
+adjustment_contrast = 1.04
+adjustment_saturation = 1.12
+tonemap_mode = 2
+tonemap_exposure = 1.0
