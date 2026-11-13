@@ -10,7 +10,7 @@ func _initialize() -> void:
 func validate() -> void:
 	var expected := {
 		"Piplup": {"Shoot": Vector3i(32,40,12), "Idle": Vector3i(24,40,6), "Walk": Vector3i(24,32,4), "Attack": Vector3i(64,64,14), "Hurt": Vector3i(40,56,2), "Faint": Vector3i(32,32,4)},
-		"Turtwig": {"Withdraw": Vector3i(24,40,11), "Idle": Vector3i(24,32,4), "Walk": Vector3i(24,32,4), "Attack": Vector3i(72,72,11), "Hurt": Vector3i(32,48,2), "Faint": Vector3i(40,32,4)},
+		"Turtwig": {"Shoot": Vector3i(32,40,12), "Withdraw": Vector3i(24,40,11), "Idle": Vector3i(24,32,4), "Walk": Vector3i(24,32,4), "Attack": Vector3i(72,72,11), "Hurt": Vector3i(32,48,2), "Faint": Vector3i(40,32,4)},
 		"Chimchar": {"Shoot": Vector3i(32,40,12), "Idle": Vector3i(24,40,5), "Walk": Vector3i(32,48,7), "Attack": Vector3i(64,80,10), "Hurt": Vector3i(32,48,2), "Faint": Vector3i(32,32,4), "Strike": Vector3i(64,72,10)},
 		"Stunky": {"Idle": Vector3i(32,48,6), "Walk": Vector3i(32,40,4), "Attack": Vector3i(72,80,11), "Hurt": Vector3i(40,56,2), "Faint": Vector3i(32,32,4)},
 		"Drapion": {"Idle": Vector3i(48,40,4), "Walk": Vector3i(48,40,4), "Attack": Vector3i(80,88,12), "Hurt": Vector3i(56,64,2), "Charge": Vector3i(48,40,10), "Strike": Vector3i(72,88,10)}

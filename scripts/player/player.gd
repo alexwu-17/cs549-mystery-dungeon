@@ -244,7 +244,10 @@ func use_move(slot: int) -> bool:
 	if move.category == PokemonMoveData.Category.STATUS:
 		if not PokemonBattleState.STATS.has(move.affected_stat) or move.stage_change == 0 or move.targeting == PokemonMoveData.Targeting.STRAIGHT_PROJECTILE:
 			return false
-	elif move.targeting != PokemonMoveData.Targeting.ADJACENT or move.range_tiles != 1:
+	elif move.targeting == PokemonMoveData.Targeting.ADJACENT:
+		if move.range_tiles != 1:
+			return false
+	elif move.targeting != PokemonMoveData.Targeting.STRAIGHT_PROJECTILE or move.range_tiles < 1:
 		return false
 	stop_held_movement()
 	character_visual.face(facing)

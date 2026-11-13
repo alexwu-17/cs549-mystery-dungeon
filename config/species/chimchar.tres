@@ -1,16 +1,18 @@
-[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=5 format=3 uid="uid://bmwb5s5yx0xtc"]
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=6 format=3 uid="uid://bmwb5s5yx0xtc"]
 
 [ext_resource type="Script" uid="uid://cxlqm507earwp" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
 [ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="2_cxm21"]
 [ext_resource type="Resource" uid="uid://csyhds8fh2d0a" path="res://config/moves/scratch.tres" id="move"]
 [ext_resource type="Resource" path="res://config/moves/leer.tres" id="status"]
+[ext_resource type="Resource" path="res://config/moves/ember.tres" id="unlock"]
 
 [resource]
 script = ExtResource("1")
 species_id = &"chimchar"
 display_name = "Chimchar"
-types = []
+types = PackedStringArray("Fire")
 starting_moves = Array[ExtResource("2_cxm21")]([ExtResource("move"), ExtResource("status")])
+floor_unlock_move = ExtResource("unlock")
 level = 20
 maximum_hp = 76
 attack = 39

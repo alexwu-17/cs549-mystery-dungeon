@@ -146,3 +146,31 @@ yet; Bug gives no STAB to Poison/Dark Drapion. A full-health starter survives
 one X-Scissor with15/20/10 HP, but two are lethal. Dodging/recharge windows are
 critical; basics have no telegraph and become the sole attack after10 executed
 X-Scissors. No coefficients, starter/Stunky stats or boss timing were rebalanced.
+
+## Elemental projectile moves (2026-11-13)
+
+Entering Floor 3 (configurable `Main.elemental_move_floor`) teaches the starter
+its `floor_unlock_move` once per run, into slot O. Starters now carry types
+Fire/Water/Grass, so these moves receive STAB1.5; existing Normal moves and
+basics are unaffected. There is still no type chart (effectiveness neutral).
+
+| Starter | Move | Type | Category | Power | PP | Range |
+| --- | --- | --- | --- | ---: | ---: | ---: |
+| Chimchar | Ember | Fire | Special | 6 | 10 | 4 |
+| Piplup | Bubble | Water | Special | 6 | 10 | 4 |
+| Turtwig | Razor Leaf | Grass | Physical | 8 | 10 | 4 |
+
+All three use one straight projectile pattern: up to four tiles in the facing
+direction following `can_traverse()`, stopping at the first wall/elevation
+change and hitting only the first enemy or boss in the lane. Misses still spend
+PP and a turn.
+
+| Starter | vs Stunky (HP42) | Hits | vs Drapion (HP92) | Hits |
+| --- | ---: | ---: | ---: | ---: |
+| Chimchar Ember | 50 | 1 | 31 | 3 |
+| Piplup Bubble | 54 | 1 | 35 | 3 |
+| Turtwig Razor Leaf | 60 | 1 | 38 | 3 |
+
+Compared with the slot-U moves (36/37/39 vs Stunky, 22/22/24 vs Drapion), the
+unlock is a limited-PP ranged finisher. Powers/PP are configuration; tune after
+manual playtesting.

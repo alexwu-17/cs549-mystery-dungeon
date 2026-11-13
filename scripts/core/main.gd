@@ -47,6 +47,9 @@ var recovery_damage_serial: int = 0
 @export var enemy_respawn_enabled: bool = true
 @export_range(1, 100) var enemy_respawn_delay: int = 100
 var repopulation := EnemyRepopulation.new()
+## First floor on which the starter learns its species' floor_unlock_move, once per run.
+@export_range(1, 99) var elemental_move_floor: int = 3
+var learned_move_pending: PokemonMoveData
 
 
 func _ready() -> void:
@@ -111,6 +114,7 @@ func start_new_run() -> void:
 	player.gameplay_enabled = true
 	player.facing = Vector2i.DOWN
 	floor_number = 1
+	learned_move_pending = null
 	player.reset_battle_state()
 	print("NEW RUN: PLAYER HP ", player.health.current, "/", player.health.maximum)
 	_begin_floor_introduction(false)
@@ -186,10 +190,22 @@ func load_test_floor() -> void:
 
 	print("Player grid position after setup: ", player.grid_position)
 	print("Player world position after setup: ", player.position)
+	_teach_floor_move()
 	refresh_fog()
 	loading_floor = false
 	player.gameplay_enabled = not game_over and not victory
 	
+func _teach_floor_move() -> void:
+	# Gameplay-authoritative: whenever a floor at or past the unlock floor loads,
+	# the starter knows its elemental move. Fresh runs reset moves, so it repeats per run.
+	var species := player.battle_state.species
+	if species == null or species.floor_unlock_move == null or floor_number < elemental_move_floor:
+		return
+	if player.battle_state.learn_move(species.floor_unlock_move):
+		learned_move_pending = species.floor_unlock_move
+		print("MOVE LEARNED: ", species.floor_unlock_move.display_name)
+
+
 func _on_stairs_reached() -> void:
 	if player.transition_locked or game_over or victory or loading_floor or not GameModeConfig.can_advance(game_mode, floor_number):
 		return
@@ -337,7 +353,15 @@ func _on_player_attack(target: Vector2i, move: PokemonMoveData = null) -> void:
 	var delta := target - player.grid_position
 	if absi(delta.x) + absi(delta.y) != 1:
 		return
-	if dungeon.can_traverse(player.grid_position, target) and is_instance_valid(boss) and boss.occupies(target):
+	var reachable := dungeon.can_traverse(player.grid_position, target)
+	if move != null and move.targeting == PokemonMoveData.Targeting.STRAIGHT_PROJECTILE:
+		# Flight follows authoritative traversal; the last tile is the first occupant or the last clear tile.
+		var path := PokemonProjectile.flight_path(dungeon, player.grid_position, delta, move.range_tiles, is_enemy_occupied)
+		reachable = not path.is_empty()
+		if reachable:
+			target = path.back()
+			ProjectileEffect.launch(entities, dungeon_renderer.get_entity_world_position(player.grid_position), dungeon_renderer.get_entity_world_position(target), move.move_type, player.attack_leap.action_speed)
+	if reachable and is_instance_valid(boss) and boss.occupies(target):
 		print("PLAYER ATTACK MINOTAUR at ", target)
 		var damage := _player_attack_damage(boss.battle_state, move)
 		dialogue.append_event(&"damage" if move != null else &"attack", {"actor": _player_display_name(), "target": _boss_display_name(), "amount": mini(damage, boss.health.current)})
@@ -347,7 +371,7 @@ func _on_player_attack(target: Vector2i, move: PokemonMoveData = null) -> void:
 		else:
 			refresh_fog()
 		return
-	if not dungeon.can_traverse(player.grid_position, target) or not enemy_occupancy.has(target):
+	if not reachable or not enemy_occupancy.has(target):
 		print("PLAYER ATTACK MISSED at ", target)
 		if move != null: dialogue.append_event(&"no_effect")
 		run_enemy_turn()
@@ -428,11 +452,18 @@ func cancel_round(preserve_player_presentation: bool = false) -> void:
 	player.round_locked = false
 	if not preserve_player_presentation:
 		player.attack_leap.finish()
+		_clear_projectiles()
 	if is_instance_valid(boss):
 		boss.character_visual.cancel()
 	for enemy in enemies:
 		if is_instance_valid(enemy):
 			enemy.attack_leap.finish()
+
+
+func _clear_projectiles() -> void:
+	for child in entities.get_children():
+		if child is ProjectileEffect:
+			child.finish()
 
 
 func _exit_tree() -> void:
@@ -592,6 +623,9 @@ func _begin_floor_introduction(advancing: bool) -> void:
 	# reveal() returns after the final fade and introduction_finished emission.
 	if GameModeConfig.is_arena(game_mode, floor_number) and not use_elevation_test:
 		MusicManager.play_boss(self)
+	if learned_move_pending != null:
+		dialogue.append_event(&"move_learned", {"move": learned_move_pending.display_name})
+		learned_move_pending = null
 	player.transition_locked = false
 
 

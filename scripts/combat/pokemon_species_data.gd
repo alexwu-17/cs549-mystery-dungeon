@@ -9,6 +9,8 @@ extends Resource
 @export var display_name: String = ""
 @export var types: PackedStringArray = []
 @export var starting_moves: Array[PokemonMoveData] = []
+## Taught once per run when the player first loads Main.elemental_move_floor.
+@export var floor_unlock_move: PokemonMoveData
 @export_range(1, 100, 1) var level: int = 1
 @export_range(1, 9999, 1) var maximum_hp: int = 1
 @export_range(1, 9999, 1) var attack: int = 1

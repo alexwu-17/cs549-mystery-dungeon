@@ -45,6 +45,29 @@ func reset(source: PokemonSpeciesData, fallback_hp: int = 1, fallback_level: int
 	moves_changed.emit()
 
 
+func knows_move(move: PokemonMoveData) -> bool:
+	return move != null and moves.has(move)
+
+
+## Fills the first empty slot, or appends while under MAX_MOVES, with full PP.
+## Returns false for null, already-known moves or a full move set.
+func learn_move(move: PokemonMoveData) -> bool:
+	if move == null or knows_move(move):
+		return false
+	for slot in range(moves.size()):
+		if moves[slot] == null:
+			moves[slot] = move
+			remaining_pp[slot] = move.maximum_pp
+			moves_changed.emit()
+			return true
+	if moves.size() >= MAX_MOVES:
+		return false
+	moves.append(move)
+	remaining_pp.append(move.maximum_pp)
+	moves_changed.emit()
+	return true
+
+
 func can_use_move(slot: int) -> bool:
 	return slot >= 0 and slot < moves.size() and moves[slot] != null and remaining_pp[slot] > 0
 

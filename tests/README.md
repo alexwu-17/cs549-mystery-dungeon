@@ -10,8 +10,8 @@ python tests/run_validations.py --godot "$GODOT_BIN"
 python tests/run_validations.py --godot "$GODOT_BIN" --suite full
 ```
 
-The default `gameplay` group contains 21 checks. `full` discovers every
-`validate_*.gd` script (currently 57). Logs default to `.godot/validation/`;
+The default `gameplay` group contains 22 checks. `full` discovers every
+`validate_*.gd` script (currently 59). Logs default to `.godot/validation/`;
 `--log-dir` selects another folder. The runner requires a zero exit, a `PASS:`
 message, and no script/parse/assertion errors. It stops failed scripts promptly
 and returns nonzero if any check fails. Engine cleanup/certificate warnings are
@@ -24,6 +24,7 @@ appearance, shadows, transparency, GPU readback or frame rates.
 | Change | Primary checks |
 | --- | --- |
 | Species stats or actor initialization | `validate_battle_state`, `validate_hud` |
+| Species types/STAB, Floor 3 move unlock, projectile lane/targeting, O slot | `validate_projectile_moves`, `validate_pokemon_moves`, `validate_battle_state` |
 | Demo startup, starter choice or player profiles | `validate_starter_selection`, `validate_pokemon_sprites`, `validate_modes` |
 | Damage formula, move data, PP and move input | `validate_pokemon_moves`, `validate_battle_state`, `validate_starter_selection` |
 | Five-turn stage expiry/refresh and move/stat/damage messages | `validate_status_duration`, `validate_status_moves`, `validate_dialogue`, `validate_sequential_rounds` |

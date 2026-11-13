@@ -2,6 +2,7 @@ extends RefCounted
 
 const TEMPLATES := {
 	&"move_used": "{actor} used {move}.",
+	&"move_learned": "{character} learned {move}!",
 	&"damage": "{target} took {amount} damage.",
 	&"stat_changed": "{actor}'s {stat} was {direction}.",
 	&"stats_restored": "{actor}'s stats returned to normal.",

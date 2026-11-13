@@ -6,6 +6,14 @@ This targets Godot **4.4.1** (Checkpoint 4 was tested on **4.7.2**, not yet veri
 
 Prioritize working, testable, maintainable changes. Pokémon gameplay is planned in the Week 10 sprint below; distinguish planned behavior from implemented systems. Do not add unrelated systems or runtime AI services.
 
+## Elemental projectile moves and Floor 3 unlock (2026-11-13)
+
+- Working agreement: no new automated visual/capture testing; the user tests features manually in the editor. Headless validation scripts remain the regression floor. Add minimal features one at a time and iterate from feedback.
+- Starters now have species types Fire/Water/Grass (Stunky Poison/Dark). STAB1.5 applies through the existing calculator; Normal moves/basics are unchanged. No type chart yet; effectiveness remains neutral.
+- `PokemonSpeciesData.floor_unlock_move` names Ember (Fire/Special/power6), Bubble (Water/Special/power6) and Razor Leaf (Grass/Physical/power8), all PP10, range4, `STRAIGHT_PROJECTILE`, in `config/moves/`. `Main.elemental_move_floor` (default3) teaches it in `load_test_floor()` through `PokemonBattleState.learn_move()` into the first empty slot (O for starters), once per run; fresh runs forget it, floors keep PP. The learned message appears after the floor reveal.
+- `PokemonProjectile.flight_path()` is the authoritative lane: repeated `can_traverse()` steps up to range, stopping at walls/elevation/ramp-side rules, and on the first occupied tile (enemy or boss), which is hit once. Misses spend PP and a turn like other moves. `ProjectileEffect` is a placeholder colored billboard that travels the resolved lane under `Entities`; it never decides hits and is freed on round cancellation.
+- Profiles map Ember/Bubble/RazorLeaf to native Shoot. Neutral STAB damage: Stunky50/54/60 (one hit), Drapion31/35/38 (three hits). Owner check `validate_projectile_moves`; default runner22/full59; all59 have final PASS results on Godot4.4.1 (initial55/59: three diagnostics-folder fixture failures and one Turtwig clip-count fixture, rerun PASS). Godot4.4.1 results are in the newest handoff. Next candidates: type chart, per-move particles, enemy roster.
+
 ## Assignment5 checkpoint and unresolved issues (2026-11-09)
 
 - Recent work includes starter status moves and five-turn stage handling, move-specific native clips, status tooltip power-row removal and shorter move descriptions; authored Drapion stats/X-Scissor with independent PP; Stunky level10 with other stats unchanged;100-turn enemy-free respawn grace; native Chimchar/Stunky/Drapion role defaults and removal of retired sprite/source/extraction assets.
