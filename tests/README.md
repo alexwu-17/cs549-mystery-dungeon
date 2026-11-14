@@ -1,7 +1,10 @@
 # Validation workflow
 
-Use focused checks while implementing a feature. Run the full suite after shared
-turn/lifecycle changes and before a checkpoint. Godot must finish importing first.
+Choose checks using the [Codex Efficiency and Testing Policy](../AGENTS.md#codex-efficiency-and-testing-policy).
+Small changes need only relevant syntax/import checks; gameplay features use focused
+tests and one headless validation. Major shared-system changes may need broader
+regressions. Do not run the full suite automatically after changes or at checkpoints.
+When an import is needed, let it finish before running dependent checks.
 Set `GODOT_BIN` or pass `--godot` with your installed executable path.
 
 ```sh
