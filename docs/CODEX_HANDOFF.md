@@ -1,5 +1,26 @@
 # Codex project handoff
 
+### Ember continuity refinement (2026-11-14)
+
+User requested earlier, fluid tadpole-like tail growth. Growth now starts at0.625 tile (within requested0.5-0.75), reaching the existing early-third-tile peak. Replaced separate ball/tail reveal masks with a single connected silhouette whose rear half stretches smoothly from1x to5x; head/pivot stays fixed, maximum soft tip about55 source pixels behind it. This removes the independent tail-opacity ramp and moving vertical reveal edge. The shader blends adjacent source animation frames in premultiplied color using tween-driven fractional source time, retaining nearest texture sampling. Existing distance-based taper/fade, release lock, speed, priorities and cancellation remain.
+
+Godot4.4.1 focused `--check-only` completed with no parse errors; scoped diff whitespace check clean. No captures or broader tests. Normal-render smoothness, silhouette and player overlap require manual gameplay review; headless parsing does not verify shader appearance.
+
+### Ember trail lifecycle (2026-11-14)
+
+User requested a ball through tile1, growing tail on tile2, peak early tile3, then taper/fade through tile4. `ember_projectile.gdshader` now masks the unchanged PixelFX sheet around its head pivot, revealing a shortened soft-edged tail (maximum54 source pixels behind the head). `ProjectileEffect._set_ember_time()` drives the mask by actual distance traveled: growth1.0-2.15 tiles, peak2.15-2.25, taper and alpha fade2.25-4.0. Short shots retain their appropriate early stage rather than compressing the lifecycle. Initial mask is explicitly applied at construction, so no full-length tail appears on the release frame; the existing preparation delay still hides the effect. The custom material mirrors directional render priority. No asset modifications, gameplay or travel timing changes.
+
+Focused deterministic Godot4.4.1 checks PASS for lifecycle values (ball/peak/end and late taper), material priorities and existing animation/direction/release/speed/cancellation checks (`.godot/pixelfx-work/ember-lifecycle.log`); known certificate-store warning remains. No GPU captures or broad suite. Shader appearance, mouth/body overlap and fade pacing require manual normal-render gameplay verification.
+
+### Ember PixelFX presentation (2026-11-14)
+
+Ember now uses the unmodified `fire/fireball` sprite-sheet export from PixelFX revision `5294518ce7c72e48b6100a744596e0acf57f2826`: `assets/effects/pixelfx/fireball.{png,json}`, 36 frames at30fps, 136x56 cells in a4x9 grid, head pivot(112,28). `third_party/pixelfx/` retains upstream MIT license/notices and reproduction instructions; this does not relicense the project. No JS runtime, gallery font or stock character is shipped.
+
+Main passes the move ID to `ProjectileEffect`; only `ember` selects the sheet. Frames advance alongside flight on the existing speed-scaled tween after release delay. A camera-facing plane rotates in the camera basis toward the projected lane; the head pivot stays on the existing release origin. Existing travel timing, cardinal player layering, cancellation, targeting/damage/PP remain owned by their existing systems. Bubble/Grass retain placeholders. No impact animation or dynamic light added; glow is baked into the export. Camera orientation is sampled at launch.
+
+Focused Godot4.4.1 deterministic scratch check PASS: sheet/grid/pivot, four directions, priorities, release delay, advancing frames, action speed, completion/cancellation and placeholder fallback (`.godot/pixelfx-work/ember.log`). Existing `validate_projectile_moves` passed release-delay assertions but failed its expected42-damage KO at line197: current pre-existing local Chimchar `types=[]` yields33 damage; user species settings were preserved. Import completed the new texture and script registration without parse errors, but editor exit reported sandbox-denied user editor-settings writes; known certificate warning persists. No full suite or automated GPU captures. Manual gameplay still needs Ember size/trail, four-direction mouth alignment, transparency/wall/fog behavior and visual timing checked.
+
+
 Temporary testing configuration: `scripts/core/main.gd` sets `elemental_move_floor = 1`, so starters learn their elemental projectile on Floor 1. Restore this value to 3 for normal progression. The focused projectile fixture explicitly selects 3 to retain progression coverage.
 
 ### Projectile travel timing (2026-11-13)

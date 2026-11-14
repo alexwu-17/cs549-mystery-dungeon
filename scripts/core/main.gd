@@ -362,7 +362,7 @@ func _on_player_attack(target: Vector2i, move: PokemonMoveData = null) -> void:
 			target = path.back()
 			# Translate the visual lane only; targeting and tile-based travel time stay authoritative.
 			var offset := player.character_visual.projectile_visual_offset() - Vector3.UP * ProjectileEffect.BODY_HEIGHT
-			var projectile := ProjectileEffect.launch(entities, dungeon_renderer.get_entity_world_position(player.grid_position) + offset, dungeon_renderer.get_entity_world_position(target) + offset, move.move_type, player.attack_leap.action_speed, player.character_visual.projectile_release_time())
+			var projectile := ProjectileEffect.launch(entities, dungeon_renderer.get_entity_world_position(player.grid_position) + offset, dungeon_renderer.get_entity_world_position(target) + offset, move.move_type, player.attack_leap.action_speed, player.character_visual.projectile_release_time(), move.move_id)
 			player.layer_over_projectile(projectile)
 	if reachable and is_instance_valid(boss) and boss.occupies(target):
 		print("PLAYER ATTACK MINOTAUR at ", target)
