@@ -3,7 +3,7 @@ extends Node3D
 const TEST_ENEMY_SCENE := preload("res://scenes/enemies/test_enemy.tscn")
 const BOSS_SCENE := preload("res://scenes/enemies/minotaur.tscn")
 
-@export var dungeon_name: String = "Mt. Midterm"
+@export var dungeon_name: String = "Assignment 5 Cave"
 @export var floor_subtitles: Dictionary = {}
 @export_range(0.0, 10.0, 0.05) var final_floor_text_hold_duration: float = 1.0
 var transition_generation: int = 0
