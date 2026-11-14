@@ -8,6 +8,13 @@ display_name = "Chimchar"
 directory = "res://assets/sprites/pokemon/Chimchar"
 pixel_size = 0.04
 body_to_ground = 8.0
+projectile_release_frames = {"Ember": 5}
+projectile_offsets = {
+"up": Vector3(0, 0, 0),
+"left": Vector3(0, 0, 0),
+"right": Vector3(0, 0, 0),
+"down": Vector3(0, 0.4, 0.25)
+}
 animations = {
 "Attack": "Attack",
 "Ember": "Shoot",

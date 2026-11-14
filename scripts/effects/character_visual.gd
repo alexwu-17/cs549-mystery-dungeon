@@ -1,6 +1,12 @@
 class_name CharacterVisual
 extends Node
 
+func projectile_release_time() -> float:
+	return 0.0
+
+func projectile_visual_offset() -> Vector3:
+	return Vector3.UP * ProjectileEffect.BODY_HEIGHT
+
 signal defeat_finished
 var defeating: bool = false
 var defeat_completed: bool = false

@@ -48,7 +48,7 @@ var recovery_damage_serial: int = 0
 @export_range(1, 100) var enemy_respawn_delay: int = 100
 var repopulation := EnemyRepopulation.new()
 ## First floor on which the starter learns its species' floor_unlock_move, once per run.
-@export_range(1, 99) var elemental_move_floor: int = 3
+@export_range(1, 99) var elemental_move_floor: int = 1 # Testing: restore to 3 for normal progression.
 var learned_move_pending: PokemonMoveData
 
 
@@ -360,7 +360,10 @@ func _on_player_attack(target: Vector2i, move: PokemonMoveData = null) -> void:
 		reachable = not path.is_empty()
 		if reachable:
 			target = path.back()
-			ProjectileEffect.launch(entities, dungeon_renderer.get_entity_world_position(player.grid_position), dungeon_renderer.get_entity_world_position(target), move.move_type, player.attack_leap.action_speed)
+			# Translate the visual lane only; targeting and tile-based travel time stay authoritative.
+			var offset := player.character_visual.projectile_visual_offset() - Vector3.UP * ProjectileEffect.BODY_HEIGHT
+			var projectile := ProjectileEffect.launch(entities, dungeon_renderer.get_entity_world_position(player.grid_position) + offset, dungeon_renderer.get_entity_world_position(target) + offset, move.move_type, player.attack_leap.action_speed, player.character_visual.projectile_release_time())
+			player.layer_over_projectile(projectile)
 	if reachable and is_instance_valid(boss) and boss.occupies(target):
 		print("PLAYER ATTACK MINOTAUR at ", target)
 		var damage := _player_attack_damage(boss.battle_state, move)

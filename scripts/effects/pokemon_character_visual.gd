@@ -199,6 +199,45 @@ func _attack_clip_name(fallback: bool = true) -> String:
 		return str(profile.animations.get("Attack", "Attack"))
 	return selected
 
+
+func projectile_visual_offset() -> Vector3:
+	var direction := "down"
+	if facing == Vector2i.UP: direction = "up"
+	elif facing == Vector2i.LEFT: direction = "left"
+	elif facing == Vector2i.RIGHT: direction = "right"
+	var offset: Vector3 = profile.projectile_offsets.get(direction, Vector3.ZERO)
+	if facing == Vector2i.DOWN: return offset
+	var camera := get_viewport().get_camera_3d()
+	var selected := _attack_clip_name()
+	if camera == null or not clips.has(selected): return super.projectile_visual_offset() + offset
+	var info: Dictionary = clips[selected]
+	var release_frame := clampi(int(profile.projectile_release_frames.get(str(attack_action), info.hit_frame)), 0, info.durations.size() - 1)
+	var frame: Dictionary = info.rows[row()][release_frame]
+	var texture: Texture2D = frame.texture
+	var bounds: Rect2i = texture.get_meta("pokemon_opaque_rect")
+	var anchor := texture.get_size() / 2.0 + ground_reference
+	if uses_attack_surface():
+		var first: Dictionary = info.rows[row()][0]
+		anchor += frame.body - first.body
+	# The low shooting pose differs from Idle: place the shot inside its actual
+	# visible bounds, in billboard space, rather than above it at a fixed height.
+	var center := Vector2(bounds.position) + Vector2(bounds.size) * 0.5
+	var origin := sprite.global_position
+	origin += camera.global_basis.x * (center.x - anchor.x) * sprite.pixel_size * sprite.global_basis.x.length()
+	origin += camera.global_basis.y * (anchor.y - center.y) * sprite.pixel_size * sprite.global_basis.y.length()
+	return origin - get_parent().global_position + offset
+
+
+func projectile_release_time() -> float:
+	var selected := _attack_clip_name()
+	if not clips.has(selected): return 0.0
+	var info: Dictionary = clips[selected]
+	var release_frame := clampi(int(profile.projectile_release_frames.get(str(attack_action), info.hit_frame)), 0, info.durations.size() - 1)
+	var elapsed := 0.0
+	for index in range(release_frame): elapsed += float(info.durations[index])
+	# Allow the configured release pose to appear before releasing (one XML tick).
+	return elapsed + minf(1.0 / 60.0, float(info.durations[release_frame]) * 0.5)
+
 func _configure_ramp_attack() -> void:
 	var attack_name := _attack_clip_name()
 	if surface_driver == null or not surface_driver.active or not clips.has(attack_name): return

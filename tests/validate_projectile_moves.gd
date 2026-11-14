@@ -145,6 +145,7 @@ func validate() -> void:
 	validate_path()
 	for index in range(3):
 		var main = load("res://scenes/main/main.tscn").instantiate()
+		main.elemental_move_floor = 3 # Exercise normal progression independently of the testing default.
 		main.use_elevation_test = true
 		main.get_node("Player").species_data = load("res://config/species/%s.tres" % NAMES[index])
 		main.get_node("Player/VisualController").profile = load("res://config/pokemon_%s.tres" % NAMES[index])
@@ -181,14 +182,32 @@ func validate() -> void:
 		assert(is_equal_approx(player.attack_leap.duration, player.character_visual.clips.Shoot.total))
 		assert(player.attack_leap.active and main.resolving_turn and player.round_locked)
 		assert(state.remaining_pp[2] == 9 and projectiles(main) == 1)
+		# Species release poses are explicit; XML HitFrame describes charging.
+		var release_time: float = player.character_visual.projectile_release_time()
+		assert(is_equal_approx(release_time, (13.0 if index == 0 else 10.5) / 60.0))
+		assert(player.get_node("PlayerSprite").alpha_cut == SpriteBase3D.ALPHA_CUT_DISABLED)
+		for child in main.entities.get_children():
+			if child is ProjectileEffect:
+				assert(not child.visible)
+				child.animation.pause()
+				child.animation.custom_step(release_time - 0.001)
+				assert(not child.visible)
+				child.animation.custom_step(0.002)
+				assert(child.visible)
 		assert(enemy.health.current == 0 and has_message(main, "took 42 damage") and has_message(main, "used " + UNLOCK_NAMES[index]))
 		player._unhandled_input(key(KEY_O)) # Locked presentation cannot double-spend.
 		assert(state.remaining_pp[2] == 9)
 		Helper.complete(main)
 		assert(rounds[0] == 1 and main.enemies.is_empty() and main.enemy_occupancy.is_empty() and player.health.current == hp)
+		# Ordering remains valid after Shoot ends, until flight/cancellation ends.
+		assert(player.get_node("PlayerSprite").alpha_cut == SpriteBase3D.ALPHA_CUT_DISABLED)
+		for child in main.entities.get_children():
+			if child is ProjectileEffect:
+				assert(child.get_child(0).render_priority < player.get_node("PlayerSprite").render_priority)
 		main.cancel_round()
 		await process_frame
 		assert(projectiles(main) == 0)
+		assert(player.get_node("PlayerSprite").alpha_cut == SpriteBase3D.ALPHA_CUT_OPAQUE_PREPASS)
 		# Only the first enemy in the lane is hit; the one behind it is untouched.
 		enemy = lane(main, [2, 4])
 		var behind: Skeleton = main.enemies[1]
@@ -217,6 +236,31 @@ func validate() -> void:
 			enemy = lane(main, [4 if direction.x != 0 else 1], direction)
 			var before: int = state.remaining_pp[2]
 			assert(player.use_move(2) and enemy.health.current == 0 and state.remaining_pp[2] == before - 1)
+			var visual_offset: Vector3 = player.character_visual.projectile_visual_offset()
+			if direction == Vector2i.DOWN:
+				assert(visual_offset.is_equal_approx(Vector3(0, 0.4, 0.25)))
+				assert(player.get_node("PlayerSprite").alpha_cut == SpriteBase3D.ALPHA_CUT_OPAQUE_PREPASS)
+			else:
+				assert(player.get_node("PlayerSprite").alpha_cut == SpriteBase3D.ALPHA_CUT_DISABLED)
+				# Reconstruct the release pose and ensure origin is inside its visible
+				# billboard bounds, rather than merely testing a configured height.
+				var visual = player.character_visual
+				var saved_time: float = visual.clip_time
+				visual.clip_time = visual.projectile_release_time()
+				visual.apply_frame()
+				var sprite: Sprite3D = player.get_node("PlayerSprite")
+				var camera: Camera3D = main.get_viewport().get_camera_3d()
+				var point := player.global_position + visual_offset - sprite.global_position
+				var rect := sprite.get_item_rect()
+				var pixel := Vector2(point.dot(camera.global_basis.x) / sprite.pixel_size - rect.position.x, rect.end.y - point.dot(camera.global_basis.y) / sprite.pixel_size)
+				assert(Rect2(sprite.texture.get_meta("pokemon_opaque_rect")).has_point(pixel))
+				visual.clip_time = saved_time
+				visual.apply_frame()
+			for child in main.entities.get_children():
+				if child is ProjectileEffect and not child.is_queued_for_deletion():
+					assert(child.global_position.is_equal_approx(main.dungeon_renderer.get_entity_world_position(player.grid_position) + visual_offset))
+					assert(child.sprite.render_priority == (5 if direction == Vector2i.DOWN else -1))
+					assert(child.get_child(0).render_priority < player.get_node("PlayerSprite").render_priority)
 			Helper.complete(main)
 		# Zero PP rejects without a turn; the next Space is still the ordinary Attack.
 		enemy = lane(main, [2])

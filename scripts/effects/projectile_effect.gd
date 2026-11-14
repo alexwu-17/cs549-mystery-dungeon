@@ -4,7 +4,8 @@ extends Node3D
 ## before this exists; it never reports hits and never blocks the round.
 
 const BODY_HEIGHT: float = DungeonData.TILE_SIZE * 0.5
-const SECONDS_PER_TILE: float = 0.06
+# Shared travel time at normal action speed; higher action speeds shorten it.
+const SECONDS_PER_TILE: float = 0.2
 const PIXEL_SIZE: float = 0.02
 const TYPE_COLORS := {
 	"Fire": Color(1.0, 0.5, 0.12),
@@ -13,19 +14,26 @@ const TYPE_COLORS := {
 }
 static var _textures: Dictionary = {}
 var animation: Tween
+var sprite: Sprite3D
 
 
-static func launch(parent: Node, from: Vector3, to: Vector3, move_type: String, speed: float = 1.0) -> ProjectileEffect:
+func set_behind_source(behind: bool) -> void:
+	# Front shots retain their original draw priority. Side/back shots share
+	# the shooter's transparent pass and must sort below its normal priority 0.
+	sprite.render_priority = -1 if behind else 5
+
+
+static func launch(parent: Node, from: Vector3, to: Vector3, move_type: String, speed: float = 1.0, release_delay: float = 0.0) -> ProjectileEffect:
 	var effect := ProjectileEffect.new()
 	parent.add_child(effect)
-	effect.play(from, to, move_type, speed)
+	effect.play(from, to, move_type, speed, release_delay)
 	return effect
 
 
-func play(from: Vector3, to: Vector3, move_type: String, speed: float = 1.0) -> void:
+func play(from: Vector3, to: Vector3, move_type: String, speed: float = 1.0, release_delay: float = 0.0) -> void:
 	global_basis = Basis.IDENTITY
 	global_position = from + Vector3.UP * BODY_HEIGHT
-	var sprite := Sprite3D.new()
+	sprite = Sprite3D.new()
 	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	sprite.shaded = false
 	sprite.pixel_size = PIXEL_SIZE
@@ -36,6 +44,10 @@ func play(from: Vector3, to: Vector3, move_type: String, speed: float = 1.0) -> 
 	var tiles := maxf(1.0, from.distance_to(to) / DungeonData.TILE_SIZE)
 	animation = create_tween()
 	animation.set_speed_scale(maxf(0.01, speed))
+	if release_delay > 0.0:
+		hide()
+		animation.tween_interval(release_delay)
+		animation.tween_callback(show)
 	animation.tween_property(self, "global_position", to + Vector3.UP * BODY_HEIGHT, tiles * SECONDS_PER_TILE)
 	animation.tween_callback(queue_free)
 

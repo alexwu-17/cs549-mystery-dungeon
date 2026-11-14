@@ -52,6 +52,30 @@ var can_request_attack: Callable
 var can_request_wait: Callable
 var _attack_depth_test_disabled: bool = false
 var _attack_render_priority: int = 0
+var _layered_projectiles: int = 0
+var _projectile_alpha_cut: int = SpriteBase3D.ALPHA_CUT_DISABLED
+
+
+func layer_over_projectile(effect: ProjectileEffect) -> void:
+	var sprite: Sprite3D = $PlayerSprite
+	effect.set_behind_source(facing != Vector2i.DOWN)
+	if facing == Vector2i.DOWN:
+		# Preserve front-shot compositing, even if an older side shot is in flight.
+		if _layered_projectiles > 0: sprite.alpha_cut = _projectile_alpha_cut
+		return
+	if _layered_projectiles == 0:
+		_projectile_alpha_cut = sprite.alpha_cut
+	# Opaque-prepass sprites ignore transparent render ordering. Side/back
+	# shots need blending; re-enable it after any intervening front shot.
+	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED
+	_layered_projectiles += 1
+	effect.tree_exiting.connect(_release_projectile_layer, CONNECT_ONE_SHOT)
+
+
+func _release_projectile_layer() -> void:
+	_layered_projectiles -= 1
+	if _layered_projectiles == 0:
+		$PlayerSprite.alpha_cut = _projectile_alpha_cut
 
 
 func _ready() -> void:

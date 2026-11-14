@@ -8,6 +8,7 @@ display_name = "Turtwig"
 directory = "res://assets/sprites/pokemon/Turtwig"
 pixel_size = 0.04
 body_to_ground = 8.0
+projectile_release_frames = {"RazorLeaf": 3}
 animations = {
 "Attack": "Attack",
 "RazorLeaf": "Shoot",
