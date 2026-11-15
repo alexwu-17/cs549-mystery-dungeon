@@ -4,7 +4,7 @@
 
 [node name="DemoMain" instance=ExtResource("1")]
 floor_subtitles = {
-3: "Cavern Depths"
+10: "Cavern Depths"
 }
 game_mode = 1
 

@@ -3,7 +3,7 @@ extends Node3D
 const TEST_ENEMY_SCENE := preload("res://scenes/enemies/test_enemy.tscn")
 const BOSS_SCENE := preload("res://scenes/enemies/minotaur.tscn")
 
-@export var dungeon_name: String = "Assignment 5 Cave"
+@export var dungeon_name: String = "Assignment 6 Highlands"
 @export var floor_subtitles: Dictionary = {}
 @export_range(0.0, 10.0, 0.05) var final_floor_text_hold_duration: float = 1.0
 var transition_generation: int = 0
@@ -49,7 +49,7 @@ var recovery_damage_serial: int = 0
 @export_range(1, 100) var enemy_respawn_delay: int = 100
 var repopulation := EnemyRepopulation.new()
 ## First floor on which the starter learns its species' floor_unlock_move, once per run.
-@export_range(1, 99) var elemental_move_floor: int = 1 # Testing: restore to 3 for normal progression.
+@export_range(1, 99) var elemental_move_floor: int = 3
 var learned_move_pending: PokemonMoveData
 
 

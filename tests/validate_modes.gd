@@ -19,7 +19,7 @@ func validate() -> void:
 		var config: DungeonGenerationConfig = main.generation_config
 		assert((config != null) == (mode == GameModeConfig.Mode.LIMIT_TESTING))
 		main.player.health.damage(5)
-		for expected in range(2, 7):
+		for expected in range(2, GameModeConfig.DEMO_FINAL_FLOOR + 2 if mode == GameModeConfig.Mode.DEMO else 7):
 			if mode == GameModeConfig.Mode.DEMO and expected > GameModeConfig.DEMO_FINAL_FLOOR:
 				var arena: DungeonData = main.dungeon
 				main._on_stairs_reached()

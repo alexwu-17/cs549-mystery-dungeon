@@ -1,5 +1,9 @@
 # Codex project handoff
 
+### Assignment 6 Highlands progression (2026-11-14)
+
+User renamed the shared dungeon title to Assignment 6 Highlands, extended Demo to ten floors (nine exploration floors plus the existing Drapion arena on Floor10), and restored elemental_move_floor to3 from the temporary Floor1 setting. Demo final-floor subtitle moves to10; move/PP persistence and boss mechanics are unchanged. validate_modes now traverses through the configured final floor and checks its cap instead of stopping at Floor6. Godot4.4.1 focused validate_modes PASS (real stair transitions through Floor10, arena/cap, HP persistence and restart); existing certificate/cleanup diagnostics remain. Name/unlock defaults verified in source; no full suite or manual UI check.
+
 ### Tile-stable occlusion decision accepted (2026-11-14)
 
 User tested this version in gameplay, confirmed it is working, and chose to retain it. The complete occlusion decision freezes until the authoritative tile changes. TerrainOcclusion's signature now excludes animation sample coordinates and includes dungeon/camera identity, camera transform/projection, viewport, tile and sample availability. Both active selections and clear decisions persist on an unchanged tile. Existing setup and explicit fog invalidation still force reevaluation; empty/nonempty sample transitions do too. No selection algorithm,40% threshold, geometry protection, transparency, shader or lighting changes. An explicit same-tile refresh can still reselect; ordinary animation cannot.
