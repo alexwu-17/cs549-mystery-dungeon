@@ -26,6 +26,10 @@ appearance, shadows, transparency, GPU readback or frame rates.
 
 | Change | Primary checks |
 | --- | --- |
+| Open elevation+1 projectile air extension, same-height hits and lower-floor immunity | `validate_upper_air_projectiles`, `validate_projectile_impact` |
+| Scratch/Tackle/Pound visual hit feedback and unchanged melee damage/PP | `validate_melee_impacts` |
+| Enemy hurt recovery timing, held hurt pose and cancellation | `validate_damage_recovery`, `validate_projectile_impact`, `validate_sequential_rounds` |
+| Projectile impact timing/particles, delayed damage, cancellation and turn locks | `validate_projectile_impact`, `validate_projectile_moves` |
 | Species stats or actor initialization | `validate_battle_state`, `validate_hud` |
 | Species types/STAB, Floor 3 move unlock, projectile lane/targeting, O slot | `validate_projectile_moves`, `validate_pokemon_moves`, `validate_battle_state` |
 | Demo startup, starter choice or player profiles | `validate_starter_selection`, `validate_pokemon_sprites`, `validate_modes` |

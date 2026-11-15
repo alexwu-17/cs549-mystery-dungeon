@@ -9,6 +9,8 @@ extends Resource
 @export var animations: Dictionary = {"Idle": "Idle", "Walk": "Walk", "Attack": "Attack", "Hurt": "Hurt"}
 ## Zero-based release pose per move; XML HitFrame can describe charging instead.
 @export var projectile_release_frames: Dictionary = {}
+## Zero-based native pose for melee feedback; source timing remains unchanged.
+@export var melee_contact_frames: Dictionary = {}
 ## World-unit offsets: down is relative to the tile (+Z is forward); other
 ## directions are relative to the visible release-pose center beneath the sprite.
 @export var projectile_offsets: Dictionary = {

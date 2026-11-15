@@ -5,7 +5,7 @@ extends Node3D
 const TILE_SIZE: float = DungeonData.TILE_SIZE
 const ELEVATION_HEIGHT: float = DungeonData.ELEVATION_HEIGHT
 const FLOOR_THICKNESS: float = 0.2
-const OCCLUSION_CLEAR_FRACTION: float = 0.75
+const OCCLUSION_CLEAR_FRACTION: float = 0.6
 var _visibility_materials := TerrainVisibilityMaterial.new()
 var _visibility_center := Vector3.ZERO
 var _terrain_occlusion := TerrainOcclusion.new()

@@ -194,10 +194,11 @@ func validate() -> void:
 				assert(not child.visible)
 				child.animation.custom_step(0.002)
 				assert(child.visible)
-		assert(enemy.health.current == 0 and has_message(main, "took 42 damage") and has_message(main, "used " + UNLOCK_NAMES[index]))
+		assert(enemy.health.current == 42 and has_message(main, "used " + UNLOCK_NAMES[index]))
 		player._unhandled_input(key(KEY_O)) # Locked presentation cannot double-spend.
 		assert(state.remaining_pp[2] == 9)
 		Helper.complete(main)
+		assert(enemy.health.current == 0 and has_message(main, "took 42 damage"))
 		assert(rounds[0] == 1 and main.enemies.is_empty() and main.enemy_occupancy.is_empty() and player.health.current == hp)
 		# Ordering remains valid after Shoot ends, until flight/cancellation ends.
 		assert(player.get_node("PlayerSprite").alpha_cut == SpriteBase3D.ALPHA_CUT_DISABLED)
@@ -212,8 +213,9 @@ func validate() -> void:
 		enemy = lane(main, [2, 4])
 		var behind: Skeleton = main.enemies[1]
 		assert(player.use_move(2))
-		assert(enemy.health.current == 0 and behind.health.current == 42 and state.remaining_pp[2] == 8)
+		assert(enemy.health.current == 42 and behind.health.current == 42 and state.remaining_pp[2] == 8)
 		Helper.complete(main)
+		assert(enemy.health.current == 0)
 		assert(main.enemies == [behind] and rounds[0] == 2)
 		# Beyond four tiles: PP and a turn are spent, nothing is damaged.
 		enemy = lane(main, [5])
@@ -235,7 +237,7 @@ func validate() -> void:
 		for direction in DungeonData.CARDINALS:
 			enemy = lane(main, [4 if direction.x != 0 else 1], direction)
 			var before: int = state.remaining_pp[2]
-			assert(player.use_move(2) and enemy.health.current == 0 and state.remaining_pp[2] == before - 1)
+			assert(player.use_move(2) and enemy.health.current == 42 and state.remaining_pp[2] == before - 1)
 			var visual_offset: Vector3 = player.character_visual.projectile_visual_offset()
 			if direction == Vector2i.DOWN:
 				assert(visual_offset.is_equal_approx(Vector3(0, 0.4, 0.25)))
@@ -262,6 +264,7 @@ func validate() -> void:
 					assert(child.sprite.render_priority == (5 if direction == Vector2i.DOWN else -1))
 					assert(child.get_child(0).render_priority < player.get_node("PlayerSprite").render_priority)
 			Helper.complete(main)
+			assert(enemy.health.current == 0)
 		# Zero PP rejects without a turn; the next Space is still the ordinary Attack.
 		enemy = lane(main, [2])
 		state.remaining_pp[2] = 0
@@ -296,9 +299,10 @@ func validate() -> void:
 		player.setup(main.boss.grid_position - Vector2i.RIGHT * 2, main.dungeon, main.dungeon_renderer)
 		player.facing = Vector2i.RIGHT
 		main.refresh_fog()
-		assert(player.use_move(2) and main.boss.health.current == 92 - DRAPION_DAMAGE[index])
+		assert(player.use_move(2) and main.boss.health.current == 92)
 		assert(state.remaining_pp[2] == 9 and projectiles(main) == 1)
 		Helper.complete(main)
+		assert(main.boss.health.current == 92 - DRAPION_DAMAGE[index])
 		main.free()
 		await process_frame
 	print("PASS: starter types/STAB, elemental move data, floor-3 unlock once per run, projectile flight/blocking/first-target, O input/PP/turns, HUD and boss hits")

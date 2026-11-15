@@ -116,8 +116,7 @@ func validate() -> void:
 			var effect := effects[0]
 			effect.animation.pause()
 			assert(effect.global_position.y > actor.global_position.y)
-			var color := effect.arrow.texture.get_image().get_pixel(12, 16)
-			assert(color.g > color.r if index == 2 else color.r > color.g)
+			assert(effect.arrow.texture == (StatChangeEffect.UP_TEXTURE if index == 2 else StatChangeEffect.DOWN_TEXTURE))
 		assert(indicators(outside).is_empty())
 		if index == 0:
 			assert(enemy.battle_state.get_effective_stat(&"defense") == 12 and other.battle_state.get_stage(&"defense") == 0)

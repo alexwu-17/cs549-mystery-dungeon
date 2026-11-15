@@ -67,16 +67,16 @@ func validate() -> void:
 	renderer.update_occlusion(camera, Vector2i.ZERO, points)
 	assert(blocked.occluded and not mesh.visible)
 	assert(blocked.fog_state == 2)
-	# Partial overlap: 1/8 and exactly 2/8 blocked stay solid, 3/8 fades.
+	# Partial overlap: exactly 40% blocked stays solid; only above 40% fades.
 	var hit_point := points[0]
 	var clear_point := hit_point + camera.global_basis.x * 20
-	for hit_count in [0, 1, 2, 3, 8]:
+	for hit_count in [0, 1, 3, 4, 5, 10]:
 		var coverage: Array[Vector3] = []
-		for index in range(8):
+		for index in range(10):
 			coverage.append(hit_point if index < hit_count else clear_point)
 		renderer.update_occlusion(camera, Vector2i.ZERO, coverage)
-		assert(blocked.occluded == (hit_count > 2))
-		assert(mesh.visible == (hit_count <= 2))
+		assert(blocked.occluded == (hit_count > 4))
+		assert(mesh.visible == (hit_count <= 4))
 	renderer.update_occlusion(camera, Vector2i.ZERO, [])
 	assert(not blocked.occluded and mesh.visible)
 	renderer.update_occlusion(camera, Vector2i.ZERO, points)
@@ -94,6 +94,8 @@ func validate() -> void:
 	var faces := mesh.mesh.get_faces()
 	var surface := mesh.global_transform * ((faces[0] + faces[1] + faces[2]) / 3.0)
 	var real_points: Array[Vector3] = [surface + (surface-camera.global_position).normalized()*0.01]
+	# This is a separate obstruction scenario on the same logical tile.
+	renderer._terrain_occlusion.invalidate()
 	renderer.update_occlusion(camera, Vector2i.ZERO, real_points, true)
 	assert(blocked.occluded and mesh.visible and mesh.get_surface_override_material(0) is ShaderMaterial)
 	for visual in renderer.fog_visuals:

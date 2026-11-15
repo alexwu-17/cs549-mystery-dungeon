@@ -7,6 +7,7 @@ const BOSS_SCENE := preload("res://scenes/enemies/minotaur.tscn")
 @export var floor_subtitles: Dictionary = {}
 @export_range(0.0, 10.0, 0.05) var final_floor_text_hold_duration: float = 1.0
 var transition_generation: int = 0
+var pending_scratch_impacts: Dictionary = {}
 @onready var floor_introduction: FloorIntroduction = $HUD/Screen/FloorIntroduction
 
 @export var use_elevation_test: bool = false
@@ -353,21 +354,68 @@ func _on_player_attack(target: Vector2i, move: PokemonMoveData = null) -> void:
 	var delta := target - player.grid_position
 	if absi(delta.x) + absi(delta.y) != 1:
 		return
+	if move != null and move.move_id in [&"scratch", &"pound", &"tackle"] and player.attack_leap.active:
+		var token := round_generation
+		resolving_turn = true
+		player.round_locked = true
+		refresh_turn_visibility()
+		var contacted: bool = await player.attack_leap.contact_finished
+		if token != round_generation or not contacted or game_over or victory or loading_floor:
+			return
+		if move.move_id == &"scratch" and dungeon.can_traverse(player.grid_position, target):
+			var hit_actor: Node3D = boss if is_instance_valid(boss) and boss.occupies(target) else enemy_occupancy.get(target)
+			if is_instance_valid(hit_actor):
+				var impact := ProjectileImpactEffect.play_on_actor(hit_actor, move.move_id)
+				var played: bool = await impact.impact_finished
+				if token != round_generation or not played or not is_instance_valid(hit_actor) or game_over or victory or loading_floor:
+					return
+		resolving_turn = false
 	var reachable := dungeon.can_traverse(player.grid_position, target)
 	if move != null and move.targeting == PokemonMoveData.Targeting.STRAIGHT_PROJECTILE:
-		# Flight follows authoritative traversal; the last tile is the first occupant or the last clear tile.
-		var path := PokemonProjectile.flight_path(dungeon, player.grid_position, delta, move.range_tiles, is_enemy_occupied)
-		reachable = not path.is_empty()
-		if reachable:
+		var plan := PokemonProjectile.flight_plan(dungeon, player.grid_position, delta, move.range_tiles, is_enemy_occupied, dungeon_renderer.is_open_upper_tile(player.grid_position))
+		var path: Array[Vector2i] = plan.path
+		reachable = bool(plan.hits_actor)
+		if not path.is_empty():
 			target = path.back()
 			# Translate the visual lane only; targeting and tile-based travel time stay authoritative.
 			var offset := player.character_visual.projectile_visual_offset() - Vector3.UP * ProjectileEffect.BODY_HEIGHT
-			var projectile := ProjectileEffect.launch(entities, dungeon_renderer.get_entity_world_position(player.grid_position) + offset, dungeon_renderer.get_entity_world_position(target) + offset, move.move_type, player.attack_leap.action_speed, player.character_visual.projectile_release_time(), move.move_id)
+			var from := dungeon_renderer.get_entity_world_position(player.grid_position)
+			var to := dungeon_renderer.get_entity_world_position(target)
+			if not plan.angled:
+				to.y = from.y # Only ramp/buffer origins facing the ramp permit angled shots.
+			elif move.move_id == &"ember":
+				var on_ramp := dungeon.get_tile(player.grid_position) == DungeonData.TileType.RAMP
+				# Lift the whole lane where the flame can intersect the upper
+				# landing or uphill treads; keep its slope and travel time intact.
+				if (on_ramp and to.y > from.y) or (not on_ramp and to.y < from.y):
+					offset.y += DungeonData.TILE_SIZE * 0.4
+			var projectile := ProjectileEffect.launch(entities, from + offset, to + offset, move.move_type, player.attack_leap.action_speed, player.character_visual.projectile_release_time(), move.move_id)
 			player.layer_over_projectile(projectile)
+			projectile.add_ground_shadow(dungeon, dungeon_renderer)
+			projectile.impact_pending = bool(plan.hits_actor)
+			# Hold the round through release and travel. Targets cannot move or
+			# react until the visual reaches the authoritative target tile.
+			var token := round_generation
+			resolving_turn = true
+			player.round_locked = true
+			refresh_turn_visibility()
+			var arrived: bool = await projectile.flight_finished
+			if token != round_generation or not arrived or game_over or victory or loading_floor:
+				return
+			var hit_actor: Node3D = (boss if is_instance_valid(boss) and boss.occupies(target) else enemy_occupancy.get(target)) if plan.hits_actor else null
+			if is_instance_valid(hit_actor):
+				var impact := ProjectileImpactEffect.play_on_actor(hit_actor, move.move_id)
+				if impact != null:
+					var played: bool = await impact.impact_finished
+					if token != round_generation or not played or not is_instance_valid(hit_actor) or game_over or victory or loading_floor:
+						return
+			resolving_turn = false
 	if reachable and is_instance_valid(boss) and boss.occupies(target):
 		print("PLAYER ATTACK MINOTAUR at ", target)
 		var damage := _player_attack_damage(boss.battle_state, move)
 		dialogue.append_event(&"damage" if move != null else &"attack", {"actor": _player_display_name(), "target": _boss_display_name(), "amount": mini(damage, boss.health.current)})
+		if move != null and move.move_id != &"scratch" and move.targeting == PokemonMoveData.Targeting.ADJACENT and damage > 0:
+			ProjectileImpactEffect.play_on_actor(boss, move.move_id)
 		boss.receive_damage(damage)
 		if not victory:
 			run_enemy_turn()
@@ -383,6 +431,8 @@ func _on_player_attack(target: Vector2i, move: PokemonMoveData = null) -> void:
 	var damage := _player_attack_damage(enemy.battle_state, move)
 	print("PLAYER ATTACK at ", target, ": ", damage)
 	dialogue.append_event(&"damage" if move != null else &"attack", {"actor": _player_display_name(), "target": enemy.character_visual.get_display_name(), "amount": mini(damage, enemy.health.current)})
+	if move != null and move.move_id != &"scratch" and move.targeting == PokemonMoveData.Targeting.ADJACENT and damage > 0:
+		ProjectileImpactEffect.play_on_actor(enemy, move.move_id)
 	enemy.receive_damage(damage)
 	if enemy.health.current == 0:
 		dialogue.append_event(&"defeat", {"target": enemy.character_visual.get_display_name()})
@@ -451,6 +501,7 @@ func cancel_round(preserve_player_presentation: bool = false) -> void:
 	# Invalidate before emitting completion signals: old continuations must stop.
 	dialogue.abandon_round()
 	round_generation += 1
+	pending_scratch_impacts.clear()
 	resolving_turn = false
 	player.round_locked = false
 	if not preserve_player_presentation:
@@ -460,13 +511,20 @@ func cancel_round(preserve_player_presentation: bool = false) -> void:
 		boss.character_visual.cancel()
 	for enemy in enemies:
 		if is_instance_valid(enemy):
+			enemy.character_visual.finish_damage_recovery()
 			enemy.attack_leap.finish()
 
 
 func _clear_projectiles() -> void:
+	for effect in player.get_children():
+		if effect is ProjectileImpactEffect:
+			effect.finish()
 	for child in entities.get_children():
 		if child is ProjectileEffect:
 			child.finish()
+		for effect in child.get_children():
+			if effect is ProjectileImpactEffect:
+				effect.finish()
 
 
 func _exit_tree() -> void:
@@ -505,6 +563,9 @@ func run_enemy_turn(peaceful: bool = false) -> void:
 			break
 		if not is_instance_valid(actor) or actor.health.current == 0:
 			continue
+		await actor.character_visual.complete_damage_recovery()
+		if token != round_generation or not is_instance_valid(actor) or actor.character_visual.disposed or game_over or victory or loading_floor:
+			return
 		if actor is Skeleton:
 			actor.attack_leap.action_speed = player.movement_speed
 		actor.character_visual.action_speed = player.movement_speed
@@ -526,6 +587,11 @@ func run_enemy_turn(peaceful: bool = false) -> void:
 		await actor.complete_action()
 		if token != round_generation or not is_instance_valid(actor) or actor.character_visual.disposed:
 			return
+		var scratch_impact: ProjectileImpactEffect = pending_scratch_impacts.get(actor.get_instance_id())
+		if is_instance_valid(scratch_impact) and not scratch_impact.completed:
+			await scratch_impact.impact_finished
+			if token != round_generation or not is_instance_valid(actor) or actor.character_visual.disposed:
+				return
 	if token != round_generation:
 		return
 	if peaceful and damage_serial == recovery_damage_serial and not game_over and not victory and not loading_floor:
@@ -584,11 +650,25 @@ func refresh_entity_visibility() -> void:
 
 func _on_enemy_attack(amount: int, actor: Node3D) -> void:
 	var move: PokemonMoveData = actor.active_attack_move
+	if move != null and move.move_id in [&"scratch", &"pound", &"tackle"] and actor is Skeleton and actor.attack_leap.active:
+		var token := round_generation
+		var contacted: bool = await actor.attack_leap.contact_finished
+		if token != round_generation or not contacted or not is_instance_valid(actor) or game_over or victory or loading_floor:
+			return
+		if move.move_id == &"scratch" and not player.invincible:
+			var impact := ProjectileImpactEffect.play_on_actor(player, move.move_id)
+			pending_scratch_impacts[actor.get_instance_id()] = impact
+			var played: bool = await impact.impact_finished
+			if token != round_generation or not played or not is_instance_valid(actor) or game_over or victory or loading_floor:
+				return
+			pending_scratch_impacts.erase(actor.get_instance_id())
 	amount = PokemonDamage.move_damage(actor.battle_state, player.battle_state, move) if move != null else PokemonDamage.basic_damage(actor.battle_state, player.battle_state, amount)
 	var visual: CharacterVisual = actor.get("character_visual")
 	if move != null and not actor is Minotaur:
 		dialogue.append_event(&"move_used", {"actor": visual.get_display_name(), "move": move.display_name})
 	dialogue.append_event(&"damage" if move != null else &"attack", {"actor": visual.get_display_name(), "target": _player_display_name(), "amount": 0 if player.invincible else mini(amount, player.health.current)})
+	if move != null and move.move_id != &"scratch" and move.targeting == PokemonMoveData.Targeting.ADJACENT and amount > 0 and not player.invincible:
+		ProjectileImpactEffect.play_on_actor(player, move.move_id)
 	player.receive_damage(amount)
 
 

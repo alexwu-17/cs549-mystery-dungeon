@@ -9,6 +9,7 @@ var action: String = "Idle"
 var clip_time: float = 0.0
 var walk_remaining: float = 0.0
 var hurt_remaining: float = 0.0
+var hurt_flash: Tween
 var frozen: bool = false
 var frame_index: int = -1
 var direction_row: int = 0
@@ -17,6 +18,7 @@ var rest_action: String = "Idle"
 var defeat_uses_faint: bool = false
 var surface_driver: AttackLeap
 var attack_action: StringName = &"Attack"
+var ramp_melee_action: bool = true
 
 func _ready() -> void:
 	super._ready()
@@ -106,7 +108,7 @@ func _process(delta: float) -> void:
 	var elapsed := delta * action_speed
 	walk_remaining = maxf(0.0, walk_remaining - elapsed)
 	hurt_remaining = maxf(0.0, hurt_remaining - elapsed)
-	if action == "Hurt" and hurt_remaining == 0.0:
+	if action == "Hurt" and hurt_remaining == 0.0 and not damage_recovering:
 		standing()
 	elif action == "Walk" and walk_remaining == 0.0:
 		standing()
@@ -159,9 +161,34 @@ func hurt() -> void:
 	walk_remaining = 0.0
 	hurt_remaining = clips[selected].total
 	play_clip("Hurt", true)
+	_finish_hurt_flash()
+	var duration: float = DAMAGE_HURT_DURATION if damage_recovering else hurt_remaining / maxf(0.01, action_speed)
+	hurt_flash = create_tween()
+	hurt_flash.tween_method(_sample_hurt_flash, 0.0, duration, duration)
+	hurt_flash.tween_callback(_finish_hurt_flash)
+
+
+func _sample_hurt_flash(elapsed: float) -> void:
+	if defeating or disposed: return
+	# Match defeat flashing without changing the fog-owned actor visibility.
+	sprite.visible = int(elapsed / maxf(0.001, profile.defeat_blink_interval)) % 2 == 0
+
+
+func _finish_hurt_flash() -> void:
+	if hurt_flash != null:
+		hurt_flash.kill()
+	if not defeating and is_instance_valid(sprite):
+		sprite.show()
+
+
+func finish_damage_recovery() -> void:
+	_finish_hurt_flash()
+	super.finish_damage_recovery()
 
 func standing() -> void:
 	if defeating: return
+	if hurt_remaining <= 0.0 and not damage_hurt_phase:
+		_finish_hurt_flash()
 	super.standing()
 	if clips.is_empty(): return
 	if surface_driver == null or not surface_driver.active:
@@ -169,9 +196,19 @@ func standing() -> void:
 		var ordinary := str(profile.animations.get("Attack", "Attack"))
 		if surface_driver != null and clips.has(ordinary):
 			surface_driver.duration = float(clips[ordinary].total)
-	if hurt_remaining > 0.0: play_clip("Hurt")
+	if hurt_remaining > 0.0 or damage_hurt_phase: play_clip("Hurt")
 	elif walk_remaining > 0.0: play_clip("Walk")
 	else: play_clip(rest_action)
+
+
+func damage_idle_pose() -> void:
+	if defeating or disposed: return
+	_finish_hurt_flash()
+	hurt_remaining = 0.0
+	walk_remaining = 0.0
+	rest_action = "Idle"
+	standing()
+
 
 func attack() -> void:
 	if defeating: return
@@ -180,6 +217,11 @@ func attack() -> void:
 	var selected := _attack_clip_name()
 	if surface_driver != null and clips.has(selected):
 		surface_driver.duration = float(clips[selected].total)
+		var info: Dictionary = clips[selected]
+		var contact_frame := clampi(int(profile.melee_contact_frames.get(str(attack_action), info.hit_frame)), 0, info.durations.size() - 1)
+		var contact := 0.0
+		for index in range(contact_frame): contact += float(info.durations[index])
+		surface_driver.contact_time = contact
 	walk_remaining = 0.0
 	hurt_remaining = 0.0
 	action = "Attack"
@@ -188,6 +230,8 @@ func attack() -> void:
 
 
 func prepare_attack(requested: StringName = &"Attack") -> void:
+	# Preserve move intent even when its source clip falls back to Attack.
+	ramp_melee_action = requested in [&"Attack", &"Scratch", &"Swing"]
 	attack_action = requested
 	if not clips.is_empty() and not clips.has(_attack_clip_name(false)):
 		attack_action = &"Attack"
@@ -239,6 +283,7 @@ func projectile_release_time() -> float:
 	return elapsed + minf(1.0 / 60.0, float(info.durations[release_frame]) * 0.5)
 
 func _configure_ramp_attack() -> void:
+	if not ramp_melee_action: return
 	var attack_name := _attack_clip_name()
 	if surface_driver == null or not surface_driver.active or not clips.has(attack_name): return
 	var info: Dictionary = clips[attack_name]
@@ -261,6 +306,7 @@ func show_frame(name: String) -> void:
 	elif name == "spin_01": play_clip("Attack", true)
 
 func cancel() -> void:
+	_finish_hurt_flash()
 	attack_action = &"Attack"
 	rest_action = "Idle"
 	walk_remaining = 0.0

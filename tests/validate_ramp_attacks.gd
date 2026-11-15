@@ -36,6 +36,18 @@ func validate() -> void:
 					var leap: AttackLeap = actor.attack_leap
 					var visual = actor.character_visual
 					var rest_origin: Vector3 = visual.sprite.global_position - leap.surface_offset
+					# Ranged/status actions must never acquire melee world travel,
+					# including when this species falls back to its Attack clip.
+					for requested in [&"Ember", &"Bubble", &"RazorLeaf", &"Leer", &"Growl", &"Withdraw"]:
+						visual.prepare_attack(requested)
+						leap.play(direction)
+						leap.animation.pause()
+						for progress in [0.0, 0.5, 1.0]:
+							leap._sample(progress)
+							assert(not leap.ramp_path and leap.attack_world_offset == Vector3.ZERO)
+							assert(actor.position == root_position and actor.grid_position == start)
+						leap.finish()
+					visual.prepare_attack()
 					leap.play(direction)
 					leap.animation.pause()
 					if data.get_tile(start) != DungeonData.TileType.RAMP:
@@ -146,6 +158,8 @@ func validate() -> void:
 		assert(main.player.grid_position == combat.player_spawn and enemy.grid_position == combat.enemy_spawns[0])
 	assert(main.enemy_occupancy.has(combat.enemy_spawns[0]))
 	main.player.attack_leap.finish()
+	# Surviving defenders finish hurt recovery before their sequential action.
+	Helper._complete_damage_recovery(main)
 	assert(main.resolving_turn and enemy.attack_leap.ramp_path and main.player.health.current == 18)
 	Helper.complete(main)
 	assert(not main.resolving_turn and not main.player.round_locked)

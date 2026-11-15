@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://d36qtb46mawst" path="res://scripts/effects/pokemon_character_visual.gd" id="3"]
 [ext_resource type="Script" uid="uid://bh3y6aguitga" path="res://scripts/effects/attack_leap.gd" id="4"]
 [ext_resource type="Resource" path="res://config/enemy_melee_attack_policy.tres" id="attack_policy"]
-[ext_resource type="Resource" path="res://config/pokemon_stunky.tres" id="pokemon"]
+[ext_resource type="Resource" uid="uid://b38pbobrk7dc" path="res://config/pokemon_stunky.tres" id="pokemon"]
 [ext_resource type="Resource" uid="uid://qkouuc3wm2jb" path="res://config/species/stunky.tres" id="species"]
 
 [sub_resource type="AtlasTexture" id="NativeIdle"]

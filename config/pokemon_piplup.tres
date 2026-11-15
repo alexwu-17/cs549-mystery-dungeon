@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1")
 display_name = "Piplup"
+melee_contact_frames = {"Attack": 6}
 directory = "res://assets/sprites/pokemon/Piplup"
 pixel_size = 0.04
 body_to_ground = 8.0

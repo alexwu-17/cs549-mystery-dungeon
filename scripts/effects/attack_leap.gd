@@ -4,6 +4,9 @@ extends Node
 signal presentation_started
 signal presentation_finished
 signal presentation_progressed(elapsed: float)
+signal contact_finished(reached: bool)
+var contact_time: float = 0.0
+var contact_emitted: bool = false
 @export var visual_path: NodePath
 @export var duration: float = 0.24
 @export var procedural_motion: bool = true
@@ -54,6 +57,8 @@ func play(direction: Vector2i) -> void:
 	ramp_path = false
 	attack_world_offset = Vector3.ZERO
 	active = true
+	contact_time = duration * 0.5
+	contact_emitted = false
 	presentation_started.emit()
 	animation = create_tween()
 	animation.set_speed_scale(action_speed)
@@ -64,12 +69,14 @@ func _sample(progress: float) -> void:
 	if ramp_path:
 		_sample_ramp_path(progress * duration)
 	presentation_progressed.emit(progress * duration)
-	if not procedural_motion:
-		return
-	var forward := 1.0 - absf(2.0 * progress - 1.0)
-	var hop := sin(PI * progress) * hop_height
-	var local_up: Vector3 = visual.get_parent().global_basis.inverse() * Vector3.UP
-	visual.position = starting_transform.origin + displacement * forward + local_up * hop
+	if procedural_motion:
+		var forward := 1.0 - absf(2.0 * progress - 1.0)
+		var hop := sin(PI * progress) * hop_height
+		var local_up: Vector3 = visual.get_parent().global_basis.inverse() * Vector3.UP
+		visual.position = starting_transform.origin + displacement * forward + local_up * hop
+	if not contact_emitted and progress * duration >= contact_time:
+		contact_emitted = true
+		contact_finished.emit(true)
 
 func finish() -> void:
 	if not active:
@@ -79,6 +86,9 @@ func finish() -> void:
 	if is_instance_valid(visual):
 		visual.transform = starting_transform
 	active = false
+	if not contact_emitted:
+		contact_emitted = true
+		contact_finished.emit(false)
 	ramp_path = false
 	attack_world_offset = Vector3.ZERO
 	attack_plane_normal = Vector3.UP

@@ -8,15 +8,58 @@ static func complete(main: Node3D) -> void:
 			complete_defeats(main)
 			return
 		if main.player.attack_leap.active:
-			main.player.attack_leap.finish()
+			_complete_leap(main.player.attack_leap)
+		elif _complete_projectile(main):
+			continue
+		elif _complete_impact(main):
+			continue
+		elif _complete_damage_recovery(main):
+			continue
 		elif is_instance_valid(main.boss) and main.boss.character_visual.active:
 			main.boss.character_visual.finish()
 		else:
 			for enemy in main.enemies:
 				if enemy.attack_leap.active:
-					enemy.attack_leap.finish()
+					_complete_leap(enemy.attack_leap)
 					break
 	assert(not main.resolving_turn, "Round did not complete deterministically")
+
+
+static func _complete_leap(leap: AttackLeap) -> void:
+	leap.animation.pause()
+	leap.animation.custom_step(100.0)
+
+
+static func _complete_projectile(main: Node3D) -> bool:
+	for effect in main.entities.get_children():
+		if effect is ProjectileEffect and not effect.flight_completed:
+			effect.animation.pause()
+			effect.animation.custom_step(100.0)
+			return true
+	return false
+
+
+static func _complete_damage_recovery(main: Node3D) -> bool:
+	var actors: Array = []
+	actors.assign(main.enemies)
+	if is_instance_valid(main.boss): actors.append(main.boss)
+	for actor in actors:
+		if is_instance_valid(actor) and actor.character_visual.damage_recovering:
+			actor.character_visual.finish_damage_recovery()
+			return true
+	return false
+
+
+static func _complete_impact(main: Node3D) -> bool:
+	var actors: Array = [main.player]
+	actors.append_array(main.entities.get_children())
+	for actor in actors:
+		for effect in actor.get_children():
+			if effect is ProjectileImpactEffect and not effect.completed:
+				effect.animation.pause()
+				effect.animation.custom_step(100.0)
+				return true
+	return false
 
 
 static func complete_introduction(main: Node3D) -> void:

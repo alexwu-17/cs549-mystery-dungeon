@@ -184,6 +184,7 @@ func receive_damage(amount: int) -> void:
 	var previous_hp := health.current
 	health.damage(amount)
 	if health.current > 0 and health.current < previous_hp:
+		character_visual.begin_damage_recovery()
 		character_visual.hurt()
 	print("MINOTAUR HP: ", health.current, "/", health.maximum)
 

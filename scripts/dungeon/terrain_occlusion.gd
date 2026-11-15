@@ -49,10 +49,12 @@ func invalidate() -> void:
 	signature.clear()
 
 func update(camera: Camera3D, tile: Vector2i, points: Array[Vector3], data: DungeonData) -> Array[Dictionary]:
-	var context: Array = [camera.get_camera_transform(), camera.get_camera_projection(), camera.get_viewport().get_visible_rect(), tile, points]
+	# Freeze the full selection on a logical tile, including a clear decision.
+	# Animation samples must not recruit/restore terrain while standing still.
+	# Setup/fog invalidation and camera changes still force a fresh decision.
+	var context: Array = [data.get_instance_id(), camera.get_instance_id(), camera.get_camera_transform(), camera.get_camera_projection(), camera.get_viewport().get_visible_rect(), tile, points.is_empty()]
 	if signature == context: return []
 	signature = context
-	signature[4] = points.duplicate()
 	stats = {"candidates": 0, "rays": points.size(), "blocked": 0, "triangle_tests": 0}
 	var next: Dictionary = {}
 	if not points.is_empty():
@@ -83,7 +85,7 @@ func update(camera: Camera3D, tile: Vector2i, points: Array[Vector3], data: Dung
 			for ray in range(points.size()):
 				if intersects(record, origins[ray], points[ray]): blocked[ray] = true
 		stats.blocked = blocked.size()
-		if blocked.size() > points.size() * 0.25:
+		if blocked.size() > points.size() * 0.4:
 			var groups: Array = [{"points": points, "origins": origins}]
 			for y in range(-1, 2):
 				for x in range(-1, 2):
@@ -144,14 +146,24 @@ static func build_tree(faces: PackedVector3Array) -> Dictionary:
 	bounds = bounds.grow(0.00001)
 	if faces.size() <= 24: return {"bounds": bounds, "faces": faces}
 	var axis := bounds.size.max_axis_index()
-	var triangles: Array = []
-	for index in range(0, faces.size(),3):
-		triangles.append([faces[index], faces[index+1], faces[index+2]])
-	triangles.sort_custom(func(a,b): return (a[0][axis]+a[1][axis]+a[2][axis]) < (b[0][axis]+b[1][axis]+b[2][axis]))
+	# Partition in linear time instead of sorting Variant triangle arrays at every
+	# level. Keep the exact faces: this changes acceleration layout, not ray hits.
+	var split := bounds.get_center()[axis]
 	var left := PackedVector3Array()
 	var right := PackedVector3Array()
-	for index in range(triangles.size()):
-		for point: Vector3 in triangles[index]:
-			if index < triangles.size()/2: left.append(point)
-			else: right.append(point)
+	for index in range(0, faces.size(), 3):
+		var centroid := (faces[index][axis] + faces[index+1][axis] + faces[index+2][axis]) / 3.0
+		if centroid < split:
+			left.append(faces[index])
+			left.append(faces[index+1])
+			left.append(faces[index+2])
+		else:
+			right.append(faces[index])
+			right.append(faces[index+1])
+			right.append(faces[index+2])
+	# Coincident centroids still need a bounded, terminating subdivision.
+	if left.is_empty() or right.is_empty():
+		var midpoint := (faces.size() / 6) * 3
+		left = faces.slice(0, midpoint)
+		right = faces.slice(midpoint)
 	return {"bounds": bounds, "left": build_tree(left), "right": build_tree(right)}

@@ -13,6 +13,12 @@ var defeat_completed: bool = false
 var defeat_animation: Tween
 
 signal presentation_finished
+signal damage_recovery_finished
+const MINIMUM_DAMAGE_RECOVERY: float = 0.5
+const DAMAGE_HURT_DURATION: float = 0.25
+var damage_hurt_phase: bool = false
+var damage_recovering: bool = false
+var damage_recovery: Tween
 signal frame_changed(name: String)
 @export var display_name: String = "Character"
 @export var sprite_path: NodePath
@@ -154,6 +160,7 @@ func finish() -> void:
 	presentation_finished.emit()
 
 func cancel() -> void:
+	finish_damage_recovery()
 	cancel_defeat()
 	sprite.show()
 	finish()
@@ -165,6 +172,7 @@ func complete_action() -> void:
 
 func _exit_tree() -> void:
 	disposed = true
+	finish_damage_recovery()
 	cancel_defeat()
 	finish()
 
@@ -175,6 +183,43 @@ func walk() -> void:
 
 func hurt() -> void:
 	pass
+
+
+func begin_damage_recovery() -> void:
+	if damage_recovery != null:
+		damage_recovery.kill()
+	damage_recovering = true
+	damage_hurt_phase = true
+	damage_recovery = create_tween()
+	# A real-time minimum: action-speed boosts must not erase the reaction.
+	damage_recovery.tween_interval(DAMAGE_HURT_DURATION)
+	damage_recovery.tween_callback(_damage_idle)
+	damage_recovery.tween_interval(MINIMUM_DAMAGE_RECOVERY - DAMAGE_HURT_DURATION)
+	damage_recovery.tween_callback(finish_damage_recovery)
+
+
+func _damage_idle() -> void:
+	damage_hurt_phase = false
+	damage_idle_pose()
+
+
+func damage_idle_pose() -> void:
+	standing()
+
+
+func finish_damage_recovery() -> void:
+	if damage_recovery != null:
+		damage_recovery.kill()
+	if not damage_recovering:
+		return
+	damage_recovering = false
+	damage_hurt_phase = false
+	damage_recovery_finished.emit()
+
+
+func complete_damage_recovery() -> void:
+	if damage_recovering:
+		await damage_recovery_finished
 
 func freeze_defeated() -> void:
 	pass
