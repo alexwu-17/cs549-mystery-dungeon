@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3 uid="uid://bv4vb1inr0miq"]
 
 [ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
 
@@ -9,7 +9,7 @@ display_name = "Ember"
 move_type = "Fire"
 category = 1
 power = 6
-maximum_pp = 10
+maximum_pp = 20
 range_tiles = 4
 targeting = 1
 animation_action = &"Ember"

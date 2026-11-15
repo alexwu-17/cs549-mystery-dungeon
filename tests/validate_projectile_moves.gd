@@ -35,7 +35,7 @@ func validate_data() -> void:
 		var move: PokemonMoveData = species.floor_unlock_move
 		assert(move != null and move.move_id == UNLOCK[index] and move.display_name == UNLOCK_NAMES[index])
 		assert(move.move_type == TYPES[index] and move.category == CATEGORIES[index] and move.power == POWER[index])
-		assert(move.maximum_pp == 10 and move.range_tiles == 4 and move.targeting == PokemonMoveData.Targeting.STRAIGHT_PROJECTILE)
+		assert(move.maximum_pp == 20 and move.range_tiles == 4 and move.targeting == PokemonMoveData.Targeting.STRAIGHT_PROJECTILE)
 		assert(not species.starting_moves.has(move) and attacker.moves.size() == 2)
 		assert(PokemonDamage.move_damage(attacker, stunky, move) == STUNKY_DAMAGE[index])
 		assert(PokemonDamage.move_damage(attacker, drapion, move) == DRAPION_DAMAGE[index])
@@ -51,15 +51,15 @@ func validate_data() -> void:
 		var changes: Array[int] = [0]
 		attacker.moves_changed.connect(func(): changes[0] += 1)
 		assert(not attacker.knows_move(move) and attacker.learn_move(move) and attacker.knows_move(move))
-		assert(attacker.moves.size() == 3 and attacker.remaining_pp == [STARTING_PP[index][0], STARTING_PP[index][1], 10])
+		assert(attacker.moves.size() == 3 and attacker.remaining_pp == [STARTING_PP[index][0], STARTING_PP[index][1], 20])
 		assert(not attacker.learn_move(move) and not attacker.learn_move(null) and changes[0] == 1)
-		assert(attacker.spend_pp(2) and attacker.remaining_pp[2] == 9)
+		assert(attacker.spend_pp(2) and attacker.remaining_pp[2] == 19)
 		attacker.reset(species)
 		assert(attacker.moves.size() == 2 and not attacker.knows_move(move))
 		# An explicit empty slot is filled before appending; a full set refuses.
 		attacker.moves[1] = null
 		attacker.remaining_pp[1] = 0
-		assert(attacker.learn_move(move) and attacker.moves[1] == move and attacker.remaining_pp[1] == 10)
+		assert(attacker.learn_move(move) and attacker.moves[1] == move and attacker.remaining_pp[1] == 20)
 		var full := species.duplicate() as PokemonSpeciesData
 		full.starting_moves = [attacker.moves[0], attacker.moves[0], attacker.moves[0], attacker.moves[0]]
 		attacker.reset(full)
@@ -164,11 +164,11 @@ func validate() -> void:
 		main._on_stairs_reached()
 		Helper.complete_introduction(main)
 		assert(main.floor_number == 3 and state.moves.size() == 3 and state.moves[2] == unlock)
-		assert(state.remaining_pp == [STARTING_PP[index][0], STARTING_PP[index][1], 10])
+		assert(state.remaining_pp == [STARTING_PP[index][0], STARTING_PP[index][1], 20])
 		assert(has_message(main, "%s learned %s!" % [player.character_visual.get_display_name(), UNLOCK_NAMES[index]]))
 		assert(main.learned_move_pending == null and not player.transition_locked)
 		assert(main.hud.move_panel.moves.size() == 3 and main.hud.move_panel.moves[2].move_name == UNLOCK_NAMES[index])
-		assert(main.hud.move_panel.moves[2].attribute_name == TYPES[index] and main.hud.move_panel.moves[2].maximum_pp == 10)
+		assert(main.hud.move_panel.moves[2].attribute_name == TYPES[index] and main.hud.move_panel.moves[2].maximum_pp == 20)
 		# Reloading a later floor neither re-teaches nor restores PP.
 		state.remaining_pp[2] = 7
 		main.load_test_floor()
@@ -295,7 +295,7 @@ func validate() -> void:
 		main.use_elevation_test = false
 		main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
 		main.load_test_floor()
-		assert(state.moves.size() == 3 and state.remaining_pp[2] == 10)
+		assert(state.moves.size() == 3 and state.remaining_pp[2] == 20)
 		player.setup(main.boss.grid_position - Vector2i.RIGHT * 2, main.dungeon, main.dungeon_renderer)
 		player.facing = Vector2i.RIGHT
 		main.refresh_fog()

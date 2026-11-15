@@ -1,5 +1,17 @@
 # Codex project handoff
 
+### Chimchar Fire typing and revised SpAtk (2026-11-14)
+
+User corrected Chimchar's missing type: species types now Fire, special_attack77->44. With the existing1.5x STAB, Ember deals exactly56 against current Stunky, between Bubble54 and Razor Leaf60. Supersedes the earlier typeless SpAtk77 adjustment. Attack39, move power,20PP, Floor3 unlock and five-floor Demo are unchanged. Focused Godot4.4.1 runtime damage/typing/PP check PASS; only the known certificate diagnostic. No full suite or commit/push.
+
+
+### Five-floor demo and projectile balance (2026-11-14)
+
+User requested Chimchar SpAtk parity,20PP for all starter projectiles, and five Demo floors. Chimchar special_attack38->77 is the minimum integer giving Ember60 damage against current42HP Stunky, matching Razor Leaf60 and exceeding Bubble54 with current unmodified stats/types. Chimchar remains typeless as configured; move power, other stats, and damage formula are unchanged. Ember/Bubble/Razor Leaf maximum_pp10->20. Demo final arena and its subtitle move10->5 (four exploration floors plus boss); Floor3 unlock remains.
+
+Godot4.4.1 focused configuration/runtime damage check PASS for actual damage values, minimum SpAtk,20PP learning/spending, Floor5 arena and Floor3 unlock. validate_modes PASS through the five-floor Demo arena/cap and restart; existing certificate/cleanup diagnostics remain. Existing projectile fixture PP expectations updated; its full legacy fixed-damage/type expectations remain previously documented as stale and it was not rerun. Balance feel and GPU appearance need gameplay review. Preserved pre-existing user edits in attack policies, Drapion/X-Scissor, enemy scene and resource UIDs. No commit/push or full suite.
+
+
 ### Assignment 6 Highlands progression (2026-11-14)
 
 User renamed the shared dungeon title to Assignment 6 Highlands, extended Demo to ten floors (nine exploration floors plus the existing Drapion arena on Floor10), and restored elemental_move_floor to3 from the temporary Floor1 setting. Demo final-floor subtitle moves to10; move/PP persistence and boss mechanics are unchanged. validate_modes now traverses through the configured final floor and checks its cap instead of stopping at Floor6. Godot4.4.1 focused validate_modes PASS (real stair transitions through Floor10, arena/cap, HP persistence and restart); existing certificate/cleanup diagnostics remain. Name/unlock defaults verified in source; no full suite or manual UI check.
