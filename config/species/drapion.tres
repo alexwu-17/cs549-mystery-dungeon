@@ -8,7 +8,7 @@
 script = ExtResource("species")
 species_id = &"drapion"
 display_name = "Drapion"
-types = []
+types = PackedStringArray("Poison", "Dark")
 starting_moves = Array[ExtResource("moves")]([ExtResource("x_scissor")])
 level = 30
 maximum_hp = 92

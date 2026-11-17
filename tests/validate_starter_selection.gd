@@ -27,6 +27,9 @@ func validate() -> void:
 	assert(current_scene != null and current_scene.scene_file_path == "res://scenes/ui/demo_start.tscn")
 	var launched = current_scene
 	assert(launched.choosing and launched.gameplay == null)
+	assert(launched.choices.size() == 3 and launched.SPECIES.size() == 3)
+	launched.start_starter(3)
+	assert(launched.gameplay == null)
 	launched.start_starter(1)
 	Helper.complete_introduction(launched.gameplay)
 	assert(launched.gameplay.player.species_data.species_id == &"piplup")
@@ -55,7 +58,7 @@ func validate() -> void:
 		key.pressed = true
 		key.physical_keycode = KEY_A
 		root.push_input(key, true)
-		assert(entry.focused_index == 2 and entry.choices[2].has_focus())
+		assert(entry.focused_index == entry.choices.size() - 1 and entry.choices[-1].has_focus())
 		key.physical_keycode = KEY_D
 		root.push_input(key, true)
 		assert(entry.focused_index == 0 and entry.choices[0].has_focus())

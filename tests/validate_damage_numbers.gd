@@ -9,7 +9,7 @@ func _initialize() -> void:
 
 func validate() -> void:
 	root.size = Vector2i(1920, 1080)
-	# Health owns the actual clamped loss; resets/healing/invalid hits emit no damage.
+	# Health clamps HP loss but reports full damage; invalid hits emit no damage.
 	var health := EntityHealth.new()
 	var losses: Array[int] = []
 	health.damaged.connect(func(amount: int): losses.append(amount))
@@ -21,9 +21,9 @@ func validate() -> void:
 	health.heal(2)
 	health.damage(100)
 	health.damage(4)
-	assert(losses == [3, 8])
+	assert(losses == [3, 100] and health.current == 0)
 	health.reset(20)
-	assert(losses == [3, 8])
+	assert(losses == [3, 100])
 	var main = load("res://scenes/main/main.tscn").instantiate()
 	main.use_elevation_test = true
 	root.add_child(main)
@@ -75,7 +75,7 @@ func validate() -> void:
 	enemy.health.reset(4)
 	enemy.receive_damage(99)
 	feedback.set_process(false)
-	assert(feedback.popups.size() == 1 and feedback.popups[0].label.text == "-4")
+	assert(feedback.popups.size() == 1 and feedback.popups[0].label.text == "-99" and enemy.health.current == 0)
 	var damage_count := feedback.popups.size()
 	enemy.receive_damage(2)
 	assert(feedback.popups.size() == damage_count)
@@ -96,27 +96,27 @@ func validate() -> void:
 	main._on_stairs_reached()
 	Helper.complete_introduction(main)
 	assert(main.floor_number == 2 and feedback.popups.is_empty())
-	# Death remains nonblocking; the lethal actual loss still has a popup.
+	# Death remains nonblocking; lethal damage displays the full hit.
 	player.health.reset(9)
 	player.receive_damage(99)
 	feedback.set_process(false)
-	assert(main.game_over and feedback.popups.size() == 1 and feedback.popups[0].label.text == "-9")
+	assert(main.game_over and feedback.popups.size() == 1 and feedback.popups[0].label.text == "-99")
 	main.start_new_run()
 	Helper.complete_introduction(main)
 	assert(not main.game_over and feedback.popups.is_empty())
 	# Boss defeat's round cancellation must not erase its lethal damage text.
 	main.game_mode = GameModeConfig.Mode.DEMO
 	main.use_elevation_test = false
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	main.boss.visible = true
 	main.boss.receive_damage(100)
 	feedback.set_process(false)
-	assert(main.victory and feedback.popups.size() == 1 and feedback.popups[0].label.text == "-92")
+	assert(main.victory and feedback.popups.size() == 1 and feedback.popups[0].label.text == "-100")
 	main.start_new_run()
 	Helper.complete_introduction(main)
 	assert(feedback.popups.is_empty() and not main.victory)
 	main.free()
 	await process_frame
-	print("PASS: actual damage events, player/enemy/boss head numbers, rise/fade, zero/heal/invincibility, fog/blink and floor/restart/death/victory cleanup")
+	print("PASS: full damage events including overkill, player/enemy/boss head numbers, rise/fade, zero/heal/invincibility, fog/blink and floor/restart/death/victory cleanup")
 	quit()

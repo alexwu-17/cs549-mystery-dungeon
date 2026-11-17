@@ -75,7 +75,7 @@ func validate() -> void:
 	assert(old_enemy.get_ref() == null and main.retiring_enemies.is_empty())
 
 	# Drapion falls back to the last Hurt frame; completion UI waits for disappearance.
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	var boss: Minotaur = main.boss
@@ -102,7 +102,7 @@ func validate() -> void:
 	# A longer finishing attack is also allowed to complete before the overlay.
 	main.start_new_run()
 	Helper.complete_introduction(main)
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	boss = main.boss
@@ -120,7 +120,7 @@ func validate() -> void:
 	# Restart during a blinking boss must not show a stale Demo Complete overlay.
 	main.start_new_run()
 	Helper.complete_introduction(main)
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	boss = main.boss

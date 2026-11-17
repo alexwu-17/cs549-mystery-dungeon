@@ -65,10 +65,26 @@ func validate() -> void:
 	player._unhandled_input(key)
 	var before: int = rounds[0]
 	player._process(Player.MOVE_INTERVAL)
-	assert(rounds[0] == before + 1 and player.movement_speed == 5.0)
+	assert(rounds[0] == before + 1 and player.movement_speed == 20.0)
+	assert(is_equal_approx(player.repeat_remaining, Player.MOVE_INTERVAL))
+	assert(Engine.time_scale == 20.0)
+	assert(player.character_visual.action_speed == 1.0 and player.attack_leap.action_speed == 1.0)
+	assert(root.get_node("MusicManager").player.pitch_scale == 2.0)
+	var visual = player.character_visual
+	visual.hurt_remaining = 0.0
+	visual.walk_remaining = 0.0
+	visual.standing()
+	var idle_time: float = visual.clip_time
+	visual._process(0.01 * Engine.time_scale)
+	assert(is_equal_approx(visual.clip_time - idle_time, 0.2))
 	Input.action_release(&"wait_turn")
 	player._process(0.0)
 	assert(player.movement_speed == 1.0 and player.held_action == &"")
+	assert(Engine.time_scale == 1.0)
+	assert(root.get_node("MusicManager").player.pitch_scale == 1.0)
+	idle_time = visual.clip_time
+	visual._process(0.01)
+	assert(is_equal_approx(visual.clip_time - idle_time, 0.01))
 	# Hidden enemy gets exactly one movement per wait. Its reveal cancels the hold.
 	player.setup(Vector2i.ZERO, data, main.dungeon_renderer)
 	data.enemy_spawns = [Vector2i(3, 0)]
@@ -81,6 +97,8 @@ func validate() -> void:
 	assert(enemy.grid_position == Vector2i(2, 0) and player.held_action == &"wait_turn")
 	player._process(Player.MOVE_INTERVAL)
 	assert(enemy.grid_position == Vector2i(1, 0) and enemy.visible)
+	assert(Engine.time_scale == 1.0)
+	assert(root.get_node("MusicManager").player.pitch_scale == 1.0)
 	assert(player.movement_speed == 1.0 and player.held_action == &"")
 	before = rounds[0]
 	assert(not player.wait_turn())
@@ -117,12 +135,13 @@ func validate() -> void:
 	# Boss visibility uses the same authoritative footprint/fog rule.
 	main.use_elevation_test = false
 	main.game_mode = GameModeConfig.Mode.DEMO
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	main.dungeon.bright_tiles[main.boss.grid_position] = true
 	main.refresh_entity_visibility()
 	assert(not main._can_player_wait())
 	main.free()
+	assert(Engine.time_scale == 1.0)
 	await process_frame
-	print("PASS: J wait/held5x, initial15 then5 peaceful turns per HP, walk/wait counters, attack/damage resets, visible-enemy/boss blocking and cancellation")
+	print("PASS: J wait/held20x including idle and release, initial15 then5 peaceful turns per HP, walk/wait counters, attack/damage resets, visible-enemy/boss blocking and cancellation")
 	quit()

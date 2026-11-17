@@ -32,6 +32,10 @@ static func _complete_leap(leap: AttackLeap) -> void:
 
 static func _complete_projectile(main: Node3D) -> bool:
 	for effect in main.entities.get_children():
+		if effect is OminousWindEffect and not effect.completed:
+			effect.animation.pause()
+			effect.animation.custom_step(100.0)
+			return true
 		if effect is ProjectileEffect and not effect.flight_completed:
 			effect.animation.pause()
 			effect.animation.custom_step(100.0)

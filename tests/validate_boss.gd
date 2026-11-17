@@ -9,7 +9,7 @@ func validate() -> void:
 	root.add_child(main)
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.boss == null)
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	var boss: Minotaur = main.boss
@@ -184,7 +184,7 @@ func validate() -> void:
 	assert(main.boss == null and not main.victory and main.floor_number == 1 and main.game_mode == GameModeConfig.Mode.DEMO)
 	assert(main.player.health.current == 20 and not main.hud.get_node("Screen/GameOver").visible)
 	# Losing to a charge uses the original game-over path, not victory.
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	boss = main.boss
@@ -200,7 +200,7 @@ func validate() -> void:
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	assert(main.boss == null and not main.game_over and main.player.health.current == 20)
 	# Restart during an active charge removes markers/effects with their owner.
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	load("res://tests/round_test_helper.gd").complete_introduction(main)
 	boss = main.boss

@@ -12,6 +12,9 @@ const EMBER_BURST: Texture2D = preload("res://assets/effects/pixelfx/ember_body_
 const EMBER_SMOKE: Texture2D = preload("res://assets/effects/pixelfx/ember_smoke.png")
 const SHEET_SHADER: Shader = preload("res://scripts/effects/projectile_impact_sheet.gdshader")
 const TEXTURES := {
+	&"healing_bloom": preload("res://assets/effects/pixelfx/healing_bloom.png"),
+	&"recovery": preload("res://assets/effects/pixelfx/recovery.png"),
+	&"shadow_ball": preload("res://assets/effects/pixelfx/shadow_ball_hit.png"),
 	&"ember": preload("res://assets/effects/pixelfx/ember_hit.png"),
 	&"razor_leaf": preload("res://assets/effects/pixelfx/razor_leaf_hit.png"),
 	&"bubble": preload("res://assets/effects/pixelfx/bubble_hit.png"),
@@ -19,6 +22,7 @@ const TEXTURES := {
 	&"tackle": preload("res://assets/effects/pixelfx/basic_hit.png"),
 	&"pound": preload("res://assets/effects/pixelfx/basic_hit.png"),
 }
+var bullet_seed: bool = false
 var animation: Tween
 var sprite: Sprite3D
 var material: ShaderMaterial
@@ -32,7 +36,7 @@ var smoke_clouds: Array[Dictionary] = []
 
 
 static func play_on_actor(target: Node3D, move_id: StringName) -> ProjectileImpactEffect:
-	if not TEXTURES.has(move_id): return null
+	if not TEXTURES.has(move_id) and move_id != &"bullet_seed": return null
 	var effect := ProjectileImpactEffect.new()
 	target.add_child(effect)
 	effect.play(target, move_id)
@@ -56,12 +60,16 @@ func play(target: Node3D, move_id: StringName) -> void:
 	global_position = body.global_position + right * (rect.position.x + bounds.position.x + bounds.size.x * 0.5) * pixel_x + up * (rect.end.y - bounds.position.y - bounds.size.y * 0.5) * pixel_y
 	var body_center := global_position
 	sprite = Sprite3D.new()
-	sprite.texture = TEXTURES[move_id]
+	bullet_seed = move_id == &"bullet_seed"
+	sprite.texture = ProjectileEffect._texture_for("Grass") if bullet_seed else TEXTURES[move_id]
 	sprite.hframes = 6
 	sprite.vframes = 8
 	if move_id == &"scratch":
 		sprite.hframes = 7
 		sprite.vframes = 7
+	if bullet_seed:
+		sprite.hframes = 1
+		sprite.vframes = 1
 	grounded_fire = move_id == &"ember"
 	if grounded_fire:
 		# Full upstream fire ring, grounded and sized to roughly one tile.
@@ -88,14 +96,56 @@ func play(target: Node3D, move_id: StringName) -> void:
 	if move_id == &"bubble": width *= 1.4
 	if move_id in [&"tackle", &"pound"]: width *= 2.5
 	sprite.pixel_size = width / 64.0
+	if bullet_seed:
+		sprite.pixel_size = maxf(body_width, bounds.size.y * pixel_y) * 1.8 / 16.0
 	if grounded_fire: sprite.pixel_size = DungeonData.TILE_SIZE / EMBER_RING_DIAMETER
+	if move_id == &"shadow_ball":
+		var info := SpiritombFx.layout(str(move_id) + "_hit")
+		sprite.hframes = info.columns
+		sprite.vframes = info.rows
+		frame_count = info.frames
+		var size: Vector2 = info.size
+		var pivot: Vector2 = info.pivot
+		sprite.offset = Vector2(size.x / 2.0 - pivot.x,pivot.y - size.y / 2.0)
+		sprite.pixel_size = 0.009
+		duration = 0.65
+	if move_id == &"recovery":
+		var info := SpiritombFx.layout("recovery")
+		sprite.hframes = info.columns
+		sprite.vframes = info.rows
+		frame_count = info.frames
+		duration = 1.9
+		# Upstream ring rises 43 pixels from its foot pivot. Fit to native body height.
+		sprite.pixel_size = maxf(0.2, bounds.size.y * pixel_y) / 43.0
+		var size: Vector2 = info.size
+		var pivot: Vector2 = info.pivot
+		sprite.offset = Vector2(size.x * 0.5 - pivot.x, pivot.y - size.y * 0.5)
+		# The opaque box includes tails/asymmetric poses. Center on the native
+		# foot anchor instead, which is stable across Charge animation frames.
+		global_position = body.global_position + right * (rect.position.x + visual.foot_anchor.x) * pixel_x + up * (rect.end.y - visual.foot_anchor.y) * pixel_y
+	if move_id == &"healing_bloom":
+		var info := SpiritombFx.layout("healing_bloom")
+		sprite.hframes = info.columns
+		sprite.vframes = info.rows
+		frame_count = info.frames
+		duration = 3.3 / 1.5
+		sprite.pixel_size = maxf(0.8, bounds.size.y * pixel_y * 1.3) * 1.1 / 70.0
+		var size: Vector2 = info.size
+		var pivot: Vector2 = info.pivot
+		sprite.offset = Vector2(size.x * 0.5 - pivot.x, pivot.y - size.y * 0.5)
+		global_position = body.global_position + right * (rect.position.x + visual.foot_anchor.x) * pixel_x + up * (rect.end.y - visual.foot_anchor.y) * pixel_y
 	add_child(sprite)
 	material = ShaderMaterial.new()
-	material.shader = SHEET_SHADER
+	material.shader = ProjectileEffect.BULLET_SEED_SHADER if bullet_seed else SHEET_SHADER
 	material.render_priority = sprite.render_priority
 	material.set_shader_parameter("sheet_texture", sprite.texture)
 	material.set_shader_parameter("atlas_grid", Vector2(sprite.hframes, sprite.vframes))
 	material.set_shader_parameter("last_frame", float(frame_count - 1))
+	if move_id == &"recovery":
+		# Fit the narrowest part of the rising hoop (24 source pixels) around
+		# the body, with at least 35% extra width over the previous effect.
+		material.set_shader_parameter("horizontal_scale", maxf(1.35, body_width * 1.25 / (24.0 * sprite.pixel_size)))
+	if bullet_seed: material.set_shader_parameter("impact", true)
 	sprite.material_override = material
 	if grounded_fire:
 		_add_ember_layers(body_center, body_width)
@@ -154,6 +204,9 @@ func _complete() -> void:
 
 
 func _sample(progress: float) -> void:
+	if bullet_seed:
+		material.set_shader_parameter("progress", progress)
+		return
 	var frame := minf(progress * frame_count, float(frame_count - 1))
 	sprite.frame = int(frame)
 	material.set_shader_parameter("frame_blend", fposmod(frame, 1.0))

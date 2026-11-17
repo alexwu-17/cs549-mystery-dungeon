@@ -4,6 +4,7 @@ extends RefCounted
 
 const HealthScript = preload("res://scripts/entities/health.gd")
 const MAX_MOVES := 4
+signal move_learned(move: PokemonMoveData)
 signal moves_changed
 signal stage_changed(stat: StringName, amount: int)
 signal stats_restored
@@ -59,12 +60,14 @@ func learn_move(move: PokemonMoveData) -> bool:
 			moves[slot] = move
 			remaining_pp[slot] = move.maximum_pp
 			moves_changed.emit()
+			move_learned.emit(move)
 			return true
 	if moves.size() >= MAX_MOVES:
 		return false
 	moves.append(move)
 	remaining_pp.append(move.maximum_pp)
 	moves_changed.emit()
+	move_learned.emit(move)
 	return true
 
 

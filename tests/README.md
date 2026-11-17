@@ -26,6 +26,7 @@ appearance, shadows, transparency, GPU readback or frame rates.
 
 | Change | Primary checks |
 | --- | --- |
+| Final-floor three-wide corridor/camera, textured bounds/upper torches, repeatable recovery, sealed arena/light, Drapion stairs, row4 music and floor-only controls | `validate_final_floor`, `validate_held_movement`; normal-render map/audio review |
 | Open elevation+1 projectile air extension, same-height hits and lower-floor immunity | `validate_upper_air_projectiles`, `validate_projectile_impact` |
 | Scratch/Tackle/Pound visual hit feedback and unchanged melee damage/PP | `validate_melee_impacts` |
 | Enemy hurt recovery timing, held hurt pose and cancellation | `validate_damage_recovery`, `validate_projectile_impact`, `validate_sequential_rounds` |
@@ -38,11 +39,18 @@ appearance, shadows, transparency, GPU readback or frame rates.
 | Stat stages, status move targeting/PP and stat arrows | `validate_status_moves`, `validate_stat_effect`, `validate_pokemon_moves`, `validate_battle_state`; normal-render inspection |
 | Move-specific clips and floating damage | `validate_pokemon_moves`, `validate_pokemon_sprites`, `validate_damage_numbers`; normal-render captures |
 | Enemy move selection, per-instance PP and attack-only randomness | `validate_enemy_moves`, `validate_pokemon_moves`, `validate_sequential_rounds` |
+| Temporary Spiritomb starter, screen Ominous Wind, Shadow Ball and cancellation | `validate_spiritomb_moves`, `validate_enemy_variety`, `validate_sequential_rounds`, `validate_effectiveness_dialogue` |
+| Four defeats -> Spiritomb reveal/audio/circular arena, HP/PP and cancellation | `validate_spiritomb_reveal`, `validate_final_encounter`, `validate_sequential_rounds`; manual transition/audio review |
+| Final arena center trigger, blackout/music timing, four-enemy formation and cancellation | `validate_final_encounter`, `validate_final_floor`, `validate_sequential_rounds` |
+| Prepared Budew/Feebas/Riolu/Gible, Splash and Dragon Breath | `validate_encounter_species`, `validate_enemy_variety`, `validate_sequential_rounds`; manual native/Frost Breath presentation |
+| Prepared enemy species scenes, action mappings, eligible enemy projectiles and cancellation | `validate_enemy_variety`, `validate_enemy_moves`, `validate_sequential_rounds`; normal-render scale/release review |
 | Combat/input/targeting | `validate_combat`, `validate_sequential_rounds`, `validate_pokemon_moves` |
 | Floor repopulation, hidden pursuit and spawn safety | `validate_repopulation`, `validate_sequential_rounds`, `validate_visibility_refresh` |
+| Floor/player-type weighted enemy selection, initial spawns and respawns | `validate_enemy_spawn_rates`, `validate_repopulation` |
 | J waiting, visibility interruption and peaceful healing | `validate_recovery`, `validate_sequential_rounds`, `validate_held_movement` |
 | Held movement | `validate_held_movement` |
 | Attack rendering priority, rounded3x3 occlusion, fog and doorway diagonals | `validate_visibility_refresh`, `validate_presentation`, `validate_fog`, `validate_continuous_terrain`; normal-render corridor/doorway/attack captures (headless skips the visual light overlay) |
+| Type-effectiveness dialogue after player/enemy/boss move damage | `validate_effectiveness_dialogue` |
 | Move display | `validate_move_panel`, `validate_hud` |
 | Drapion species, charged move/basic selection, deferred PP and balance | `validate_drapion_moves`, `validate_enemy_moves`, `validate_battle_state`, `validate_boss`, `validate_drapion_swing` |
 | Boss/defeat | `validate_boss`, `validate_drapion_swing`, `validate_enemy_defeat` |
@@ -111,3 +119,9 @@ profile is missing or invalid. `validate_pokemon_sprites` and
 `validate_ramp_sprites` cover the defaults. `profile_pokemon_sprites.gd --
 --defaults` profiles role defaults; the retired `--placeholder` comparison and
 legacy sprite-extraction Python test/tool no longer exist.
+
+Recovery move: `godot --headless --path . --script tests/validate_recovery_move.gd` verifies starter reveal learning, healing/PP/Charge/popups, turn completion, cancellation and reset.
+
+Species editor serialization: `godot --headless --editor --path . --script tests/validate_species_editor_save.gd`. Editor mode is required to exercise non-tool Resource placeholders and catch packed-array default/serialization regressions; normal runtime loading cannot certify this path.
+
+Stairs confirmation/UI priority: `godot --headless --path . --script tests/validate_stairs_prompt.gd`. Real stair entry now requires explicit choice; fixtures intending to advance must call `main.stairs_prompt.choose(true)` before completing introduction. `validate_final_floor.gd` covers the recovery-tile notice and final-floor flow.

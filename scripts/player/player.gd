@@ -17,11 +17,13 @@ const MOVE_ACTIONS := [&"move_slot_1", &"move_slot_2", &"move_slot_3", &"move_sl
 
 const MOVE_INTERVAL: float = 0.24
 const HELD_SPEED: float = 3.0
-const WAIT_SPEED: float = 5.0
+const WAIT_SPEED: float = 20.0
 var held_action: StringName = &""
 var held_direction: Vector2i = Vector2i.ZERO
 var repeat_remaining: float = 0.0
 var movement_speed: float = 1.0
+var holding_still: bool = false
+var acceleration_enabled: bool = true
 
 @export var species_data: PokemonSpeciesData
 var battle_state: PokemonBattleState = PokemonBattleState.new()
@@ -124,6 +126,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	if dungeon_data == null:
 		return
+	if event.is_action("hold_still"):
+		stop_held_movement()
+		holding_still = Input.is_action_pressed("hold_still")
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_released("wait_turn") and held_action == &"wait_turn":
 		stop_held_movement()
 	elif event.is_action_pressed("wait_turn"):
@@ -152,6 +159,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			stop_held_movement()
 			if not can_accept_movement():
 				return
+			if holding_still or Input.is_action_pressed("hold_still"):
+				facing = directions[index]
+				character_visual.face(facing)
+				get_viewport().set_input_as_handled()
+				return
 			held_action = actions[index]
 			held_direction = directions[index]
 			repeat_remaining = MOVE_INTERVAL
@@ -178,6 +190,10 @@ func _set_movement_speed(speed: float) -> void:
 
 
 func _process(delta: float) -> void:
+	holding_still = Input.is_action_pressed("hold_still") and get_window().has_focus()
+	if holding_still:
+		stop_held_movement()
+		return
 	if held_action == &"":
 		return
 	if not Input.is_action_pressed(held_action) or transition_locked or not gameplay_enabled or health.current == 0:
@@ -189,10 +205,11 @@ func _process(delta: float) -> void:
 	repeat_remaining = maxf(0.0, repeat_remaining - delta)
 	if repeat_remaining > 0.0:
 		return
-	var speed := WAIT_SPEED if held_action == &"wait_turn" else HELD_SPEED
+	var speed := (WAIT_SPEED if held_action == &"wait_turn" else HELD_SPEED) if acceleration_enabled else 1.0
 	_set_movement_speed(speed)
 	if can_accept_movement():
-		repeat_remaining = MOVE_INTERVAL / speed
+		# Held waiting already accelerates the engine clock, including delta.
+		repeat_remaining = MOVE_INTERVAL if held_action == &"wait_turn" else MOVE_INTERVAL / speed
 		if held_action == &"wait_turn":
 			wait_turn()
 		else:
@@ -213,6 +230,9 @@ func try_move(direction: Vector2i) -> void:
 		return
 	facing = direction
 	character_visual.face(facing)
+	if holding_still or Input.is_action_pressed("hold_still"):
+		stop_held_movement()
+		return
 	var target_position := grid_position + direction
 	var walkable := dungeon_data.can_traverse(grid_position, target_position)
 
@@ -265,12 +285,16 @@ func use_move(slot: int) -> bool:
 	if not _can_attack() or not battle_state.can_use_move(slot):
 		return false
 	var move := battle_state.moves[slot]
-	if move.category == PokemonMoveData.Category.STATUS:
+	if move.move_id == &"recovery":
+		if move.category != PokemonMoveData.Category.STATUS or move.targeting != PokemonMoveData.Targeting.SELF: return false
+	elif move.category == PokemonMoveData.Category.STATUS:
 		if not PokemonBattleState.STATS.has(move.affected_stat) or move.stage_change == 0 or move.targeting == PokemonMoveData.Targeting.STRAIGHT_PROJECTILE:
 			return false
 	elif move.targeting == PokemonMoveData.Targeting.ADJACENT:
 		if move.range_tiles != 1:
 			return false
+	elif move.targeting == PokemonMoveData.Targeting.SCREEN:
+		pass
 	elif move.targeting != PokemonMoveData.Targeting.STRAIGHT_PROJECTILE or move.range_tiles < 1:
 		return false
 	stop_held_movement()
@@ -308,6 +332,7 @@ func complete_action() -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		holding_still = false
 		stop_held_movement()
 
 

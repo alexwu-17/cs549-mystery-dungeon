@@ -154,7 +154,7 @@ func validate() -> void:
 		# Boss damage uses the same arrival gate, including lethal victory.
 		main.game_mode = GameModeConfig.Mode.DEMO
 		main.use_elevation_test = false
-		main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+		main.floor_number = GameModeConfig.DRAPION_FLOOR
 		main.load_test_floor()
 		main.player.setup(main.boss.grid_position - Vector2i.RIGHT * 2, main.dungeon, main.dungeon_renderer)
 		main.player.facing = Vector2i.RIGHT

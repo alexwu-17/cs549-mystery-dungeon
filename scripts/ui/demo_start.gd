@@ -55,7 +55,7 @@ func show_selection() -> void:
 	var cards := HBoxContainer.new()
 	cards.add_theme_constant_override("separation", 28)
 	column.add_child(cards)
-	for index in range(SPECIES.size()):
+	for index in range(3):
 		var card := VBoxContainer.new()
 		card.add_theme_constant_override("separation", 16)
 		cards.add_child(card)
@@ -78,14 +78,15 @@ func show_selection() -> void:
 		select.focus_entered.connect(_focus_starter.bind(index))
 		card.mouse_entered.connect(_hover_starter.bind(index))
 		select.mouse_entered.connect(_hover_starter.bind(index))
-	for index in range(choices.size()):
-		choices[index].focus_neighbor_left = choices[index].get_path_to(choices[posmod(index - 1, choices.size())])
-		choices[index].focus_neighbor_right = choices[index].get_path_to(choices[(index + 1) % choices.size()])
-	choices[0].grab_focus()
 	var hint := Label.new()
 	hint.text = "A / D or ← / → to choose · Enter / Space to start"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(hint)
+	for index in range(choices.size()):
+		choices[index].focus_neighbor_left = choices[index].get_path_to(choices[posmod(index - 1, choices.size())])
+		choices[index].focus_neighbor_right = choices[index].get_path_to(choices[(index + 1) % choices.size()])
+	choices[0].grab_focus()
+
 
 
 func _input(event: InputEvent) -> void:

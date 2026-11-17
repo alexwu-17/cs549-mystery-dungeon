@@ -56,6 +56,7 @@ func validate() -> void:
 	# A real hidden actor still pursues once per player round after respawning.
 	var main = load("res://scenes/main/main.tscn").instantiate()
 	main.use_elevation_test = true
+	main.enemy_spawn_table = null # This fixture owns Stunky's fixed HP/PP assertions.
 	root.add_child(main)
 	Helper.complete_introduction(main)
 	main.cancel_round()
@@ -103,7 +104,7 @@ func validate() -> void:
 	main.cancel_round()
 	assert(main.repopulation.empty_turns == 0)
 	main.game_mode = GameModeConfig.Mode.DEMO
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	for index in range(100): main._advance_repopulation()
 	assert(main.enemies.is_empty() and main.repopulation.empty_turns == 0)
 	main.game_mode = GameModeConfig.Mode.INFINITE

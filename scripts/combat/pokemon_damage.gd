@@ -3,6 +3,7 @@ extends RefCounted
 ## Deterministic user-supplied Explorers-inspired formula; independent of targeting.
 const BASIC_POWER := 1
 const BASIC_MULTIPLIER := 0.5
+const TypeChart = preload("res://scripts/combat/pokemon_type_chart.gd")
 
 
 static func raw_damage(attacker: PokemonBattleState, defender: PokemonBattleState, category: PokemonMoveData.Category, power: int) -> float:
@@ -27,10 +28,14 @@ static func basic_damage(attacker: PokemonBattleState, defender: PokemonBattleSt
 	return modified_damage(raw_damage(attacker, defender, PokemonMoveData.Category.PHYSICAL, BASIC_POWER), BASIC_MULTIPLIER)
 
 
-static func move_damage(attacker: PokemonBattleState, defender: PokemonBattleState, move: PokemonMoveData, effectiveness: float = 1.0) -> int:
+static func move_damage(attacker: PokemonBattleState, defender: PokemonBattleState, move: PokemonMoveData, effectiveness: float = -1.0) -> int:
 	if move.category == PokemonMoveData.Category.STATUS:
 		return 0
 	var stab := 1.0
 	if attacker.species != null and attacker.species.types.has(move.move_type):
 		stab = 1.5
+	if effectiveness < 0.0:
+		var defending_types := defender.species.types if defender.species != null else PackedStringArray()
+		effectiveness = TypeChart.effectiveness(move.move_type, defending_types)
+	# Preserve the original modifier pipeline: multiply, then round once.
 	return modified_damage(raw_damage(attacker, defender, move.category, move.power), 1.0, stab, effectiveness)

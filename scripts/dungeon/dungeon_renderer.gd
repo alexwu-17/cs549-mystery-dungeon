@@ -476,9 +476,9 @@ func create_stairs_tile(grid_position: Vector2i) -> void:
 	create_floor_tile(grid_position)
 	var marker := MeshInstance3D.new()
 	var box := BoxMesh.new()
-	box.size = Vector3(TILE_SIZE * 0.6, 0.15, TILE_SIZE * 0.6)
+	box.size = Vector3(TILE_SIZE * 0.6, 0.025, TILE_SIZE * 0.6)
 	marker.mesh = box
-	marker.position = grid_to_world(grid_position, dungeon_data.get_elevation(grid_position)) + Vector3(0, 0.2, 0)
+	marker.position = grid_to_world(grid_position, dungeon_data.get_elevation(grid_position)) + Vector3(0, 0.025, 0)
 	add_child(marker)
 	register_fog_visual(marker, [grid_position], true)
 	var illustration: Node3D = STAIRS_VISUAL.instantiate()

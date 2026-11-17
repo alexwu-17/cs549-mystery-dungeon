@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_spawn_table.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+early_last_floor = 2
+typed_first_floor = 3
+typed_last_floor = 0
+early_weights = PackedInt32Array(45, 45, 4, 2, 2, 2)

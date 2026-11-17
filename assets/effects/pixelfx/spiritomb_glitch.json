@@ -1,0 +1,594 @@
+{
+ "frames": [
+  {
+   "filename": "spiritomb_glitch 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 1",
+   "frame": {
+    "x": 320,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 2",
+   "frame": {
+    "x": 640,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 3",
+   "frame": {
+    "x": 960,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 4",
+   "frame": {
+    "x": 0,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 5",
+   "frame": {
+    "x": 320,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 6",
+   "frame": {
+    "x": 640,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 7",
+   "frame": {
+    "x": 960,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 8",
+   "frame": {
+    "x": 0,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 9",
+   "frame": {
+    "x": 320,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 10",
+   "frame": {
+    "x": 640,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 11",
+   "frame": {
+    "x": 960,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 12",
+   "frame": {
+    "x": 0,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 13",
+   "frame": {
+    "x": 320,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 14",
+   "frame": {
+    "x": 640,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 15",
+   "frame": {
+    "x": 960,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 16",
+   "frame": {
+    "x": 0,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 17",
+   "frame": {
+    "x": 320,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 18",
+   "frame": {
+    "x": 640,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 19",
+   "frame": {
+    "x": 960,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 20",
+   "frame": {
+    "x": 0,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 21",
+   "frame": {
+    "x": 320,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 22",
+   "frame": {
+    "x": 640,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 23",
+   "frame": {
+    "x": 960,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  },
+  {
+   "filename": "spiritomb_glitch 24",
+   "frame": {
+    "x": 0,
+    "y": 1080,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 33
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "spiritomb_glitch.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 1280,
+   "h": 1260
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "spiritomb_glitch",
+    "from": 0,
+    "to": 24,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "transitions/glitch-wipe",
+   "name": "Glitch wipe",
+   "fps": 30,
+   "loop": false,
+   "frames": 25,
+   "frameSize": [
+    320,
+    180
+   ],
+   "pivot": [
+    0,
+    0
+   ],
+   "columns": 4,
+   "revision": "5294518ce7c72e48b6100a744596e0acf57f2826",
+   "sourceSegment": [
+    0,
+    0.8
+   ]
+  }
+ }
+}

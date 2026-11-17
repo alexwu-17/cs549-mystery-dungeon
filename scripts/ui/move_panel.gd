@@ -5,10 +5,23 @@ const MoveDisplayData = preload("res://scripts/ui/move_display_data.gd")
 const SLOT_COUNT := 4
 const SLOT_ACTIONS := [&"move_slot_1", &"move_slot_2", &"move_slot_3", &"move_slot_4"]
 const BUILTIN_ICONS := {
-	"Fire": preload("res://assets/ui/moves/fire.svg"),
-	"Water": preload("res://assets/ui/moves/water.svg"),
-	"Grass": preload("res://assets/ui/moves/grass.svg"),
-	"Normal": preload("res://assets/ui/moves/normal.svg"),
+	"Normal": preload("res://assets/ui/types/normal.png"),
+	"Fighting": preload("res://assets/ui/types/fighting.png"),
+	"Flying": preload("res://assets/ui/types/flying.png"),
+	"Poison": preload("res://assets/ui/types/poison.png"),
+	"Ground": preload("res://assets/ui/types/ground.png"),
+	"Rock": preload("res://assets/ui/types/rock.png"),
+	"Bug": preload("res://assets/ui/types/bug.png"),
+	"Ghost": preload("res://assets/ui/types/ghost.png"),
+	"Steel": preload("res://assets/ui/types/steel.png"),
+	"Fire": preload("res://assets/ui/types/fire.png"),
+	"Water": preload("res://assets/ui/types/water.png"),
+	"Grass": preload("res://assets/ui/types/grass.png"),
+	"Electric": preload("res://assets/ui/types/electric.png"),
+	"Psychic": preload("res://assets/ui/types/psychic.png"),
+	"Ice": preload("res://assets/ui/types/ice.png"),
+	"Dragon": preload("res://assets/ui/types/dragon.png"),
+	"Dark": preload("res://assets/ui/types/dark.png"),
 	"Physical": preload("res://assets/ui/moves/physical.svg"),
 	"Special": preload("res://assets/ui/moves/special.svg"),
 	"Status": preload("res://assets/ui/moves/status.svg"),
@@ -47,6 +60,10 @@ func _ready() -> void:
 	detail_body.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	detail_body.add_theme_constant_override("separation", 8)
 	details.add_child(detail_body)
+	var intro := get_parent().get_node_or_null("FloorIntroduction")
+	if intro != null:
+		intro.visibility_changed.connect(func():
+			if intro.visible: _hide_details())
 	_refresh()
 
 
@@ -99,6 +116,10 @@ func _slot_key(index: int) -> String:
 
 
 func _show_details(index: int) -> void:
+	var intro := get_parent().get_node_or_null("FloorIntroduction")
+	if intro != null and intro.visible:
+		_hide_details()
+		return
 	hovered_slot = index
 	if index >= moves.size() or moves[index] == null or moves[index].move_name.is_empty():
 		details.hide()

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+move_id = &"splash"
+display_name = "Splash"
+move_type = "Water"
+category = 2
+power = 0
+maximum_pp = 20
+range_tiles = 1
+targeting = 3
+animation_action = &"Splash"
+description = "Does nothing. Can be used regardless of distance to the player."

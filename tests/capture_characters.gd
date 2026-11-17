@@ -66,7 +66,7 @@ func boss_capture() -> bool:
 	var main = load("res://scenes/main/demo_main.tscn").instantiate()
 	root.add_child(main)
 	Helper.complete_introduction(main)
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	main.player.invincible = true
@@ -141,7 +141,7 @@ func defeat_capture() -> bool:
 	enemy.character_visual.finish_defeat()
 	await defeat_save_capture("Stunky_gone")
 	assert(main.retiring_enemies.is_empty())
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	var boss: Minotaur = main.boss

@@ -3,7 +3,7 @@ extends Control
 
 const Formatter = preload("res://scripts/ui/combat_message_formatter.gd")
 @export var history_limit: int = 200
-@export var visible_lines: int = 3
+@export var visible_lines: int = 5
 @export var inactivity_seconds: float = 4.0
 var character_name_provider: Callable
 var enemy_name_provider: Callable
@@ -83,7 +83,9 @@ func refresh_window() -> void:
 	var spacing := text.get_theme_constant("line_separation")
 	var height := font.get_height(font_size) * maxi(1, visible_lines) + spacing * maxi(0, visible_lines - 1)
 	text.custom_minimum_size.y = height
-	panel.offset_top = -height - 24.0 - 18.0
+	var margins: MarginContainer = $DialoguePanel/MarginContainer
+	var padding := margins.get_theme_constant("margin_top") + margins.get_theme_constant("margin_bottom")
+	panel.offset_top = -height - padding + panel.offset_bottom
 	# Use shaped/rendered line offsets, not message count or character truncation.
 	var first := maxi(0, text.get_line_count() - maxi(1, visible_lines))
 	text.get_v_scroll_bar().value = text.get_line_offset(first)

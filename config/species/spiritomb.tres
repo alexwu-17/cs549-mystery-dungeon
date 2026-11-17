@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=5 format=3 uid="uid://bcn5crhmb3ea8"]
+
+[ext_resource type="Resource" path="res://config/moves/shadow_ball.tres" id="ball"]
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="move_script"]
+[ext_resource type="Script" uid="uid://cxlqm507earwp" path="res://scripts/combat/pokemon_species_data.gd" id="script"]
+[ext_resource type="Resource" uid="uid://cij4ywnx8a2ap" path="res://config/moves/ominous_wind.tres" id="wind"]
+
+[resource]
+script = ExtResource("script")
+species_id = &"spiritomb"
+display_name = "Spiritomb"
+types = PackedStringArray("Ghost", "Dark")
+starting_moves = Array[ExtResource("move_script")]([ExtResource("wind"), ExtResource("ball")])
+level = 30
+maximum_hp = 120
+attack = 55
+special_attack = 30
+defense = 49
+special_defense = 50

@@ -1,22 +1,33 @@
-[gd_resource type="Resource" script_class="PokemonSpriteProfile" format=3 uid="uid://h3op5xnc2rke"]
+[gd_resource type="Resource" script_class="PokemonSpriteProfile" load_steps=2 format=3 uid="uid://h3op5xnc2rke"]
 
 [ext_resource type="Script" uid="uid://bju87ccdulvfo" path="res://scripts/effects/pokemon_sprite_profile.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
 display_name = "Piplup"
-melee_contact_frames = {"Attack": 6}
 directory = "res://assets/sprites/pokemon/Piplup"
 pixel_size = 0.04
 body_to_ground = 8.0
-projectile_release_frames = {"Bubble": 3}
 animations = {
 "Attack": "Attack",
 "Bubble": "Shoot",
+"Charge": "Charge",
 "Growl": "Shoot",
 "Hurt": "Hurt",
 "Idle": "Idle",
 "Walk": "Walk"
+}
+projectile_release_frames = {
+"Bubble": 3
+}
+melee_contact_frames = {
+"Attack": 6
+}
+projectile_offsets = {
+"down": Vector3(0, 0.4, 0.25),
+"left": Vector3(0, 0, 0),
+"right": Vector3(0, 0, 0),
+"up": Vector3(0, 0, 0)
 }
 defeat_minimum_duration = 0.8
 defeat_blink_interval = 0.075

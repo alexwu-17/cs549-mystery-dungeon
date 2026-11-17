@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3 uid="uid://cij4ywnx8a2ap"]
+
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="script"]
+
+[resource]
+script = ExtResource("script")
+move_id = &"ominous_wind"
+display_name = "Ominous Wind"
+move_type = "Ghost"
+category = 1
+power = 4
+maximum_pp = 20
+range_tiles = 4
+targeting = 5
+animation_action = &"OminousWind"
+affected_stat = &""
+stage_change = 0
+description = "Hits all enemies visible on the screen."

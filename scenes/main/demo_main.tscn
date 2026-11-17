@@ -1,11 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://wdld06klqson"]
+[gd_scene load_steps=3 format=3 uid="uid://wdld06klqson"]
 
 [ext_resource type="PackedScene" uid="uid://b7cqo4g87duu1" path="res://scenes/main/main.tscn" id="1"]
+[ext_resource type="AudioStream" uid="uid://cehscmmhssqyt" path="res://assets/audio/music/cynthia_piano.ogg" id="2_piano"]
 
 [node name="DemoMain" instance=ExtResource("1")]
 floor_subtitles = {
-5: "Cavern Depths"
+5: "Cavern Depths",
+6: "???"
 }
+final_approach_track = ExtResource("2_piano")
 game_mode = 1
 
 [node name="Player" parent="." index="5"]

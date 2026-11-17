@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="Texture2D" path="res://assets/sprites/pokemon/Spiritomb/Idle-Anim.png" id="texture"]
+[ext_resource type="Script" path="res://scripts/effects/pokemon_character_visual.gd" id="visual"]
+[ext_resource type="Resource" path="res://config/pokemon_spiritomb.tres" id="profile"]
+[sub_resource type="AtlasTexture" id="idle"]
+atlas = ExtResource("texture")
+region = Rect2(0, 0, 32, 40)
+[node name="Spiritomb" type="Node3D"]
+[node name="Sprite" type="Sprite3D" parent="."]
+cast_shadow = 2
+pixel_size = 0.04
+billboard = 1
+alpha_cut = 2
+texture_filter = 0
+texture = SubResource("idle")
+[node name="VisualController" type="Node" parent="."]
+script = ExtResource("visual")
+profile = ExtResource("profile")
+fallback_profile = ExtResource("profile")
+sprite_path = NodePath("../Sprite")

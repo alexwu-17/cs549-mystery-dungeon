@@ -1,0 +1,3209 @@
+{
+ "frames": [
+  {
+   "filename": "dread_sky 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 1",
+   "frame": {
+    "x": 320,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 2",
+   "frame": {
+    "x": 640,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 3",
+   "frame": {
+    "x": 960,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 4",
+   "frame": {
+    "x": 1280,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 5",
+   "frame": {
+    "x": 1600,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 6",
+   "frame": {
+    "x": 1920,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 7",
+   "frame": {
+    "x": 2240,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 8",
+   "frame": {
+    "x": 2560,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 9",
+   "frame": {
+    "x": 0,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 10",
+   "frame": {
+    "x": 320,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 11",
+   "frame": {
+    "x": 640,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 12",
+   "frame": {
+    "x": 960,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 13",
+   "frame": {
+    "x": 1280,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 14",
+   "frame": {
+    "x": 1600,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 15",
+   "frame": {
+    "x": 1920,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 16",
+   "frame": {
+    "x": 2240,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 17",
+   "frame": {
+    "x": 2560,
+    "y": 180,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 18",
+   "frame": {
+    "x": 0,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 19",
+   "frame": {
+    "x": 320,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 20",
+   "frame": {
+    "x": 640,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 21",
+   "frame": {
+    "x": 960,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 22",
+   "frame": {
+    "x": 1280,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 23",
+   "frame": {
+    "x": 1600,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 24",
+   "frame": {
+    "x": 1920,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 25",
+   "frame": {
+    "x": 2240,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 26",
+   "frame": {
+    "x": 2560,
+    "y": 360,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 27",
+   "frame": {
+    "x": 0,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 28",
+   "frame": {
+    "x": 320,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 29",
+   "frame": {
+    "x": 640,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 30",
+   "frame": {
+    "x": 960,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 31",
+   "frame": {
+    "x": 1280,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 32",
+   "frame": {
+    "x": 1600,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 33",
+   "frame": {
+    "x": 1920,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 34",
+   "frame": {
+    "x": 2240,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 35",
+   "frame": {
+    "x": 2560,
+    "y": 540,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 36",
+   "frame": {
+    "x": 0,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 37",
+   "frame": {
+    "x": 320,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 38",
+   "frame": {
+    "x": 640,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 39",
+   "frame": {
+    "x": 960,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 40",
+   "frame": {
+    "x": 1280,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 41",
+   "frame": {
+    "x": 1600,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 42",
+   "frame": {
+    "x": 1920,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 43",
+   "frame": {
+    "x": 2240,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 44",
+   "frame": {
+    "x": 2560,
+    "y": 720,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 45",
+   "frame": {
+    "x": 0,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 46",
+   "frame": {
+    "x": 320,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 47",
+   "frame": {
+    "x": 640,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 48",
+   "frame": {
+    "x": 960,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 49",
+   "frame": {
+    "x": 1280,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 50",
+   "frame": {
+    "x": 1600,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 51",
+   "frame": {
+    "x": 1920,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 52",
+   "frame": {
+    "x": 2240,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 53",
+   "frame": {
+    "x": 2560,
+    "y": 900,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 54",
+   "frame": {
+    "x": 0,
+    "y": 1080,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 55",
+   "frame": {
+    "x": 320,
+    "y": 1080,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 56",
+   "frame": {
+    "x": 640,
+    "y": 1080,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 57",
+   "frame": {
+    "x": 960,
+    "y": 1080,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 58",
+   "frame": {
+    "x": 1280,
+    "y": 1080,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 59",
+   "frame": {
+    "x": 1600,
+    "y": 1080,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 60",
+   "frame": {
+    "x": 1920,
+    "y": 1080,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 61",
+   "frame": {
+    "x": 2240,
+    "y": 1080,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 62",
+   "frame": {
+    "x": 2560,
+    "y": 1080,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 63",
+   "frame": {
+    "x": 0,
+    "y": 1260,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 64",
+   "frame": {
+    "x": 320,
+    "y": 1260,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 65",
+   "frame": {
+    "x": 640,
+    "y": 1260,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 66",
+   "frame": {
+    "x": 960,
+    "y": 1260,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 67",
+   "frame": {
+    "x": 1280,
+    "y": 1260,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 68",
+   "frame": {
+    "x": 1600,
+    "y": 1260,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 69",
+   "frame": {
+    "x": 1920,
+    "y": 1260,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 70",
+   "frame": {
+    "x": 2240,
+    "y": 1260,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 71",
+   "frame": {
+    "x": 2560,
+    "y": 1260,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 72",
+   "frame": {
+    "x": 0,
+    "y": 1440,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 73",
+   "frame": {
+    "x": 320,
+    "y": 1440,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 74",
+   "frame": {
+    "x": 640,
+    "y": 1440,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 75",
+   "frame": {
+    "x": 960,
+    "y": 1440,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 76",
+   "frame": {
+    "x": 1280,
+    "y": 1440,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 77",
+   "frame": {
+    "x": 1600,
+    "y": 1440,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 78",
+   "frame": {
+    "x": 1920,
+    "y": 1440,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 79",
+   "frame": {
+    "x": 2240,
+    "y": 1440,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 80",
+   "frame": {
+    "x": 2560,
+    "y": 1440,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 81",
+   "frame": {
+    "x": 0,
+    "y": 1620,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 82",
+   "frame": {
+    "x": 320,
+    "y": 1620,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 83",
+   "frame": {
+    "x": 640,
+    "y": 1620,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 84",
+   "frame": {
+    "x": 960,
+    "y": 1620,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 85",
+   "frame": {
+    "x": 1280,
+    "y": 1620,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 86",
+   "frame": {
+    "x": 1600,
+    "y": 1620,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 87",
+   "frame": {
+    "x": 1920,
+    "y": 1620,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 88",
+   "frame": {
+    "x": 2240,
+    "y": 1620,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 89",
+   "frame": {
+    "x": 2560,
+    "y": 1620,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 90",
+   "frame": {
+    "x": 0,
+    "y": 1800,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 91",
+   "frame": {
+    "x": 320,
+    "y": 1800,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 92",
+   "frame": {
+    "x": 640,
+    "y": 1800,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 93",
+   "frame": {
+    "x": 960,
+    "y": 1800,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 94",
+   "frame": {
+    "x": 1280,
+    "y": 1800,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 95",
+   "frame": {
+    "x": 1600,
+    "y": 1800,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 96",
+   "frame": {
+    "x": 1920,
+    "y": 1800,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 97",
+   "frame": {
+    "x": 2240,
+    "y": 1800,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 98",
+   "frame": {
+    "x": 2560,
+    "y": 1800,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 99",
+   "frame": {
+    "x": 0,
+    "y": 1980,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 100",
+   "frame": {
+    "x": 320,
+    "y": 1980,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 101",
+   "frame": {
+    "x": 640,
+    "y": 1980,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 102",
+   "frame": {
+    "x": 960,
+    "y": 1980,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 103",
+   "frame": {
+    "x": 1280,
+    "y": 1980,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 104",
+   "frame": {
+    "x": 1600,
+    "y": 1980,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 105",
+   "frame": {
+    "x": 1920,
+    "y": 1980,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 106",
+   "frame": {
+    "x": 2240,
+    "y": 1980,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 107",
+   "frame": {
+    "x": 2560,
+    "y": 1980,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 108",
+   "frame": {
+    "x": 0,
+    "y": 2160,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 109",
+   "frame": {
+    "x": 320,
+    "y": 2160,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 110",
+   "frame": {
+    "x": 640,
+    "y": 2160,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 111",
+   "frame": {
+    "x": 960,
+    "y": 2160,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 112",
+   "frame": {
+    "x": 1280,
+    "y": 2160,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 113",
+   "frame": {
+    "x": 1600,
+    "y": 2160,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 114",
+   "frame": {
+    "x": 1920,
+    "y": 2160,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 115",
+   "frame": {
+    "x": 2240,
+    "y": 2160,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 116",
+   "frame": {
+    "x": 2560,
+    "y": 2160,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 117",
+   "frame": {
+    "x": 0,
+    "y": 2340,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 118",
+   "frame": {
+    "x": 320,
+    "y": 2340,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 119",
+   "frame": {
+    "x": 640,
+    "y": 2340,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 120",
+   "frame": {
+    "x": 960,
+    "y": 2340,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 121",
+   "frame": {
+    "x": 1280,
+    "y": 2340,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 122",
+   "frame": {
+    "x": 1600,
+    "y": 2340,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 123",
+   "frame": {
+    "x": 1920,
+    "y": 2340,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 124",
+   "frame": {
+    "x": 2240,
+    "y": 2340,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 125",
+   "frame": {
+    "x": 2560,
+    "y": 2340,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 126",
+   "frame": {
+    "x": 0,
+    "y": 2520,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 127",
+   "frame": {
+    "x": 320,
+    "y": 2520,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 128",
+   "frame": {
+    "x": 640,
+    "y": 2520,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 129",
+   "frame": {
+    "x": 960,
+    "y": 2520,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 130",
+   "frame": {
+    "x": 1280,
+    "y": 2520,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 131",
+   "frame": {
+    "x": 1600,
+    "y": 2520,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 132",
+   "frame": {
+    "x": 1920,
+    "y": 2520,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 133",
+   "frame": {
+    "x": 2240,
+    "y": 2520,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 134",
+   "frame": {
+    "x": 2560,
+    "y": 2520,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 135",
+   "frame": {
+    "x": 0,
+    "y": 2700,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 136",
+   "frame": {
+    "x": 320,
+    "y": 2700,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 137",
+   "frame": {
+    "x": 640,
+    "y": 2700,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 138",
+   "frame": {
+    "x": 960,
+    "y": 2700,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 139",
+   "frame": {
+    "x": 1280,
+    "y": 2700,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 140",
+   "frame": {
+    "x": 1600,
+    "y": 2700,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 141",
+   "frame": {
+    "x": 1920,
+    "y": 2700,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 142",
+   "frame": {
+    "x": 2240,
+    "y": 2700,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  },
+  {
+   "filename": "dread_sky 143",
+   "frame": {
+    "x": 2560,
+    "y": 2700,
+    "w": 320,
+    "h": 180
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 180
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 180
+   },
+   "duration": 83
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "dread_sky.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 2880,
+   "h": 2880
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "dread_sky",
+    "from": 0,
+    "to": 143,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "dungeon/dread_sky",
+   "name": "Dread sky",
+   "fps": 12,
+   "loop": true,
+   "frames": 144,
+   "frameSize": [
+    320,
+    180
+   ],
+   "pivot": [
+    160,
+    180
+   ],
+   "columns": 9,
+   "revision": "5294518ce7c72e48b6100a744596e0acf57f2826",
+   "source": "core/scene sky + weather/aurora three-shades-darker subtractive purple + weather/fireflies purple, no meadow"
+  }
+ }
+}

@@ -31,7 +31,11 @@ func _forget_actor(id: int) -> void:
 	watched.erase(id)
 
 
-func _on_damage(amount: int, actor_ref: WeakRef, visual_ref: WeakRef) -> void:
+func show_heal(amount: int, actor: Node3D, visual: CharacterVisual) -> void:
+	_on_damage(amount, weakref(actor), weakref(visual), true)
+
+
+func _on_damage(amount: int, actor_ref: WeakRef, visual_ref: WeakRef, healing: bool = false) -> void:
 	if not is_inside_tree():
 		return
 	var actor: Node3D = actor_ref.get_ref()
@@ -40,10 +44,10 @@ func _on_damage(amount: int, actor_ref: WeakRef, visual_ref: WeakRef) -> void:
 	if amount <= 0 or actor == null or visual == null or visual.disposed or camera == null or not actor.is_visible_in_tree():
 		return
 	var label := Label.new()
-	label.text = "-%d" % amount
+	label.text = ("+%d" if healing else "-%d") % amount
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.add_theme_font_size_override("font_size", 26)
-	label.add_theme_color_override("font_color", Color(1.0, 0.35, 0.28))
+	label.add_theme_color_override("font_color", (Color(0.3, 1.0, 0.4) if healing else Color(1.0, 0.35, 0.28)))
 	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
 	label.add_theme_constant_override("outline_size", 6)
 	add_child(label)

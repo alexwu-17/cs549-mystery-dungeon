@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3 uid="uid://byy71txc6o2ix"]
+
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+move_id = &"recovery"
+display_name = "Recovery"
+move_type = "Normal"
+category = 2
+power = 0
+maximum_pp = 10
+range_tiles = 1
+targeting = 3
+animation_action = &"Charge"
+affected_stat = &""
+stage_change = 0
+description = "Restores 50% of the user's maximum HP."

@@ -174,3 +174,104 @@ starts its0.25s swipes at that pose, then applies damage/Hurt; Pound/Tackle
 show the flash and apply damage at their contact pose. No
 post-hit wait or PP/damage-value change is added. Space/basic attacks without a move ID
 retain their existing presentation.
+
+## Final-floor torch flame
+
+`assets/effects/pixelfx/torch_flame.{png,json}` adapts the pinned upstream
+`fire/torch` tongue/burn recipe, excluding its drawn bracket, handle and wrap.
+Flame, smoke and embers loop for 2 seconds at 30fps (60 frames, 72x120 cells,
+10 columns, source origin36,94). Existing license and Hugo Duprez notices apply.
+Reproduce from the project root with Node18+:
+
+```powershell
+node tools/pixelfx/export_torch_flame.mjs <path-to-pixelfx-checkout>
+```
+
+FinalCorridorEnvironment shares one SpriteFrames resource across all torches,
+uses nearest-filtered upright billboards, and positions each flame at the native
+3D torch cup. Original OBJ and upstream source are unchanged.
+
+## Dragon Breath
+
+`assets/effects/pixelfx/dragon_breath.{png,json}` exports pinned upstream
+`ice/frost-breath` with its original colors/shape, at40fps (48 looping frames,
+6x8 cells of184x104, mouth origin12,50). Runtime uses the artwork for a
+Dragon-type two-tile move. Reproduce with Node18+ from the project root:
+
+```powershell
+node tools/pixelfx/export_dragon_breath.mjs <path-to-pixelfx-checkout>
+```
+
+Existing MIT license / Hugo Duprez attribution applies.
+
+## Final-corridor dread sky
+
+`assets/effects/pixelfx/dread_sky.{png,json}` combines the pinned checkout's
+`core/scene.js` sky backdrop, `weather/aurora`, and `weather/fireflies`.
+Aurora palettes are dark/pale purple; subtractive compositing dims the sky and
+stars under the curtains, with a subdued violet body. Fireflies retain upstream
+motion/pulses/wings but use purple light; meadow/grass/haze are excluded.
+No fonts/actors are included. Existing MIT/Hugo Duprez notices apply.
+
+```powershell
+node tools/pixelfx/export_dread_sky.mjs <path-to-pixelfx-checkout>
+```
+
+Output is144 frames at12fps over a12-second loop (320x180 cells,9x16 atlas).
+Runtime uses one nearest-sampled, unlit background quad, depth-tested behind
+geometry. It neither lights nor darkens actors and adds no per-frame CPU image
+processing, particles, radiance updates or gameplay RNG draws.
+
+### Darker sky and single Eclipse
+
+The dread-sky exporter now shifts both aurora ramps three palette levels darker
+and reduces the plain sky to near-black purple. It renders aurora stars separately
+with the previous palettes; firefly palettes/motion remain unchanged.
+The same command also exports `dread_eclipse.{png,json}` from `shadow/eclipse`,
+excluding its extra surrounding stars (48 frames at12fps,4s loop,160x144 cells,
+7x7 atlas). The shader composites it once at the visible sky center, independently
+of the sky's3x mirror-repeat zoom. PixelFX's existing MIT notices apply.
+
+## Spiritomb reveal transitions
+
+`spiritomb_glitch.{png,json}` uses pinned `transitions/glitch-wipe` source time
+0?0.8s (25 frames,4x7 atlas). `spiritomb_dissolve.{png,json}` uses
+`transitions/pixel-dissolve` source time1.1?2.2s (34 frames,5x7 atlas).
+Both are320x180/30fps, nonlooping, transparent overlay exports with black ink.
+The game holds solid black separately for3 seconds. Existing MIT/Hugo Duprez
+notices apply; no upstream files are modified.
+
+```powershell
+node tools/pixelfx/export_spiritomb_transitions.mjs <path-to-pixelfx-checkout>
+```
+
+## Spiritomb test moves
+
+`tools/pixelfx/export_spiritomb_moves.mjs` renders the pinned checkout's
+weather/blizzard as purple Ominous Wind,shadow/void-orb as Shadow Ball,
+shadow/dark-explosion without the central shrinking sphere as its impact,
+and arcane/arcane-missiles as a slower dark-purple/black Dark Pulse volley.
+All weather/volley whites are mapped into purple; native actor artwork is excluded.
+Sprite sheets and per-sheet layout/runtime pivots live in matching PNG/JSON assets.
+Existing MIT/Hugo Duprez notices apply; upstream source is not modified.
+
+```powershell
+node tools/pixelfx/export_spiritomb_moves.mjs <path-to-pixelfx-checkout>
+```
+
+### Shadow Ball revision / Dark Pulse removal
+
+Dark Pulse was removed at user request; its earlier adaptation notes are historical.
+The Spiritomb exporter now emits only Ominous Wind,Shadow Ball and Shadow Ball's
+impact. Explosion adaptation removes ground rings/glow,dust,ground smoke and
+resting shards/wisps; airborne smoke/particles remain. Runtime orb scale is90%
+of the initial size and animation plays at30fps (2x original15fps sampling).
+
+Ominous Wind now excludes Blizzard's ground/snowbank pass entirely and uses
+lighter lavender/stronger near wind sheets. Shadow Ball uses opt-in camera-plane
+billboarding so its circle is not foreshortened by camera pitch.
+
+Recovery uses the pinned upstream `src/fx/holy/heal.js`, exported without actor/background by `tools/pixelfx/export_recovery.mjs`. Original palette and rising hoop/sparkles are preserved; runtime scales the effect to native Pokémon body height. See existing PixelFX license and revision above.
+The Recovery adaptation removes Heal's internal `recolor(p, A, ...)` body drawing as well as disabling the stock actor pass, preserving effects around the native Pokémon.
+
+Healing Bloom uses upstream `src/fx/nature/healing-bloom.js` at the pinned revision above, exported via `tools/pixelfx/export_healing_bloom.mjs`. Flower geometry (stem, leaves, bud, petals and central flower heart) is omitted; healing glow/rings/crosses/motes remain. Output: `assets/effects/pixelfx/healing_bloom.png` and `.json`. The upstream effect credits Sprite Fusion's heal by Hugo Duprez (MIT, 2026); accompanying LICENSE/NOTICE apply.

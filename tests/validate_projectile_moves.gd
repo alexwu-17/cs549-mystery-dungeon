@@ -293,7 +293,7 @@ func validate() -> void:
 		# Boss arena: the shot crosses an empty tile and uses authored Drapion stats.
 		main.game_mode = GameModeConfig.Mode.DEMO
 		main.use_elevation_test = false
-		main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+		main.floor_number = GameModeConfig.DRAPION_FLOOR
 		main.load_test_floor()
 		assert(state.moves.size() == 3 and state.remaining_pp[2] == 20)
 		player.setup(main.boss.grid_position - Vector2i.RIGHT * 2, main.dungeon, main.dungeon_renderer)

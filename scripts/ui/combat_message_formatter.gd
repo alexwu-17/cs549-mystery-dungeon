@@ -1,13 +1,19 @@
 extends RefCounted
 
 const TEMPLATES := {
+	&"stairs_question": "Would you like to proceed to the next floor?",
+	&"fully_restored": "HP and PP fully restored.",
 	&"move_used": "{actor} used {move}.",
 	&"move_learned": "{character} learned {move}!",
 	&"damage": "{target} took {amount} damage.",
+	&"immune": "It had no effect...",
+	&"super_effective": "It's super effective!",
+	&"not_very_effective": "It's not very effective...",
 	&"stat_changed": "{actor}'s {stat} was {direction}.",
 	&"stats_restored": "{actor}'s stats returned to normal.",
 	&"stats_refreshed": "{actor}'s stat changes were refreshed.",
 	&"no_effect": "But it had no effect.",
+	&"splash_no_effect": "It did nothing.",
 	&"attack": "{actor} attacks {target} for {amount} damage.",
 	&"defeat": "{target} was defeated.",
 	&"heal": "{character} recovered {amount} HP.",

@@ -3,12 +3,14 @@ render_mode unshaded, cull_disabled, depth_draw_never, depth_test_disabled;
 
 uniform sampler2D sheet_texture : source_color, filter_nearest, repeat_disable;
 uniform vec2 atlas_grid = vec2(6.0, 8.0);
+uniform float horizontal_scale = 1.0;
 uniform float last_frame = 47.0;
 uniform float frame_blend : hint_range(0.0, 1.0) = 0.0;
 uniform float fade_amount : hint_range(0.0, 1.0) = 1.0;
 
 // Keep the feedback camera-facing even with a custom material override.
 void vertex() {
+    VERTEX.x *= horizontal_scale;
     MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0], INV_VIEW_MATRIX[1], INV_VIEW_MATRIX[2], MODEL_MATRIX[3]);
 }
 

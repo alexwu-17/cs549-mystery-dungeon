@@ -4,6 +4,9 @@ extends Node3D
 const DIRECTIONS = [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]
 
 signal attack_requested(damage: int)
+signal attack_resolution_finished
+var attack_resolution_pending := false
+var active_projectile_plan: Dictionary = {}
 
 # Legacy/fallback HP remains editable when no species is assigned.
 @export var maximum_hp: int = 6:
@@ -52,20 +55,36 @@ func setup(start: Vector2i, data: DungeonData, renderer: DungeonRenderer) -> voi
 	position = dungeon_renderer.get_entity_world_position(grid_position)
 
 
-func take_turn(player_position: Vector2i, occupied: Dictionary) -> void:
+func take_turn(player_position: Vector2i, occupied: Dictionary, projectile_occupied: Callable = Callable()) -> void:
 	if health.current == 0:
 		return
 	var difference := player_position - grid_position
-	if difference == Vector2i.ZERO or dungeon_data.can_traverse(grid_position, player_position):
-		if difference != Vector2i.ZERO:
-			attack_leap.finish()
-			active_attack_move = attack_policy.choose_and_spend(battle_state, attack_rng, _supports_move) if attack_policy != null else null
-			print("SKELETON ATTACK at ", grid_position, ": ", active_attack_move.display_name if active_attack_move != null else "Basic")
-			facing = difference
-			character_visual.face(facing)
-			character_visual.prepare_attack(active_attack_move.animation_action if active_attack_move != null else &"Attack")
-			attack_leap.play(difference)
-			attack_requested.emit(attack_damage)
+	if difference == Vector2i.ZERO:
+		return
+	var adjacent := dungeon_data.can_traverse(grid_position, player_position)
+	var blocker := projectile_occupied if projectile_occupied.is_valid() else func(tile: Vector2i): return tile == player_position or occupied.has(tile)
+	var can_execute := func(move: PokemonMoveData):
+		if move.move_id == &"splash": return true
+		if move.targeting == PokemonMoveData.Targeting.SCREEN: return true
+		if move.category == PokemonMoveData.Category.STATUS: return false
+		if move.targeting == PokemonMoveData.Targeting.ADJACENT:
+			return adjacent and move.range_tiles == 1
+		return not projectile_plan(move, player_position, blocker).is_empty()
+	# The policy filters ineligible shots before rolling or spending PP.
+	# A basic choice at range pursues rather than inventing a ranged basic attack.
+	active_attack_move = attack_policy.choose_and_spend(battle_state, attack_rng, can_execute) if attack_policy != null else null
+	if adjacent or active_attack_move != null:
+		var chosen := active_attack_move
+		attack_leap.finish()
+		active_attack_move = chosen
+		active_projectile_plan = projectile_plan(chosen, player_position, blocker) if chosen != null and chosen.targeting == PokemonMoveData.Targeting.STRAIGHT_PROJECTILE else {}
+		facing = Vector2i(signi(difference.x), signi(difference.y))
+		if chosen != null and chosen.move_id == &"splash":
+			facing = Vector2i(signi(difference.x), 0) if absi(difference.x) > absi(difference.y) else Vector2i(0, signi(difference.y))
+		character_visual.face(facing)
+		character_visual.prepare_attack(chosen.animation_action if chosen != null else &"Attack")
+		attack_leap.play(facing)
+		attack_requested.emit(attack_damage)
 		return
 	var next := next_step_toward(player_position, occupied)
 	if next == grid_position or next == player_position or occupied.has(next):
@@ -79,8 +98,32 @@ func take_turn(player_position: Vector2i, occupied: Dictionary) -> void:
 	position = dungeon_renderer.get_entity_world_position(grid_position)
 
 
-func _supports_move(move: PokemonMoveData) -> bool:
-	return move.targeting == PokemonMoveData.Targeting.ADJACENT and move.range_tiles == 1 and move.category != PokemonMoveData.Category.STATUS
+func projectile_plan(move: PokemonMoveData, target: Vector2i, blocker: Callable) -> Dictionary:
+	if move == null or move.targeting != PokemonMoveData.Targeting.STRAIGHT_PROJECTILE:
+		return {}
+	var delta := target - grid_position
+	if delta == Vector2i.ZERO or (delta.x != 0 and delta.y != 0):
+		return {}
+	var direction := Vector2i(signi(delta.x), signi(delta.y))
+	var plan := PokemonProjectile.flight_plan(dungeon_data, grid_position, direction, move.range_tiles, blocker, dungeon_renderer.is_open_upper_tile(grid_position))
+	var path: Array[Vector2i] = plan.path
+	return plan if bool(plan.hits_actor) and not path.is_empty() and path.back() == target else {}
+
+
+func finish_attack_resolution() -> void:
+	if not attack_resolution_pending: return
+	attack_resolution_pending = false
+	attack_resolution_finished.emit()
+
+
+func layer_over_projectile(effect: ProjectileEffect) -> void:
+	effect.set_behind_source(facing != Vector2i.DOWN)
+	if facing == Vector2i.DOWN: return
+	var sprite := character_visual.sprite
+	var original_cut := sprite.alpha_cut
+	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED
+	effect.flight_finished.connect(func(_arrived: bool):
+		if is_instance_valid(sprite): sprite.alpha_cut = original_cut, CONNECT_ONE_SHOT)
 
 
 func _clear_attack_move() -> void:
@@ -138,6 +181,8 @@ func next_step_toward(goal: Vector2i, occupied: Dictionary) -> Vector2i:
 func complete_action() -> void:
 	if attack_leap.active:
 		await attack_leap.presentation_finished
+	if attack_resolution_pending:
+		await attack_resolution_finished
 
 
 func reset_battle_state() -> void:

@@ -112,7 +112,7 @@ func _process(delta: float) -> void:
 		standing()
 	elif action == "Walk" and walk_remaining == 0.0:
 		standing()
-	# Idle keeps its authored breathing/jump cadence even during fast movement.
+	# Idle follows engine time; ordinary held movement keeps authored cadence.
 	# Attack is sampled by the existing blocking action Tween, not a second clock.
 	if action in ["Attack","Swing"]: return
 	clip_time += delta if action == "Idle" else elapsed

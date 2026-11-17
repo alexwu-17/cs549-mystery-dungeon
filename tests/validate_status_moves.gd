@@ -161,7 +161,7 @@ func validate() -> void:
 		Helper.complete_introduction(main)
 		assert(player.battle_state.stat_stages.is_empty() and player.battle_state.remaining_pp == pp and player.health.current == hp)
 		assert(main.enemies[0].battle_state.stat_stages.is_empty())
-		main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+		main.floor_number = GameModeConfig.DRAPION_FLOOR
 		main.load_test_floor()
 		var boss: Minotaur = main.boss
 		boss.battle_state.change_stage(&"attack", -1)

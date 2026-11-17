@@ -31,6 +31,13 @@ func play_dungeon(requester: Node, restart: bool = false) -> void:
 func play_boss(requester: Node) -> void:
 	_play(requester, boss_track, false)
 
+func play_custom(requester: Node, stream: AudioStream) -> void:
+	_play(requester, stream, false)
+
+func set_wait_acceleration(requester: Node, accelerated: bool) -> void:
+	if owns_playback(requester):
+		player.pitch_scale = 2.0 if accelerated else 1.0
+
 func _play(requester: Node, stream: AudioStream, restart: bool) -> void:
 	if not owns_playback(requester):
 		return
@@ -44,6 +51,7 @@ func stop_music(requester: Node) -> void:
 	if owns_playback(requester):
 		player.stop()
 		player.stream = null
+		player.pitch_scale = 1.0
 
 func release(requester: Node) -> void:
 	if owns_playback(requester):

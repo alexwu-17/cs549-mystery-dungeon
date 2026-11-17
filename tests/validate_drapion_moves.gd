@@ -27,7 +27,7 @@ func make_main(index: int = 0) -> Node3D:
 	Helper.complete_introduction(main)
 	main.use_elevation_test = false
 	main.game_mode = GameModeConfig.Mode.DEMO
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	return main
 
@@ -159,7 +159,7 @@ func validate() -> void:
 		main.start_new_run()
 		Helper.complete_introduction(main)
 		assert(not main.victory and main.boss == null)
-		main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+		main.floor_number = GameModeConfig.DRAPION_FLOOR
 		main.load_test_floor()
 		assert(main.boss.health.current == 92 and main.boss.battle_state.remaining_pp == [10])
 		main.free()

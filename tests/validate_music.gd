@@ -40,22 +40,30 @@ func validate() -> void:
 		assert(music.player.playing)
 		Helper.complete_introduction(main)
 		assert(music.player.stream == music.dungeon_track and music.player.get_playback_position() >= 29.0)
+		var restart_started := Time.get_ticks_msec()
 		main.start_new_run()
-		assert(music.player.playing and music.player.get_playback_position() < 1.0)
+		# Audio runs while synchronous floor generation loads the new run.
+		var restart_elapsed := (Time.get_ticks_msec() - restart_started) / 1000.0
+		assert(music.player.playing and music.player.get_playback_position() < restart_elapsed + 1.0)
 		Helper.complete_introduction(main)
 		main.player.receive_damage(100)
 		assert(not music.player.playing)
 		main.start_new_run()
 		Helper.complete_introduction(main)
 		if mode == "demo_main":
-			main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR - 1
+			main.floor_number = GameModeConfig.DRAPION_FLOOR - 1
 			main.load_test_floor()
 			main._on_stairs_reached()
-			assert(not music.player.playing and main.floor_number == GameModeConfig.DEMO_FINAL_FLOOR - 1)
+			assert(not music.player.playing and main.floor_number == GameModeConfig.DRAPION_FLOOR - 1)
 			step(main.floor_introduction, 0.251)
-			assert(main.floor_number == GameModeConfig.DEMO_FINAL_FLOOR and not music.player.playing)
+			assert(main.floor_number == GameModeConfig.DRAPION_FLOOR and not music.player.playing)
+			main.boss_music_start.pause()
+			main.boss_music_start.custom_step(0.999)
+			assert(not music.player.playing)
+			main.boss_music_start.custom_step(0.002)
+			assert(music.player.playing and music.player.stream == music.boss_track)
 			step(main.floor_introduction, 1.501)
-			assert(main.floor_introduction.visible and not music.player.playing)
+			assert(main.floor_introduction.visible and music.player.playing)
 			step(main.floor_introduction, 0.251)
 			assert(not main.floor_introduction.visible and music.player.playing)
 			assert(music.player.stream == music.boss_track and music.player.get_playback_position() < 1.0)
@@ -63,12 +71,14 @@ func validate() -> void:
 			assert(main.victory and not music.player.playing)
 			main.start_new_run()
 			Helper.complete_introduction(main)
-			main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR - 1
+			main.floor_number = GameModeConfig.DRAPION_FLOOR - 1
 			main._on_stairs_reached()
 			step(main.floor_introduction, 0.251)
 			var stale: Tween = main.floor_introduction.animation
+			var stale_music: Tween = main.boss_music_start
 			main.start_new_run()
 			assert(not stale.is_valid() or not stale.is_running())
+			assert(not stale_music.is_valid() or not stale_music.is_running())
 			Helper.complete_introduction(main)
 			assert(main.floor_number == 1 and music.player.stream == music.dungeon_track and music.player.playing)
 		main.free()
@@ -77,7 +87,7 @@ func validate() -> void:
 	var old = load("res://scenes/main/demo_main.tscn").instantiate()
 	root.add_child(old)
 	Helper.complete_introduction(old)
-	old.floor_number = GameModeConfig.DEMO_FINAL_FLOOR - 1
+	old.floor_number = GameModeConfig.DRAPION_FLOOR - 1
 	old._on_stairs_reached()
 	var newer = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(newer)
@@ -90,5 +100,5 @@ func validate() -> void:
 	assert(not music.player.playing)
 	await process_frame
 	await process_frame
-	print("PASS: Ogg dungeon loop17.450/boss loop22.540, import settings, single player, continuous floors, silent boss intro/completion, death/victory/restart, stale ownership")
+	print("PASS: Ogg dungeon loop17.450/boss loop22.540, import settings, single player, continuous floors, boss music at one second, death/victory/restart, stale ownership")
 	quit()

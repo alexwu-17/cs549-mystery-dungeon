@@ -24,6 +24,7 @@ corner_radius_bottom_left = 6
 corner_radius_bottom_right = 6
 
 [node name="HUD" type="CanvasLayer"]
+layer = 60
 script = ExtResource("1_hud")
 
 [node name="Screen" type="Control" parent="."]
@@ -129,6 +130,7 @@ mouse_filter = 2
 script = ExtResource("7_damage")
 
 [node name="FloorIntroduction" parent="Screen" instance=ExtResource("4_intro")]
+z_index = 100
 
 [node name="GameOver" type="ColorRect" parent="Screen"]
 visible = false

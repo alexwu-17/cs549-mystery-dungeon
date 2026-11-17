@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://cxlqm507earwp" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
 [ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="2_qjxgg"]
-[ext_resource type="Resource" path="res://config/moves/pound.tres" id="move"]
-[ext_resource type="Resource" path="res://config/moves/growl.tres" id="status"]
+[ext_resource type="Resource" uid="uid://c47robtsu1aqh" path="res://config/moves/pound.tres" id="move"]
+[ext_resource type="Resource" uid="uid://j2v0k1gyo01y" path="res://config/moves/growl.tres" id="status"]
 [ext_resource type="Resource" path="res://config/moves/bubble.tres" id="unlock"]
 
 [resource]
@@ -14,8 +14,8 @@ types = PackedStringArray("Water")
 starting_moves = Array[ExtResource("2_qjxgg")]([ExtResource("move"), ExtResource("status")])
 floor_unlock_move = ExtResource("unlock")
 level = 20
-maximum_hp = 80
-attack = 40
-special_attack = 42
+maximum_hp = 105
+attack = 36
+special_attack = 37
 defense = 36
 special_defense = 35

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/combat/pokemon_move_data.gd" id="script"]
+[resource]
+script = ExtResource("script")
+move_id = &"shadow_ball"
+display_name = "Shadow Ball"
+move_type = "Ghost"
+category = 1
+power = 6
+maximum_pp = 20
+range_tiles = 4
+targeting = 1
+animation_action = &"ShadowBall"

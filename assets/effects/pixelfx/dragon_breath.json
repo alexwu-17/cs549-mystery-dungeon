@@ -1,0 +1,1097 @@
+{
+ "frames": [
+  {
+   "filename": "dragon_breath 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 1",
+   "frame": {
+    "x": 184,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 2",
+   "frame": {
+    "x": 368,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 3",
+   "frame": {
+    "x": 552,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 4",
+   "frame": {
+    "x": 736,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 5",
+   "frame": {
+    "x": 920,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 6",
+   "frame": {
+    "x": 0,
+    "y": 104,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 7",
+   "frame": {
+    "x": 184,
+    "y": 104,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 8",
+   "frame": {
+    "x": 368,
+    "y": 104,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 9",
+   "frame": {
+    "x": 552,
+    "y": 104,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 10",
+   "frame": {
+    "x": 736,
+    "y": 104,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 11",
+   "frame": {
+    "x": 920,
+    "y": 104,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 12",
+   "frame": {
+    "x": 0,
+    "y": 208,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 13",
+   "frame": {
+    "x": 184,
+    "y": 208,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 14",
+   "frame": {
+    "x": 368,
+    "y": 208,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 15",
+   "frame": {
+    "x": 552,
+    "y": 208,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 16",
+   "frame": {
+    "x": 736,
+    "y": 208,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 17",
+   "frame": {
+    "x": 920,
+    "y": 208,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 18",
+   "frame": {
+    "x": 0,
+    "y": 312,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 19",
+   "frame": {
+    "x": 184,
+    "y": 312,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 20",
+   "frame": {
+    "x": 368,
+    "y": 312,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 21",
+   "frame": {
+    "x": 552,
+    "y": 312,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 22",
+   "frame": {
+    "x": 736,
+    "y": 312,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 23",
+   "frame": {
+    "x": 920,
+    "y": 312,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 24",
+   "frame": {
+    "x": 0,
+    "y": 416,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 25",
+   "frame": {
+    "x": 184,
+    "y": 416,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 26",
+   "frame": {
+    "x": 368,
+    "y": 416,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 27",
+   "frame": {
+    "x": 552,
+    "y": 416,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 28",
+   "frame": {
+    "x": 736,
+    "y": 416,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 29",
+   "frame": {
+    "x": 920,
+    "y": 416,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 30",
+   "frame": {
+    "x": 0,
+    "y": 520,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 31",
+   "frame": {
+    "x": 184,
+    "y": 520,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 32",
+   "frame": {
+    "x": 368,
+    "y": 520,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 33",
+   "frame": {
+    "x": 552,
+    "y": 520,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 34",
+   "frame": {
+    "x": 736,
+    "y": 520,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 35",
+   "frame": {
+    "x": 920,
+    "y": 520,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 36",
+   "frame": {
+    "x": 0,
+    "y": 624,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 37",
+   "frame": {
+    "x": 184,
+    "y": 624,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 38",
+   "frame": {
+    "x": 368,
+    "y": 624,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 39",
+   "frame": {
+    "x": 552,
+    "y": 624,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 40",
+   "frame": {
+    "x": 736,
+    "y": 624,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 41",
+   "frame": {
+    "x": 920,
+    "y": 624,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 42",
+   "frame": {
+    "x": 0,
+    "y": 728,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 43",
+   "frame": {
+    "x": 184,
+    "y": 728,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 44",
+   "frame": {
+    "x": 368,
+    "y": 728,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 45",
+   "frame": {
+    "x": 552,
+    "y": 728,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 46",
+   "frame": {
+    "x": 736,
+    "y": 728,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  },
+  {
+   "filename": "dragon_breath 47",
+   "frame": {
+    "x": 920,
+    "y": 728,
+    "w": 184,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 184,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 184,
+    "h": 104
+   },
+   "duration": 25
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "dragon_breath.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 1104,
+   "h": 832
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "dragon_breath",
+    "from": 0,
+    "to": 47,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "dungeon/dragon_breath",
+   "name": "Frost breath",
+   "fps": 40,
+   "loop": true,
+   "frames": 48,
+   "frameSize": [
+    184,
+    104
+   ],
+   "pivot": [
+    12,
+    50
+   ],
+   "columns": 6,
+   "revision": "5294518ce7c72e48b6100a744596e0acf57f2826",
+   "source": "ice/frost-breath"
+  }
+ }
+}

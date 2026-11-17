@@ -7,7 +7,8 @@ extends Resource
 
 @export var species_id: StringName = &""
 @export var display_name: String = ""
-@export var types: PackedStringArray = []
+# Keep the default Variant packed too: editor placeholder saves reject a plain [] default.
+@export var types: PackedStringArray = PackedStringArray()
 @export var starting_moves: Array[PokemonMoveData] = []
 ## Taught once per run when the player first loads Main.elemental_move_floor.
 @export var floor_unlock_move: PokemonMoveData

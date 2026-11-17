@@ -1,0 +1,15 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/enemies/test_enemy.tscn" id="base"]
+[ext_resource type="Resource" path="res://config/species/tangela.tres" id="species"]
+[ext_resource type="Resource" path="res://config/pokemon_tangela.tres" id="visual"]
+
+[ext_resource type="Resource" path="res://config/enemy_projectile_attack_policy.tres" id="policy"]
+
+[node name="Tangela" instance=ExtResource("base")]
+species_data = ExtResource("species")
+attack_policy = ExtResource("policy")
+
+[node name="VisualController" parent="." index="1"]
+profile = ExtResource("visual")
+fallback_profile = ExtResource("visual")

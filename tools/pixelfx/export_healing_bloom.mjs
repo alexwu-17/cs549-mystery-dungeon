@@ -1,0 +1,23 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {resolve,join,dirname} from 'node:path';
+import {pathToFileURL} from 'node:url';
+const root=resolve(process.argv[2]);
+const source=join(root,'src/fx/nature/healing-bloom.js');
+let code=readFileSync(source,'utf8');
+// Remove all flower geometry, retaining floor ring, light, crosses and motes.
+code=code.replace('if (t > BUD - 0.05) for (const q of petals) if (Math.sin(q.az) < 0 && !q.gone) petal(p, q, top);','');
+const begin=code.indexOf('      const pts = stem(), top = pts[12], g = grow();');
+const end=code.indexOf('      const e = t - OPEN + 0.12;',begin);
+if(begin<0 || end<0) throw new Error('Healing bloom geometry block changed');
+code=code.slice(0,begin)+'      const top = stem()[12];\n'+code.slice(end);
+code=code.replace(/      for \(const q of flying\) drawLeaf\([^\n]+\n/,'');
+code=code.replace(/from "([^"]+)"/g,(_,p)=>`from "${pathToFileURL(resolve(dirname(source),p)).href}"`);
+const mod=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+const {renderFrames,spriteSheet}=await import(pathToFileURL(join(root,'tools/lib/fxlib.mjs')).href);
+const frames=renderFrames({id:'healing_bloom',meta:mod.meta,mod},{actor:false,bg:'none',seed:5,options:{}});
+const sheet=spriteSheet({id:'healing_bloom',meta:mod.meta,mod},frames,'healing_bloom');
+sheet.json.meta.pixelfx.runtimePivot=[62,108];
+sheet.json.meta.pixelfx.revision='5294518ce7c72e48b6100a744596e0acf57f2826';
+writeFileSync('assets/effects/pixelfx/healing_bloom.png',sheet.png);
+writeFileSync('assets/effects/pixelfx/healing_bloom.json',JSON.stringify(sheet.json,null,1)+'\n');
+console.log('PASS: healing bloom particles exported without flower geometry');

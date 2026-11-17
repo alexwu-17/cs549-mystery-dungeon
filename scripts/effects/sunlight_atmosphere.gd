@@ -89,6 +89,9 @@ func _update_context() -> void:
 		if not bounds.has_area() and not data.rooms.is_empty():
 			bounds = data.rooms[0]
 			for room in data.rooms: bounds = bounds.merge(room)
+		# The authored final approach extends beyond the diamond room bounds.
+		if GameModeConfig.is_final_floor(main.game_mode, main.floor_number) and not main.use_elevation_test:
+			bounds = bounds.merge(data.map_bounds)
 		mask_bounds = bounds.grow(2) if bounds.has_area() else Rect2i(data.player_spawn-Vector2i(12,12),Vector2i(24,24))
 		ground_mist.build(main,mask_bounds)
 		mask_image = Image.create(mask_bounds.size.x,mask_bounds.size.y,false,Image.FORMAT_L8)

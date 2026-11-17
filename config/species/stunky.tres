@@ -8,7 +8,7 @@
 script = ExtResource("1")
 species_id = &"stunky"
 display_name = "Stunky"
-types = []
+types = PackedStringArray("Poison", "Dark")
 starting_moves = Array[ExtResource("2_yf6xp")]([ExtResource("scratch")])
 level = 10
 maximum_hp = 42

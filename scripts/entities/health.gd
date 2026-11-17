@@ -3,6 +3,7 @@ extends RefCounted
 
 signal changed(current: int, maximum: int)
 signal died
+## Full incoming damage, including overkill; current HP still clamps to zero.
 signal damaged(amount: int)
 
 var maximum: int = 1
@@ -21,7 +22,7 @@ func damage(amount: int) -> void:
 	var lost := mini(current, amount)
 	current -= lost
 	changed.emit(current, maximum)
-	damaged.emit(lost)
+	damaged.emit(amount)
 	if current == 0:
 		died.emit()
 

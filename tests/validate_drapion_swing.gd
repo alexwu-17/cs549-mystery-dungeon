@@ -8,7 +8,7 @@ func validate() -> void:
 	load("res://tests/round_test_helper.gd").use_legacy_battle_stats(main)
 	root.add_child(main)
 	Helper.complete_introduction(main)
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	var boss: Minotaur = main.boss
@@ -96,7 +96,7 @@ func validate() -> void:
 	# Restart cancels the native lethal Swing and suppresses stale overlay completion.
 	main.start_new_run()
 	Helper.complete_introduction(main)
-	main.floor_number = GameModeConfig.DEMO_FINAL_FLOOR
+	main.floor_number = GameModeConfig.DRAPION_FLOOR
 	main.load_test_floor()
 	Helper.complete_introduction(main)
 	boss = main.boss

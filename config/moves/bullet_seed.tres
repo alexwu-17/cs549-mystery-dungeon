@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+move_id = &"bullet_seed"
+display_name = "Bullet Seed"
+move_type = "Grass"
+category = 0
+power = 5
+maximum_pp = 20
+range_tiles = 4
+targeting = 1
+animation_action = &"BulletSeed"
+description = "Fires five glowing seeds up to 4 tiles straight ahead. Deals damage once to the first target."

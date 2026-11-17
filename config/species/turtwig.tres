@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://cxlqm507earwp" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
 [ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="2_f8wqh"]
-[ext_resource type="Resource" path="res://config/moves/tackle.tres" id="move"]
-[ext_resource type="Resource" path="res://config/moves/withdraw.tres" id="status"]
+[ext_resource type="Resource" uid="uid://baxpcmjxgyxx1" path="res://config/moves/tackle.tres" id="move"]
+[ext_resource type="Resource" uid="uid://eldu7u1yitbm" path="res://config/moves/withdraw.tres" id="status"]
 [ext_resource type="Resource" path="res://config/moves/razor_leaf.tres" id="unlock"]
 
 [resource]
@@ -14,8 +14,8 @@ types = PackedStringArray("Grass")
 starting_moves = Array[ExtResource("2_f8wqh")]([ExtResource("move"), ExtResource("status")])
 floor_unlock_move = ExtResource("unlock")
 level = 20
-maximum_hp = 67
-attack = 43
-special_attack = 43
+maximum_hp = 84
+attack = 41
+special_attack = 32
 defense = 41
-special_defense = 41
+special_defense = 43
