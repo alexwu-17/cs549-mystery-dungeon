@@ -40,8 +40,13 @@ func validate() -> void:
 		assert(music.player.playing)
 		Helper.complete_introduction(main)
 		assert(music.player.stream == music.dungeon_track and music.player.get_playback_position() >= 29.0)
+		# Restart must rewind from 30 s to the start. Floor loading blocks the main
+		# thread while audio keeps mixing, so compare with the time the restart took
+		# rather than a fixed wall-clock bound (machine speed dependent).
+		var restart_started := Time.get_ticks_msec()
 		main.start_new_run()
-		assert(music.player.playing and music.player.get_playback_position() < 1.0)
+		var restart_seconds := (Time.get_ticks_msec() - restart_started) / 1000.0
+		assert(music.player.playing and music.player.get_playback_position() < restart_seconds + 0.5)
 		Helper.complete_introduction(main)
 		main.player.receive_damage(100)
 		assert(not music.player.playing)

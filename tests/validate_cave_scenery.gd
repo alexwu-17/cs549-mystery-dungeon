@@ -25,6 +25,9 @@ func validate() -> void:
 	var renderer := DungeonRenderer.new()
 	renderer.cave_continuous_ground_enabled = false
 	renderer.cave_stone_mapping_enabled = false
+	# This check owns the full four-sided border/apron contract; the plateau terrain,
+	# which takes over three sides, is covered by validate_out_of_bounds_scenery.
+	renderer.out_of_bounds_scenery_enabled = false
 	root.add_child(renderer)
 	for seed_value in [4,17]:
 		TestDungeonFactory.rng.seed=seed_value

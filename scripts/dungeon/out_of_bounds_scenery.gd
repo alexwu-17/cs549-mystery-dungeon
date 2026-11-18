@@ -81,12 +81,12 @@ func setup(data: DungeonData, backdrop: CaveTerrainBackdrop, renderer: DungeonRe
 	_columns = roundi(region.size.x / SPACING) + 1
 	_rows = roundi(region.size.y / SPACING) + 1
 	_heights.resize(_columns * _rows)
+	# Deep map-interior vertices only shape edge normals; skip the noise there.
+	var interior := map_rect.grow(-INTERIOR_MARGIN)
 	for row in range(_rows):
 		for column in range(_columns):
 			var point := _grid_point(column, row)
-			# Deep map-interior vertices only shape edge normals; skip the noise there.
-			var inside := map_rect.grow(-INTERIOR_MARGIN).has_point(point)
-			_heights[row * _columns + column] = ground_level if inside else height_at(point.x, point.y)
+			_heights[row * _columns + column] = ground_level if interior.has_point(point) else height_at(point.x, point.y)
 	_build_chunks()
 	set_meta("geometry_bounds", Rect2i(Vector2i(region.position.ceil()), Vector2i(region.size.floor())))
 
@@ -159,6 +159,7 @@ func height_at(x: float, z: float) -> float:
 	var mountains: float = _settings.mountain * smoothstep(0.0, _settings.rise, distance) * shape
 	var height := lerpf(ground_level, lowland_level() + mountains, smoothstep(0.0, _settings.rim, distance))
 	var south := smoothstep(south_cut - _settings.south_fade, south_cut, z)
+	if south <= 0.0: return height # Floor lookups only matter near the southern edge.
 	return lerpf(height, maxf(floor_at(x, z) + CLEARANCE, ground_level), south)
 
 
@@ -176,88 +177,123 @@ func _grid_normal(column: int, row: int) -> Vector3:
 	return Vector3(-dx, 1.0, -dz).normalized()
 
 
-func _include_quad(column: int, row: int) -> bool:
-	# Outside the map only; the region already ends at the southern map edge.
-	var center := _grid_point(column, row) + Vector2.ONE * SPACING * 0.5
-	return not map_rect.has_point(center)
+## Quad index ranges [start, end) per chunk along one axis.
+func _chunk_ranges(origin: float, count: int) -> Array[Vector2i]:
+	var ranges: Array[Vector2i] = []
+	var current := -1
+	var begin := 0
+	for index in range(count):
+		var chunk := floori((origin + (index + 0.5) * SPACING) / CHUNK_SIZE)
+		if chunk != current:
+			if index > begin or current != -1: ranges.append(Vector2i(begin, index))
+			current = chunk
+			begin = index
+	ranges.append(Vector2i(begin, count))
+	return ranges.filter(func(r: Vector2i) -> bool: return r.y > r.x)
 
 
 func _build_chunks() -> void:
-	var groups: Dictionary = {}
-	for row in range(_rows - 1):
-		for column in range(_columns - 1):
-			if not _include_quad(column, row): continue
-			var center := _grid_point(column, row) + Vector2.ONE * SPACING * 0.5
-			var key := Vector2i(floori(center.x / CHUNK_SIZE), floori(center.y / CHUNK_SIZE))
-			if not groups.has(key): groups[key] = []
-			groups[key].append(Vector2i(column, row))
-	var keys := groups.keys()
-	keys.sort()
-	for key in keys:
-		var vertices := PackedVector3Array()
-		var normals := PackedVector3Array()
-		var indices := PackedInt32Array()
-		var local: Dictionary = {}
-		for quad: Vector2i in groups[key]:
-			var corners := [quad, quad + Vector2i.RIGHT, quad + Vector2i.DOWN, quad + Vector2i.ONE]
-			var ids: Array[int] = []
-			for corner: Vector2i in corners:
-				if not local.has(corner):
-					local[corner] = vertices.size()
-					var point := _grid_point(corner.x, corner.y)
-					vertices.append(Vector3(point.x, _grid_height(corner.x, corner.y), point.y))
-					normals.append(_grid_normal(corner.x, corner.y))
-				ids.append(local[corner])
-			# Godot front faces are clockwise seen from the normal side.
-			indices.append_array([ids[0], ids[1], ids[2], ids[1], ids[3], ids[2]])
-		_add_skirts(groups[key], vertices, normals, indices)
-		var arrays := []
-		arrays.resize(Mesh.ARRAY_MAX)
-		arrays[Mesh.ARRAY_VERTEX] = vertices
-		arrays[Mesh.ARRAY_NORMAL] = normals
-		arrays[Mesh.ARRAY_INDEX] = indices
-		var mesh := ArrayMesh.new()
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-		var node := MeshInstance3D.new()
-		node.name = "OutOfBoundsTerrain_%d_%d" % [key.x, key.y]
-		node.mesh = mesh
-		node.material_override = material
-		# Ridge shadows are what make the lowland readable from above.
-		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		node.set_meta("geometry_purpose", "out_of_bounds_scenery")
-		add_child(node)
-		chunks.append(node)
-		diagnostics.vertices += vertices.size()
-		diagnostics.triangles += indices.size() / 3
-		for vertex in vertices: diagnostics.max_height = maxf(diagnostics.max_height, vertex.y)
+	# Normals once for the whole grid (central differences, clamped at the edges).
+	var grid_normals := PackedVector3Array()
+	grid_normals.resize(_columns * _rows)
+	for row in range(_rows):
+		var up := maxi(row - 1, 0) * _columns
+		var down := mini(row + 1, _rows - 1) * _columns
+		var row_span := float(mini(row + 1, _rows - 1) - maxi(row - 1, 0)) * SPACING
+		for column in range(_columns):
+			var left := maxi(column - 1, 0)
+			var right := mini(column + 1, _columns - 1)
+			var dx := (_heights[row * _columns + right] - _heights[row * _columns + left]) / (float(right - left) * SPACING)
+			var dz := (_heights[down + column] - _heights[up + column]) / row_span
+			grid_normals[row * _columns + column] = Vector3(-dx, 1.0, -dz).normalized()
+	var column_ranges := _chunk_ranges(region.position.x, _columns - 1)
+	var row_ranges := _chunk_ranges(region.position.y, _rows - 1)
+	# Quad centres never lie on the map edge (the grid is aligned to it), so this
+	# excludes exactly the quads inside the map.
+	for rows in row_ranges:
+		for columns in column_ranges:
+			# Every grid vertex of the block, row by row; quads inside the map are
+			# simply not indexed, so their vertices are never drawn.
+			var width: int = columns.y - columns.x + 1
+			var height: int = rows.y - rows.x + 1
+			var vertices := PackedVector3Array()
+			var normals := PackedVector3Array()
+			vertices.resize(width * height)
+			normals.resize(width * height)
+			for r in range(height):
+				var row: int = rows.x + r
+				var z := region.position.y + row * SPACING
+				for c in range(width):
+					var column: int = columns.x + c
+					vertices[r * width + c] = Vector3(region.position.x + column * SPACING, _heights[row * _columns + column], z)
+					normals[r * width + c] = grid_normals[row * _columns + column]
+			var indices := PackedInt32Array()
+			indices.resize((width - 1) * (height - 1) * 6)
+			var count := 0
+			for r in range(height - 1):
+				var center_z := region.position.y + (rows.x + r + 0.5) * SPACING
+				for c in range(width - 1):
+					var center_x := region.position.x + (columns.x + c + 0.5) * SPACING
+					if map_rect.has_point(Vector2(center_x, center_z)): continue
+					var a := r * width + c
+					# Godot front faces are clockwise seen from the normal side.
+					indices[count] = a
+					indices[count + 1] = a + 1
+					indices[count + 2] = a + width
+					indices[count + 3] = a + 1
+					indices[count + 4] = a + width + 1
+					indices[count + 5] = a + width
+					count += 6
+			if count == 0: continue
+			indices.resize(count)
+			_add_skirts(columns, rows, vertices, normals, indices)
+			var arrays := []
+			arrays.resize(Mesh.ARRAY_MAX)
+			arrays[Mesh.ARRAY_VERTEX] = vertices
+			arrays[Mesh.ARRAY_NORMAL] = normals
+			arrays[Mesh.ARRAY_INDEX] = indices
+			var mesh := ArrayMesh.new()
+			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+			var corner := _grid_point(columns.x, rows.x)
+			var key := Vector2i(floori((corner.x + SPACING * 0.5) / CHUNK_SIZE), floori((corner.y + SPACING * 0.5) / CHUNK_SIZE))
+			var node := MeshInstance3D.new()
+			node.name = "OutOfBoundsTerrain_%d_%d" % [key.x, key.y]
+			node.mesh = mesh
+			node.material_override = material
+			# Ridge shadows are what make the lowland readable from above.
+			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			node.set_meta("geometry_purpose", "out_of_bounds_scenery")
+			add_child(node)
+			chunks.append(node)
+			diagnostics.vertices += vertices.size()
+			diagnostics.triangles += indices.size() / 3
+			diagnostics.max_height = maxf(diagnostics.max_height, mesh.get_aabb().end.y)
 	diagnostics.mesh_nodes = chunks.size()
 
 
-func _add_skirts(quads: Array, vertices: PackedVector3Array, normals: PackedVector3Array, indices: PackedInt32Array) -> void:
+func _add_skirts(columns: Vector2i, rows: Vector2i, vertices: PackedVector3Array, normals: PackedVector3Array, indices: PackedInt32Array) -> void:
 	# Close the outer west/north/east edges below the lowland, so no gap opens
 	# behind the last mountains at the end of the region.
-	for quad: Vector2i in quads:
-		var edges: Array = []
-		if quad.x == 0: edges.append([quad + Vector2i.DOWN, quad, Vector3.LEFT])
-		if quad.x == _columns - 2: edges.append([quad + Vector2i.RIGHT, quad + Vector2i.ONE, Vector3.RIGHT])
-		if quad.y == 0: edges.append([quad, quad + Vector2i.RIGHT, Vector3.FORWARD])
-		for edge in edges:
-			var a: Vector2i = edge[0]
-			var b: Vector2i = edge[1]
-			var outward: Vector3 = edge[2]
-			var pa := _grid_point(a.x, a.y)
-			var pb := _grid_point(b.x, b.y)
-			var top_a := Vector3(pa.x, _grid_height(a.x, a.y), pa.y)
-			var top_b := Vector3(pb.x, _grid_height(b.x, b.y), pb.y)
-			var base := vertices.size()
-			vertices.append_array([top_a, top_b, Vector3(pa.x, skirt_base(), pa.y), Vector3(pb.x, skirt_base(), pb.y)])
-			normals.append_array([outward, outward, outward, outward])
-			var first := [base, base + 1, base + 2]
-			var second := [base + 1, base + 3, base + 2]
-			for triangle in [first, second]:
-				var cross := (vertices[triangle[1]] - vertices[triangle[0]]).cross(vertices[triangle[2]] - vertices[triangle[0]])
-				if cross.dot(outward) > 0.0: triangle = [triangle[0], triangle[2], triangle[1]]
-				indices.append_array(triangle)
+	var edges: Array = []
+	for row in range(rows.x, rows.y):
+		if columns.x == 0: edges.append([Vector2i(0, row + 1), Vector2i(0, row), Vector3.LEFT])
+		if columns.y == _columns - 1: edges.append([Vector2i(_columns - 1, row), Vector2i(_columns - 1, row + 1), Vector3.RIGHT])
+	if rows.x == 0:
+		for column in range(columns.x, columns.y): edges.append([Vector2i(column, 0), Vector2i(column + 1, 0), Vector3.FORWARD])
+	var base_height := skirt_base()
+	for edge in edges:
+		var a: Vector2i = edge[0]
+		var b: Vector2i = edge[1]
+		var outward: Vector3 = edge[2]
+		var pa := _grid_point(a.x, a.y)
+		var pb := _grid_point(b.x, b.y)
+		var base := vertices.size()
+		vertices.append_array([Vector3(pa.x, _grid_height(a.x, a.y), pa.y), Vector3(pb.x, _grid_height(b.x, b.y), pb.y), Vector3(pa.x, base_height, pa.y), Vector3(pb.x, base_height, pb.y)])
+		normals.append_array([outward, outward, outward, outward])
+		for triangle in [[base, base + 1, base + 2], [base + 1, base + 3, base + 2]]:
+			var cross := (vertices[triangle[1]] - vertices[triangle[0]]).cross(vertices[triangle[2]] - vertices[triangle[0]])
+			if cross.dot(outward) > 0.0: triangle = [triangle[0], triangle[2], triangle[1]]
+			indices.append_array(triangle)
 
 
 func apply_shade(shade: Color) -> void:
