@@ -55,16 +55,24 @@ var terrain_fill_cells: Dictionary = {}
 @export var cave_stone_mapping_enabled: bool = true
 @export var cave_weathered_edges_enabled: bool = true
 @export_group("Out-of-bounds scenery")
-## Decorative ridge models beyond the logical map, over the scenery border and apron.
+## Continuous procedural terrain beyond the logical map (west, north and east).
 @export var out_of_bounds_scenery_enabled: bool = true
-@export_range(0.5, 3.0, 0.05) var out_of_bounds_height_scale: float = 2.2
-@export_range(0.0, 1.0, 0.05) var out_of_bounds_far_density: float = 0.6
-## Share of the border fog palette lifted toward white for the sky-lit ridges.
+## Tiles the terrain reaches beyond the map edge.
+@export_range(4, 48, 1) var out_of_bounds_extent: int = 22
+## Highest mountain height above the ground, in world units (one floor elevation is 3.0).
+@export_range(0.0, 20.0, 0.1) var out_of_bounds_mountain_height: float = 6.0
+## Height of the rolling ground next to the map edge.
+@export_range(0.0, 4.0, 0.05) var out_of_bounds_foothill_height: float = 0.8
+## Tiles from the map edge until mountains reach full height.
+@export_range(0.5, 40.0, 0.5) var out_of_bounds_rise_distance: float = 12.0
+## Typical width of hills and mountains, in tiles.
+@export_range(2.0, 60.0, 0.5) var out_of_bounds_feature_size: float = 14.0
+## Detail of smaller bumps on the larger forms (fractal gain).
+@export_range(0.0, 1.0, 0.05) var out_of_bounds_roughness: float = 0.45
+## Tiles over which heights fall to the ground before the southern map edge.
+@export_range(0.5, 30.0, 0.5) var out_of_bounds_south_fade: float = 10.0
+## Share of the border fog palette lifted toward white for the sky-lit terrain.
 @export_range(0.0, 1.0, 0.05) var out_of_bounds_shade_lift: float = 0.65
-## Keep the band south of the map flat so ridges never stand between the camera and play.
-@export var out_of_bounds_foreground_clear: bool = true
-## Far ridges reach at most this many cells beyond the detailed border, whatever the apron size.
-@export_range(0, 48, 1) var out_of_bounds_far_extent: int = 16
 @export_group("")
 var cave_background: CaveTerrainBackdrop
 var out_of_bounds_scenery: OutOfBoundsScenery

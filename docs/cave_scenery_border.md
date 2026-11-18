@@ -49,3 +49,28 @@ Stages 2–4 were proposals in the Stage-1 checkpoint. The subsequent reversible
 ## Out-of-bounds ridge scenery (2026-11-13)
 
 `OutOfBoundsScenery` (`scripts/dungeon/out_of_bounds_scenery.gd`) is a renderer child created after the cave background whenever `out_of_bounds_scenery_enabled` (default true) and `cave_scenery_border_width > 0`. It places the three groupmate-authored ridge meshes from `assets/environment/out_of_bounds/oob_{1,2,3}.obj` on 2x2 blocks over the detailed external border and on hash-thinned 4x4 blocks over the apron (`out_of_bounds_far_density`, default 0.6), never over the logical map. Block grids are aligned flush to the rectangle they surround. With `out_of_bounds_foreground_clear` (default true) no block extends south of `map_bounds`: the fixed 35-degree camera follows from the south, so ridges there (near band up to about 3.2 world units, far band up to about 6) would stand between it and the play area; that band keeps the flat ground and apron. Each instance is centered on its block, rests on the highest ground top under it (external record tops or the apron height), is quarter-turned by coordinate hash and vertically stretched by `out_of_bounds_height_scale` (default 2.2). Far blocks reach at most `out_of_bounds_far_extent` (default 16) cells beyond the detailed border, independent of the camera-derived apron guard. One MultiMesh per 16-cell chunk and model (44 nodes on the standard 42x32 layout, about 490k triangles) lets off-screen ridges cull; all share one `shaders/out_of_bounds_spring.gdshader` material: rock on slopes, spring grass on level faces, sparse blossom speckles, no shadow casting. `apply_shade()` follows the border fog palette lifted toward white by `out_of_bounds_shade_lift` (default 0.65). No tiles, elevations, spawns, traversal or generator RNG change; `tests/validate_out_of_bounds_scenery.gd` owns the placement, determinism, shade and toggle contracts. Appearance, draw cost and far-blur interaction need a normal-render check.
+
+## Procedural out-of-bounds terrain (2026-11-18)
+
+Supersedes the ridge-tile section above. The tiles produced needle-like peaks: their authored slopes were stretched 2.2x vertically, and independent randomly chosen tiles never matched at their seams. `OutOfBoundsScenery` now builds one continuous heightfield instead.
+
+- **Area.** West, north and east of the map, from the map edge out to `out_of_bounds_extent` tiles. No terrain south of the map's southern edge, where the camera sits; heights fade to the floor over `out_of_bounds_south_fade` tiles before that line.
+- **Shape.** Rolling foothills reach full height within three tiles of the edge. Mountains grow with `smoothstep(0, out_of_bounds_rise_distance, distance)` times a blend of smooth FBM and ridged noise (Godot `FastNoiseLite`), sharpened slightly toward peaks.
+- **Floor.** Every external border-rock top is pushed to its four cell corners and interpolated bilinearly, so the surface never dips below a rock. Beyond the detailed border the floor is the apron height.
+- **Seed.** `floor_visual_seed` combined with a key from the floor's player spawn and stairs positions: same floor, same terrain; each floor differs; generation RNG untouched.
+- **Mesh.** 0.5-unit vertex grid with normals from central differences, 16-unit chunks for culling, skirts closing the outer edges. On the standard 42x32 layout: about 27k triangles in 20 nodes, roughly 110 ms per floor build, steepest neighbouring step about 0.9 per 0.5 units (61 degrees).
+- **Shading.** Placeholder `shaders/out_of_bounds_terrain.gdshader`: one muted ground color, a darker rock tone on steep faces, multiplied by the lifted border fog shade (`out_of_bounds_shade_lift`).
+
+| Setting (DungeonRenderer, Out-of-bounds scenery group) | Default |
+| --- | ---: |
+| `out_of_bounds_scenery_enabled` | true |
+| `out_of_bounds_extent` | 22 |
+| `out_of_bounds_mountain_height` | 6.0 |
+| `out_of_bounds_foothill_height` | 0.8 |
+| `out_of_bounds_rise_distance` | 12.0 |
+| `out_of_bounds_feature_size` | 14.0 |
+| `out_of_bounds_roughness` | 0.45 |
+| `out_of_bounds_south_fade` | 10.0 |
+| `out_of_bounds_shade_lift` | 0.65 |
+
+The ridge OBJ files stay in the repository unreferenced until the team decides to remove them. Trees and bushes are not placed; a later pass will put them on this surface using `height_at()`.

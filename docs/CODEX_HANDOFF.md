@@ -1,5 +1,15 @@
 # Codex project handoff
 
+### Procedural out-of-bounds terrain (2026-11-18)
+
+Context: the user applied the ridge and tree patches on their Windows machine, judged the ridges as "green needles" and the scene as busy, and asked for discussion before code. Agreed plan: replace the ridge tiles with one continuous procedural terrain (no toggle back), leave trees and bushes out for now, and defer shading. The tree commit is reverted in this branch (`a5ee7de`). The user's screenshot showed it applied on one checkout, while their Windows checkout (`249d73d`) never had it; any checkout that applied it must revert it before taking this change.
+
+Implementation: `scripts/dungeon/out_of_bounds_scenery.gd` rewritten (class name, renderer hook and `apply_shade()` contract kept). Renderer exports replaced: removed `out_of_bounds_height_scale`, `out_of_bounds_far_density`, `out_of_bounds_foreground_clear`, `out_of_bounds_far_extent`; added `out_of_bounds_extent`, `out_of_bounds_mountain_height`, `out_of_bounds_foothill_height`, `out_of_bounds_rise_distance`, `out_of_bounds_feature_size`, `out_of_bounds_roughness`, `out_of_bounds_south_fade`; `out_of_bounds_shade_lift` kept. `shaders/out_of_bounds_spring.gdshader` deleted; placeholder `shaders/out_of_bounds_terrain.gdshader` added. Details and defaults in `docs/cave_scenery_border.md`.
+
+Finding during the pass: seeding from `floor_visual_seed` alone gave every floor identical terrain (it is 0 for all floors), so the seed now also uses a layout key from player spawn and stairs. Measured on seeds 4/17: 15.8k vertices, 27.2k triangles, 20 chunks, max height 6.1, mean height about 1.0 at the edge rising to about 3.7 beyond 12 tiles, steepest step 0.91 per 0.5 units, about 110 ms extra floor build.
+
+Validation on Godot 4.4.1 headless: import clean; rewritten `validate_out_of_bounds_scenery` PASS on first run; full suite 60/60 PASS (`.godot/validation/full4/`). Not verified: on-screen look, whether the rise and mountain height suit the camera from ground and elevation-1 rooms, the joint where terrain meets interior cave ground at the map edge, and GPU cost.
+
 ### Spring HD-2D background, iteration 1 (2026-11-13)
 
 User request: use the groupmate's bridge/out-of-bounds models and an Octopath-style post-processing stack to make the background read like the supplied reference, slightly more spring-like. Archives `bridge_and_oob_models.7z` and `updated_oob_models.7z` contain Blender OBJ/MTL exports: `bridge.obj`/`bridge_broken.obj` (2x2 Blender units, 1.37 tall, seven flat brown materials) and ridge tiles `oob.obj`, `OOB_1/2/3.obj` (2x2 footprint; 1.90/0.84/0.59 tall; OOB_2/3 are offset along +Z in the source, so placement recenters by mesh AABB rather than editing the files). Only the three updated ridge tiles are imported this iteration, unchanged, at `assets/environment/out_of_bounds/`; bridges are deferred.
