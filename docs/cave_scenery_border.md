@@ -74,3 +74,46 @@ Supersedes the ridge-tile section above. The tiles produced needle-like peaks: t
 | `out_of_bounds_shade_lift` | 0.65 |
 
 The ridge OBJ files stay in the repository unreferenced until the team decides to remove them. Trees and bushes are not placed; a later pass will put them on this surface using `height_at()`.
+
+### Cliff face and rock shading (2026-11-18)
+
+The gameplay camera (35-degree pitch, narrow lens) only reaches about 2-5 tiles past the north edge, so a gradual rise read as a flat band of fog colour. The profile now puts a cliff right behind the map edge: a short uneven ledge, a cliff rising `out_of_bounds_cliff_height` over `out_of_bounds_cliff_width` tiles starting `out_of_bounds_cliff_distance` tiles out (height varied 70-100% along the edge), then mountains beyond its top. The camera is unchanged.
+
+| Setting | Default |
+| --- | ---: |
+| `out_of_bounds_cliff_height` | 6.0 |
+| `out_of_bounds_cliff_distance` | 0.25 |
+| `out_of_bounds_cliff_width` | 2.0 |
+| `out_of_bounds_mountain_height` | 4.0 (above the cliff top) |
+| `out_of_bounds_foothill_height` | 0.5 (ledge) |
+| `out_of_bounds_rise_distance` | 10.0 (beyond the cliff top) |
+
+Shading in `shaders/out_of_bounds_terrain.gdshader`: horizontal rock bands, each a different tone between `rock_dark` and `rock_light`, with soft dark seams, warped by a slow world-space signal; spring grass on faces flatter than about 50 degrees with a ragged edge; fine grain and relief from the cave ground's shared stone detail texture. These shader uniforms can be tuned on the material without code changes.
+
+## Plateau terrain and anti-tiling rock (2026-11-18)
+
+Supersedes the cliff profile above. The gameplay camera cannot see peaks that rise above the map, so the land now falls away instead: the map is a plateau and the camera looks down from its rim onto a lowland of small mountains.
+
+**Profile.** At the map edge the terrain is at map level. Over `out_of_bounds_rim_width` tiles it drops to `out_of_bounds_lowland_depth` below the floor. Ridged mountains (`out_of_bounds_mountain_height`, `out_of_bounds_feature_size`, `out_of_bounds_rise_distance`, `out_of_bounds_roughness`) rise from that lowland, so their tops stay near map level and whole mountains fit in the few tiles the camera reaches. Toward the southern edge everything blends back to the remaining border ground over `out_of_bounds_south_fade` tiles.
+
+**Ownership of the three sides.** While the terrain is active, the flat border ground, the north apron strip, the side apron strips north of the southern edge, and decorative filler outside the map are omitted on the west, north and east sides; otherwise they would cover the lowland. The south side keeps all of them. Turning `out_of_bounds_scenery_enabled` off restores everything.
+
+**Rock material.** `RockTextureSet` builds a three-layer texture array once per session: the authored cave stone grain, cellular cracks and fine grit. Each layer stores a tangent-space normal, a height and an albedo variation. The shader:
+
+- samples each layer with randomized triangle-grid tiling, with a random offset and rotation per lattice point, which hides repetition;
+- blends layers by slope and macro noise, sharpened by layer height;
+- projects normal maps from three axes with whiteout blending;
+- colours by two very large noise signals (warm and cool grey, rust on steep faces) plus crevice dirt, darker valleys and dusty crests.
+
+**Cost.** The grid is 0.25 tiles, which is about 107k triangles and roughly 0.5 s to build each floor. Each terrain pixel reads up to 27 texture samples.
+
+| Setting | Default |
+| --- | ---: |
+| `out_of_bounds_lowland_depth` | 2.4 |
+| `out_of_bounds_rim_width` | 0.6 |
+| `out_of_bounds_mountain_height` | 2.8 |
+| `out_of_bounds_rise_distance` | 1.6 |
+| `out_of_bounds_feature_size` | 5.6 |
+| `out_of_bounds_roughness` | 0.45 |
+| `out_of_bounds_shade_lift` | 0.45 |
+| `out_of_bounds_cast_shadows` | true |

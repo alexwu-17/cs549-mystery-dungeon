@@ -103,8 +103,8 @@ Godot references: [Environment / SSAO](https://docs.godotengine.org/en/4.4/class
 | Sun | (-48, -32, 0) degrees, RGB (1.00, 0.96, 0.86), energy 1.05, angular 0.75 |
 | Ambient | RGB (0.80, 0.90, 0.80), energy 0.38 |
 | SSAO | On, same values as C |
-| Glow | On, intensity 0.5, bloom 0.1, HDR threshold 1.0, soft-light blend |
-| Depth fog | On, exponential, light RGB (0.80, 0.88, 0.76), density 0.016, aerial perspective 0.6, no sky/height fog |
+| Glow | On, intensity 0.35, bloom 0.1, HDR threshold 1.0, soft-light blend |
+| Depth fog | On, exponential, light RGB (0.80, 0.88, 0.76), density 0.008, aerial perspective 0.6, no sky/height fog |
 | Far blur | `CameraAttributesPractical` on the WorldEnvironment: far distance 19, transition 14, amount 0.06, near blur off |
 | Adjustments | Brightness 1.02, contrast 1.04, saturation 1.12 |
 | Tonemap | Filmic, exposure 1.0 |

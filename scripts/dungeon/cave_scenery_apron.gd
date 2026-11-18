@@ -7,6 +7,8 @@ var guard_margin: int = 0
 var _logical_bounds: Rect2i
 var _max_surface: float
 var _camera: Camera3D
+## World Z from which the side strips start (terrain-owned rows above it); -inf keeps all strips.
+var terrain_owned_until: float = -INF
 
 func setup(data: DungeonData, bounds: Rect2i, camera: Camera3D) -> void:
 	_logical_bounds = data.map_bounds
@@ -43,10 +45,14 @@ func _rebuild() -> void:
 	var inner := Rect2(Vector2(detailed_bounds.position)-Vector2.ONE*0.5,Vector2(detailed_bounds.size))
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_strip(surface,Rect2(outer.position,Vector2(outer.size.x,inner.position.y-outer.position.y)))
+	# The side strips start at terrain_owned_until when the out-of-bounds terrain
+	# owns the west/north/east surroundings; the north strip is omitted then.
+	var side_top := maxf(inner.position.y, terrain_owned_until)
+	if terrain_owned_until <= inner.position.y:
+		_strip(surface,Rect2(outer.position,Vector2(outer.size.x,inner.position.y-outer.position.y)))
 	_strip(surface,Rect2(Vector2(outer.position.x,inner.end.y),Vector2(outer.size.x,outer.end.y-inner.end.y)))
-	_strip(surface,Rect2(Vector2(outer.position.x,inner.position.y),Vector2(inner.position.x-outer.position.x,inner.size.y)))
-	_strip(surface,Rect2(Vector2(inner.end.x,inner.position.y),Vector2(outer.end.x-inner.end.x,inner.size.y)))
+	_strip(surface,Rect2(Vector2(outer.position.x,side_top),Vector2(inner.position.x-outer.position.x,inner.end.y-side_top)))
+	_strip(surface,Rect2(Vector2(inner.end.x,side_top),Vector2(outer.end.x-inner.end.x,inner.end.y-side_top)))
 	mesh = surface.commit()
 	set_meta("geometry_bounds", visual_bounds)
 

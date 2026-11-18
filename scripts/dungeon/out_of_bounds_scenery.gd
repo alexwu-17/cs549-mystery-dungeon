@@ -1,7 +1,11 @@
 class_name OutOfBoundsScenery
 extends Node3D
-## Continuous procedural terrain around the logical map: low rolling ground at
-## the map edge rising to mountains with distance. Rendering only: no tiles,
+## Continuous procedural terrain around the logical map. The map sits on a
+## plateau: at its west, north and east edges the ground drops into a lowland of
+## small ridged mountains whose tops stay near map level, so the fixed gameplay
+## camera (which only reaches a few tiles past the edge) looks down onto whole
+## mountains. The flat border ground, apron and out-of-map filler on those sides
+## are omitted by the renderer while this node owns them. Rendering only: no tiles,
 ## elevations, spawns, traversal or generator RNG change; noise is seeded from
 ## the renderer's visual seed plus the floor's spawn and stairs positions (read
 ## only), so each floor gets its own range. Built once per floor as spatial chunks.
@@ -10,14 +14,14 @@ extends Node3D
 ## map, where the fixed camera sits; heights fade to the ground toward that line.
 
 const SHADER = preload("res://shaders/out_of_bounds_terrain.gdshader")
-## Vertex spacing in world units (one tile is 1.0).
-const SPACING := 0.5
+## Vertex spacing in world units (one tile is 1.0); fine enough for small ridges.
+const SPACING := 0.25
 ## Chunk size in world units, so off-screen parts are frustum-culled.
 const CHUNK_SIZE := 16.0
-## The surface stays this far above the border rocks it covers.
+## Where the terrain meets the remaining south border rocks it stays this far above them.
 const CLEARANCE := 0.02
-## Distance from the map edge over which foothills reach full height.
-const FOOTHILL_RISE := 3.0
+## Vertices deeper than this inside the map only feed edge normals; they skip noise.
+const INTERIOR_MARGIN := 1.0
 ## How much the ridged layer shapes the mountains versus the rolling layer.
 const RIDGE_BLEND := 0.6
 const PEAK_SHARPNESS := 1.4
@@ -38,6 +42,7 @@ var _floor_corners: Dictionary = {}
 var _rolling := FastNoiseLite.new()
 var _ridged := FastNoiseLite.new()
 var _settings: Dictionary = {}
+var shadows: bool = true
 
 
 func setup(data: DungeonData, backdrop: CaveTerrainBackdrop, renderer: DungeonRenderer) -> void:
@@ -45,21 +50,29 @@ func setup(data: DungeonData, backdrop: CaveTerrainBackdrop, renderer: DungeonRe
 	shade_lift = renderer.out_of_bounds_shade_lift
 	material = ShaderMaterial.new()
 	material.shader = SHADER
+	RockTextureSet.ensure()
+	material.set_shader_parameter("rock_layers", RockTextureSet.layers)
+	material.set_shader_parameter("macro_noise", RockTextureSet.macro)
 	_settings = {
-		"mountain": renderer.out_of_bounds_mountain_height,
-		"foothill": renderer.out_of_bounds_foothill_height,
-		"rise": maxf(0.5, renderer.out_of_bounds_rise_distance),
+		"depth": maxf(0.0, renderer.out_of_bounds_lowland_depth),
+		"rim": maxf(0.1, renderer.out_of_bounds_rim_width),
+		"mountain": maxf(0.0, renderer.out_of_bounds_mountain_height),
+		"rise": maxf(0.1, renderer.out_of_bounds_rise_distance),
 		"south_fade": maxf(0.5, renderer.out_of_bounds_south_fade),
 	}
 	_configure_noise(renderer, layout_key(data))
 	ground_level = TerrainFillVisuals.wall_top_offset(0.1, 0.5)
+	# Valley floors darken toward the lowland; crests lighten toward the map rim.
+	material.set_shader_parameter("height_low", lowland_level())
+	material.set_shader_parameter("height_high", ground_level + 0.1)
+	shadows = renderer.out_of_bounds_cast_shadows
 	map_rect = Rect2(Vector2(data.map_bounds.position) - Vector2.ONE * 0.5, Vector2(data.map_bounds.size))
 	south_cut = map_rect.end.y
 	var extent := float(renderer.out_of_bounds_extent)
 	region = Rect2(map_rect.position - Vector2.ONE * extent, Vector2(map_rect.size.x + 2.0 * extent, south_cut - (map_rect.position.y - extent)))
-	# The surface must cover every border rock beneath it. Each cell corner takes
-	# the highest top of its neighboring external cells, so the bilinear floor
-	# over a cell never dips below that cell's rock.
+	# Only the south border rocks remain; where the terrain fades back to map
+	# level near the southern edge it must sit on or above them. Each cell corner
+	# takes the highest top of its neighboring external cells.
 	for record in backdrop.records:
 		if not record.external: continue
 		var cell: Vector2i = record.cell
@@ -71,7 +84,9 @@ func setup(data: DungeonData, backdrop: CaveTerrainBackdrop, renderer: DungeonRe
 	for row in range(_rows):
 		for column in range(_columns):
 			var point := _grid_point(column, row)
-			_heights[row * _columns + column] = height_at(point.x, point.y)
+			# Deep map-interior vertices only shape edge normals; skip the noise there.
+			var inside := map_rect.grow(-INTERIOR_MARGIN).has_point(point)
+			_heights[row * _columns + column] = ground_level if inside else height_at(point.x, point.y)
 	_build_chunks()
 	set_meta("geometry_bounds", Rect2i(Vector2i(region.position.ceil()), Vector2i(region.size.floor())))
 
@@ -127,16 +142,24 @@ func floor_at(x: float, z: float) -> float:
 	return lerpf(lerpf(a, b, tx), lerpf(c, d, tx), tz)
 
 
+## World height of the lowland floor, below the map rim.
+func lowland_level() -> float:
+	return ground_level - float(_settings.depth)
+
+
 ## Terrain surface height at a world XZ point (also defined over the map, for normals).
+## The rim stays at map level at the edge, drops to the lowland over the rim width,
+## and small ridged mountains rise from the lowland toward map level. Near the
+## southern edge everything blends back up to the remaining border ground.
 func height_at(x: float, z: float) -> float:
 	var distance := map_distance(x, z)
 	var rolling := clampf((_rolling.get_noise_2d(x, z) + 1.0) * 0.5, 0.0, 1.0)
 	var ridged := clampf((_ridged.get_noise_2d(x, z) + 1.0) * 0.5, 0.0, 1.0)
-	var foothills: float = _settings.foothill * smoothstep(0.0, FOOTHILL_RISE, distance) * rolling
 	var shape := pow(lerpf(rolling, ridged, RIDGE_BLEND), PEAK_SHARPNESS)
 	var mountains: float = _settings.mountain * smoothstep(0.0, _settings.rise, distance) * shape
-	var south := 1.0 - smoothstep(south_cut - _settings.south_fade, south_cut, z)
-	return maxf(floor_at(x, z) + CLEARANCE, ground_level + (foothills + mountains) * south)
+	var height := lerpf(ground_level, lowland_level() + mountains, smoothstep(0.0, _settings.rim, distance))
+	var south := smoothstep(south_cut - _settings.south_fade, south_cut, z)
+	return lerpf(height, maxf(floor_at(x, z) + CLEARANCE, ground_level), south)
 
 
 func _grid_height(column: int, row: int) -> float:
@@ -199,7 +222,8 @@ func _build_chunks() -> void:
 		node.name = "OutOfBoundsTerrain_%d_%d" % [key.x, key.y]
 		node.mesh = mesh
 		node.material_override = material
-		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# Ridge shadows are what make the lowland readable from above.
+		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		node.set_meta("geometry_purpose", "out_of_bounds_scenery")
 		add_child(node)
 		chunks.append(node)
@@ -210,8 +234,8 @@ func _build_chunks() -> void:
 
 
 func _add_skirts(quads: Array, vertices: PackedVector3Array, normals: PackedVector3Array, indices: PackedInt32Array) -> void:
-	# Close the outer west/north/east edges down to the ground base, so no gap
-	# opens behind tall mountains at the end of the region.
+	# Close the outer west/north/east edges below the lowland, so no gap opens
+	# behind the last mountains at the end of the region.
 	for quad: Vector2i in quads:
 		var edges: Array = []
 		if quad.x == 0: edges.append([quad + Vector2i.DOWN, quad, Vector3.LEFT])
@@ -226,7 +250,7 @@ func _add_skirts(quads: Array, vertices: PackedVector3Array, normals: PackedVect
 			var top_a := Vector3(pa.x, _grid_height(a.x, a.y), pa.y)
 			var top_b := Vector3(pb.x, _grid_height(b.x, b.y), pb.y)
 			var base := vertices.size()
-			vertices.append_array([top_a, top_b, Vector3(pa.x, CaveTerrainBackdrop.GROUND_BASE, pa.y), Vector3(pb.x, CaveTerrainBackdrop.GROUND_BASE, pb.y)])
+			vertices.append_array([top_a, top_b, Vector3(pa.x, skirt_base(), pa.y), Vector3(pb.x, skirt_base(), pb.y)])
 			normals.append_array([outward, outward, outward, outward])
 			var first := [base, base + 1, base + 2]
 			var second := [base + 1, base + 3, base + 2]
@@ -246,3 +270,7 @@ func apply_shade(shade: Color) -> void:
 
 func current_shade() -> Color:
 	return _shade
+
+
+func skirt_base() -> float:
+	return minf(CaveTerrainBackdrop.GROUND_BASE, lowland_level() - 2.0)

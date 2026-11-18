@@ -6,6 +6,20 @@ This targets Godot **4.4.1** (Checkpoint 4 was tested on **4.7.2**, not yet veri
 
 Prioritize working, testable, maintainable changes. Pokémon gameplay is planned in the Week 10 sprint below; distinguish planned behavior from implemented systems. Do not add unrelated systems or runtime AI services.
 
+## Plateau out-of-bounds terrain and anti-tiling rock (2026-11-18)
+
+- Supersedes the cliff profile below. Chosen from private prototype renders (scratch worktree, Xvfb + `--rendering-driver opengl3`; no repo capture tests): the user wanted whole ridged mountains visible from the gameplay camera, grey realistic rock and no visible tiling. The map is now a plateau: at the west/north/east edges the ground drops (`out_of_bounds_rim_width`0.6 tiles) to a lowland `out_of_bounds_lowland_depth`2.4 below the map floor, with small ridged mountains (`out_of_bounds_mountain_height`2.8, `out_of_bounds_feature_size`5.6, `out_of_bounds_rise_distance`1.6) whose tops stay near map level. Grid spacing 0.25 (~107k triangles, ~0.5 s per floor build; deep map-interior vertices skip noise). Terrain chunks cast shadows (`out_of_bounds_cast_shadows`). Shade lift 0.45.
+- While `DungeonRenderer.out_of_bounds_owns_sides()` (terrain enabled, border width >0, cave fill active), the renderer omits on those sides: external border records (`CaveTerrainBackdrop.plan(..., external_from_y)`), the north apron strip and the side strips above the southern edge (`CaveSceneryApron.terrain_owned_until`), and decorative geometry-plan/legacy filler outside the map (`is_terrain_owned_cell()`). Required structure lies inside the map. Disabling the terrain restores all of them. Fixtures (`preserve_terrain`) are unaffected.
+- `shaders/out_of_bounds_terrain.gdshader` + `RockTextureSet` (runtime-built once, ~0.3 s): Texture2DArray of three 256px layers (authored cave stone grain, cellular cracks, FBM grit) packing tangent normal RG, height B, albedo variation A; stochastic triangle-grid sampling with random offset/rotation per lattice vertex; height-aware layer blending by slope/macro; whiteout triplanar normal maps; two macro noise signals for warm/cool grey, rust on steep faces, dirt in crevices/valleys and dusty crests. Up to 27 texture reads per terrain pixel: watch GPU frame time. Owner check `validate_out_of_bounds_scenery`.
+
+## Out-of-bounds cliff face and rock shading (2026-11-18)
+
+- Superseded the same day by the plateau section above; kept for history.
+
+- In-editor check showed the first terrain read as flat fog. Real frames rendered privately (Xvfb + Godot `--rendering-driver opengl3`, scratch only, not a repo test) proved the terrain existed but the fixed 35-degree camera sees only about 2-5 tiles past the north edge, so peaks never enter frame. User chose option 1: keep the camera and make that band a readable cliff, not a camera change.
+- Height profile is now ledge (`out_of_bounds_foothill_height`0.5 over 1 tile) + cliff (`out_of_bounds_cliff_height`6.0, rising from `out_of_bounds_cliff_distance`0.25 over `out_of_bounds_cliff_width`2.0 tiles, varied 70-100% along the edge by noise) + mountains beyond the cliff top (`out_of_bounds_mountain_height`4.0 over `out_of_bounds_rise_distance`10). Steepest step ~78 degrees by design (test bound 3.0 per 0.5).
+- `shaders/out_of_bounds_terrain.gdshader` now shades rock bands of varied tone with soft dark seams (spacing 0.7, warped), spring grass on gentle faces with ragged edges, and grain/relief from the shared `CaveStoneMaterial.detail()` sampled triplanar. Spring preset haze reduced: fog density 0.016 to 0.008, glow 0.5 to 0.35. Camera framing unchanged.
+
 ## Procedural out-of-bounds terrain (2026-11-18)
 
 - User reviewed ridges plus trees in the editor and asked to replace the "green needle" ridge tiles with one continuous, smoother, more realistic terrain, no toggle back to the tiles, and no trees/bushes for now (the tree commit was reverted; placement returns later). Shading is a placeholder pending a separate pass.

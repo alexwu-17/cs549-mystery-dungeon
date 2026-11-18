@@ -55,24 +55,29 @@ var terrain_fill_cells: Dictionary = {}
 @export var cave_stone_mapping_enabled: bool = true
 @export var cave_weathered_edges_enabled: bool = true
 @export_group("Out-of-bounds scenery")
-## Continuous procedural terrain beyond the logical map (west, north and east).
+## Plateau terrain beyond the logical map (west, north and east). While enabled it
+## replaces the flat border ground, apron and out-of-map filler on those sides.
 @export var out_of_bounds_scenery_enabled: bool = true
 ## Tiles the terrain reaches beyond the map edge.
 @export_range(4, 48, 1) var out_of_bounds_extent: int = 22
-## Highest mountain height above the ground, in world units (one floor elevation is 3.0).
-@export_range(0.0, 20.0, 0.1) var out_of_bounds_mountain_height: float = 6.0
-## Height of the rolling ground next to the map edge.
-@export_range(0.0, 4.0, 0.05) var out_of_bounds_foothill_height: float = 0.8
-## Tiles from the map edge until mountains reach full height.
-@export_range(0.5, 40.0, 0.5) var out_of_bounds_rise_distance: float = 12.0
-## Typical width of hills and mountains, in tiles.
-@export_range(2.0, 60.0, 0.5) var out_of_bounds_feature_size: float = 14.0
+## How far below the map floor the lowland lies, in world units (one floor elevation is 3.0).
+@export_range(0.0, 10.0, 0.05) var out_of_bounds_lowland_depth: float = 2.4
+## Tiles over which the ground drops from the map edge to the lowland.
+@export_range(0.1, 6.0, 0.05) var out_of_bounds_rim_width: float = 0.6
+## Height of the lowland mountains above the lowland floor.
+@export_range(0.0, 10.0, 0.05) var out_of_bounds_mountain_height: float = 2.8
+## Tiles from the map edge until the mountains reach full height.
+@export_range(0.1, 20.0, 0.1) var out_of_bounds_rise_distance: float = 1.6
+## Typical width of one mountain, in tiles.
+@export_range(1.0, 60.0, 0.1) var out_of_bounds_feature_size: float = 5.6
 ## Detail of smaller bumps on the larger forms (fractal gain).
 @export_range(0.0, 1.0, 0.05) var out_of_bounds_roughness: float = 0.45
-## Tiles over which heights fall to the ground before the southern map edge.
+## Tiles over which heights return to the ground before the southern map edge.
 @export_range(0.5, 30.0, 0.5) var out_of_bounds_south_fade: float = 10.0
 ## Share of the border fog palette lifted toward white for the sky-lit terrain.
-@export_range(0.0, 1.0, 0.05) var out_of_bounds_shade_lift: float = 0.65
+@export_range(0.0, 1.0, 0.05) var out_of_bounds_shade_lift: float = 0.45
+## Terrain shadows define the ridges seen from above.
+@export var out_of_bounds_cast_shadows: bool = true
 @export_group("")
 var cave_background: CaveTerrainBackdrop
 var out_of_bounds_scenery: OutOfBoundsScenery
@@ -82,6 +87,17 @@ var _occlusion_context: Array = []
 var _stone_variants: Dictionary = {}
 var cave_rock_profiles: Dictionary = {}
 var _rock_meshes: Dictionary = {}
+
+
+## True while the out-of-bounds terrain owns the west, north and east surroundings.
+## Requires the cave background (it supplies the remaining south border).
+func out_of_bounds_owns_sides() -> bool:
+	return out_of_bounds_scenery_enabled and cave_scenery_border_width > 0 and cave_fill_active
+
+
+## Cells outside the map, north of its southern edge, belong to the terrain then.
+func is_terrain_owned_cell(data: DungeonData, cell: Vector2i) -> bool:
+	return out_of_bounds_owns_sides() and not data.map_bounds.has_point(cell) and cell.y < data.map_bounds.end.y
 
 
 func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure_only: bool = false) -> bool:
@@ -111,6 +127,13 @@ func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure
 		geometry_plan = EnvironmentGeometryPlan.build(data, original, options, structure_only)
 		var checked := EnvironmentGeometryPlan.repair(geometry_plan, data, original)
 		geometry_plan = checked.plan
+		# Decorative boundary filler outside the map would stand above the lowered
+		# plateau terrain; drop it on the terrain-owned sides. Required structure
+		# (walls, foundations, supports) always lies inside the map.
+		var kept: Array = []
+		for element in geometry_plan.elements:
+			if not is_terrain_owned_cell(data, element.cell): kept.append(element)
+		geometry_plan.elements = kept
 		if cave_fill_active:
 			CaveTerrainBackdrop.refine_boundaries(data, geometry_plan.elements, floor_visual_seed, cave_ground_height_variation_enabled)
 		geometry_diagnostics.active = true
@@ -324,6 +347,8 @@ func create_terrain_fill(preserve_terrain: bool = false) -> void:
 	layout = UpperTerrainVisuals.prepare(dungeon_data, layout, mode, upper_filler_max_distance, terrace_band_width, terrace_irregular_edges, terrace_protected_clearance, pitch)
 	terrain_metrics = layout.metrics
 	terrain_fill_cells = layout.cells
+	for cell in terrain_fill_cells.keys():
+		if is_terrain_owned_cell(dungeon_data, cell): terrain_fill_cells.erase(cell)
 	var ground_rules: Dictionary = CaveTerrainBackdrop.ground_rules(dungeon_data, {}) if cave_fill_active else {}
 	var wall_top := TerrainFillVisuals.wall_top_offset(FLOOR_THICKNESS / 2.0)
 	for tile: Vector2i in terrain_fill_cells:
