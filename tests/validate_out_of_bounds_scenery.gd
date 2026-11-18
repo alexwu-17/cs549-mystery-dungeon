@@ -1,7 +1,8 @@
 extends SceneTree
 ## Owns: decorative out-of-bounds ridge placement (never over the logical map,
 ## inside the apron bounds, deterministic, batched), fog shade lift, toggles
-## and fixture exemptions. Appearance needs a normal-render check by the user.
+## and fixture exemptions, plus tree/bush vegetation on the ridges. Appearance
+## needs a normal-render check by the user.
 const Snapshots = preload("res://tests/validate_terraces.gd")
 const CameraScript = preload("res://scripts/core/presentation_camera.gd")
 func _initialize() -> void: call_deferred("validate")
@@ -9,7 +10,59 @@ func _initialize() -> void: call_deferred("validate")
 func transforms(scenery: OutOfBoundsScenery) -> Array:
 	var result: Array = []
 	for placement in scenery.placements: result.append([placement.block, placement.model, placement.transform, placement.far])
+	for item in scenery.vegetation: result.append([item.kind, item.block, item.transform, item.color])
 	return result
+
+
+func check_vegetation(scenery: OutOfBoundsScenery, renderer: DungeonRenderer, data: DungeonData) -> void:
+	assert(scenery.diagnostics.trees > 0 and scenery.diagnostics.bushes > 0)
+	assert(scenery.vegetation.size() == scenery.diagnostics.trees + scenery.diagnostics.bushes)
+	var ridge_blocks: Dictionary = {}
+	for placement in scenery.placements: ridge_blocks[placement.block] = placement
+	var map_rect := Rect2(Vector2(data.map_bounds.position) - Vector2.ONE * 0.5, Vector2(data.map_bounds.size))
+	var instances := 0
+	var blossoms := 0
+	for batch in scenery.vegetation_batches:
+		assert(batch.multimesh.use_colors and batch.material_override == null)
+		assert(batch.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF)
+		assert(batch.get_meta("geometry_purpose") == "out_of_bounds_vegetation")
+		instances += batch.multimesh.instance_count
+	assert(instances == scenery.vegetation.size())
+	for item in scenery.vegetation:
+		var mesh: Mesh = OutOfBoundsScenery.TREE if item.kind == "tree" else OutOfBoundsScenery.BUSH
+		# Only on ridge blocks (never over or south of the map); bushes only on the near band.
+		assert(ridge_blocks.has(item.block) and ridge_blocks[item.block].far == item.far)
+		if item.kind == "bush": assert(not item.far)
+		var block: Rect2i = item.block
+		var point: Vector3 = item.point
+		assert(point.x > block.position.x - 0.5 and point.x < block.end.x - 0.5 and point.z > block.position.y - 0.5 and point.z < block.end.y - 0.5)
+		# The surface point lies on the ridge above its ground top, and the whole canopy clears the map.
+		assert(point.y > float(item.ground))
+		var flat := Vector2(point.x, point.z)
+		var gap := Vector2(maxf(maxf(map_rect.position.x - flat.x, flat.x - map_rect.end.x), 0.0), maxf(maxf(map_rect.position.y - flat.y, flat.y - map_rect.end.y), 0.0)).length()
+		assert(gap >= float(item.radius))
+		# Z-up source turns upright, its base center lands just below the surface point, height in range.
+		var transform: Transform3D = item.transform
+		assert((transform.basis * Vector3(0, 0, 1)).normalized().dot(Vector3.UP) > 0.999)
+		assert((transform * OutOfBoundsScenery.vegetation_base(mesh)).is_equal_approx(point - Vector3.UP * OutOfBoundsScenery.SINK))
+		var bounds: AABB = transform * mesh.get_aabb()
+		var target: float = renderer.out_of_bounds_tree_height * (1.0 if item.kind == "tree" else OutOfBoundsScenery.BUSH_HEIGHT_SHARE)
+		assert(is_equal_approx(bounds.size.y, float(item.height)) and item.height >= target * 0.8 - 0.001 and item.height <= target * 1.2 + 0.001)
+		var batch_node: MultiMeshInstance3D = scenery.vegetation_batches[item.batch]
+		assert(item.instance < batch_node.multimesh.instance_count and batch_node.multimesh.mesh == scenery.vegetation_meshes[item.kind])
+		if item.color == OutOfBoundsScenery.BLOSSOM: blossoms += 1
+	assert(blossoms > 0 and blossoms < scenery.diagnostics.trees)
+	# Duplicated meshes carry their own materials; the imported resources stay untouched.
+	var tree_mesh: ArrayMesh = scenery.vegetation_meshes["tree"]
+	assert(tree_mesh != OutOfBoundsScenery.TREE and tree_mesh.get_surface_count() == 2)
+	var instance_colored := 0
+	for surface in range(2):
+		var surface_material := tree_mesh.surface_get_material(surface) as ShaderMaterial
+		assert(surface_material != null and scenery.vegetation_materials.has(surface_material))
+		if surface_material.get_shader_parameter("use_instance_color"): instance_colored += 1
+	assert(instance_colored == 1) # Canopy takes instance colors; trunk keeps its base color.
+	assert(scenery.vegetation_meshes["bush"].get_surface_count() == 1)
+	assert(OutOfBoundsScenery.TREE.surface_get_material(0) is StandardMaterial3D and OutOfBoundsScenery.BUSH.surface_get_material(0) is StandardMaterial3D)
 
 func validate() -> void:
 	root.size = Vector2i(1920, 1080)
@@ -32,9 +85,10 @@ func validate() -> void:
 			var children := renderer.get_child_count()
 			var scenery := renderer.out_of_bounds_scenery
 			assert(scenery != null and scenery.get_parent() == renderer and scenery.get_child_count() == scenery.diagnostics.mesh_nodes)
-			assert(scenery.diagnostics.near > 0 and scenery.diagnostics.far > 0 and scenery.diagnostics.mesh_nodes == scenery.batches.size())
+			assert(scenery.diagnostics.near > 0 and scenery.diagnostics.far > 0 and scenery.diagnostics.mesh_nodes == scenery.batches.size() + scenery.vegetation_batches.size())
 			# Spatially chunked batches so off-screen ridges cull; bounded node count.
 			assert(scenery.batches.size() > 3 and scenery.batches.size() <= 120)
+			assert(scenery.vegetation_batches.size() > 2 and scenery.vegetation_batches.size() <= 80)
 			var full_far: int = scenery.diagnostics.far
 			assert(before == Snapshots.snapshot(data) and rng_state == TestDungeonFactory.rng.state)
 			var apron := renderer.cave_background.scenery_apron
@@ -69,6 +123,7 @@ func validate() -> void:
 				var source: AABB = OutOfBoundsScenery.MODELS[placement.model].get_aabb()
 				assert(is_equal_approx(bounds.size.y, source.size.y * (block.size.x / maxf(source.size.x, source.size.z)) * renderer.out_of_bounds_height_scale))
 			assert(models_used.size() == 3)
+			check_vegetation(scenery, renderer, data)
 			# Far blocks sit flush against the detailed border on the north and side edges.
 			var flush := 0
 			for placement in scenery.placements:
@@ -106,10 +161,36 @@ func validate() -> void:
 			dim.a = 1.0
 			assert(scenery.current_shade() == dim)
 			assert(scenery.material.get_shader_parameter("fog_shade") == Vector3(dim.r, dim.g, dim.b))
+			for vegetation_material in scenery.vegetation_materials:
+				assert(vegetation_material.get_shader_parameter("fog_shade") == Vector3(dim.r, dim.g, dim.b))
 			renderer.apply_fog(1)
 			var other: Color = renderer.other_elevation_material.albedo_color.lerp(Color.WHITE, renderer.out_of_bounds_shade_lift)
 			other.a = 1.0
 			assert(scenery.current_shade() == other and transforms(scenery) == first)
+			# Vegetation toggles and densities leave the ridges untouched.
+			var ridges: Array = []
+			for placement in scenery.placements: ridges.append(placement.transform)
+			var default_trees: int = scenery.diagnostics.trees
+			renderer.out_of_bounds_vegetation_enabled = false
+			assert(renderer.render_dungeon(data))
+			var bare := renderer.out_of_bounds_scenery
+			assert(bare.vegetation.is_empty() and bare.vegetation_batches.is_empty() and bare.get_child_count() == bare.batches.size())
+			for index in range(bare.placements.size()): assert(bare.placements[index].transform == ridges[index])
+			renderer.out_of_bounds_vegetation_enabled = true
+			renderer.out_of_bounds_tree_density = 0.0
+			renderer.out_of_bounds_bush_density = 0.0
+			assert(renderer.render_dungeon(data) and renderer.out_of_bounds_scenery.vegetation.is_empty())
+			renderer.out_of_bounds_tree_density = 1.0
+			renderer.out_of_bounds_blossom_ratio = 0.0
+			assert(renderer.render_dungeon(data))
+			var dense := renderer.out_of_bounds_scenery
+			assert(dense.diagnostics.trees > default_trees and dense.diagnostics.bushes == 0)
+			for item in dense.vegetation: assert(item.color != OutOfBoundsScenery.BLOSSOM)
+			renderer.out_of_bounds_tree_density = 0.3
+			renderer.out_of_bounds_bush_density = 0.45
+			renderer.out_of_bounds_blossom_ratio = 0.3
+			assert(renderer.render_dungeon(data) and transforms(renderer.out_of_bounds_scenery) == first)
+			scenery = renderer.out_of_bounds_scenery
 			# Toggles: disabled scenery or no border leaves nothing behind; re-enabling restores it.
 			renderer.out_of_bounds_scenery_enabled = false
 			assert(renderer.render_dungeon(data) and renderer.out_of_bounds_scenery == null)
@@ -125,5 +206,5 @@ func validate() -> void:
 		assert(renderer.render_dungeon(data, true) and renderer.out_of_bounds_scenery == null)
 	renderer.free()
 	camera.free()
-	print("PASS: out-of-bounds ridges stay off the logical map inside the apron, three batched models, deterministic hashed placement, height/ground anchoring, shade lift, toggles and fixture exemptions")
+	print("PASS: out-of-bounds ridges stay off the logical map inside the apron, three batched models, deterministic hashed placement, height/ground anchoring, shade lift, toggles and fixture exemptions; trees/bushes on ridge surfaces clear of the map, upright, sized, colored, shaded and toggleable")
 	quit()

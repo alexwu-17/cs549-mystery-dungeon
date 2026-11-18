@@ -41,7 +41,7 @@ appearance, shadows, transparency, GPU readback or frame rates.
 | Boss/defeat | `validate_boss`, `validate_drapion_swing`, `validate_enemy_defeat` |
 | Floors, modes, reset or input locks | `validate_battle_state`, `validate_modes`, `validate_floor_introduction`, full regression for shared lifecycle changes |
 | Character animation | `validate_attack_leap`, `validate_character_sprites`, `validate_pokemon_sprites`, relevant ramp tests and normal-render inspection |
-| Out-of-bounds ridge scenery, lighting presets or HD-2D post-processing | `validate_out_of_bounds_scenery`, `validate_lighting_presets`, `validate_cave_scenery`, `validate_sunlight_atmosphere`; normal-render inspection by the user |
+| Out-of-bounds ridge scenery and vegetation, lighting presets or HD-2D post-processing | `validate_out_of_bounds_scenery`, `validate_lighting_presets`, `validate_cave_scenery`, `validate_sunlight_atmosphere`; normal-render inspection by the user |
 | Terrain, generation, atmosphere or rendering | Relevant subsystem checks; full regression when shared data/rendering contracts change |
 
 ## Consolidated combat coverage
