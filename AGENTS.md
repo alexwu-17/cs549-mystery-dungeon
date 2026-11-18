@@ -6,12 +6,6 @@ This targets Godot **4.4.1** (Checkpoint 4 was tested on **4.7.2**, not yet veri
 
 Prioritize working, testable, maintainable changes. Pokémon gameplay is planned in the Week 10 sprint below; distinguish planned behavior from implemented systems. Do not add unrelated systems or runtime AI services.
 
-## Out-of-bounds trees and bushes (2026-11-18)
-
-- Groupmate Tinkercad models are imported byte-identical at `assets/environment/out_of_bounds/vegetation/{tree/tree.obj,bush/bush.obj}` (each with its own `obj.mtl`). They are Z-up millimetres without normals/UVs; Godot generates normals. `OutOfBoundsScenery.z_up_basis()` turns them upright at placement; never edit the source files to fix orientation. The tree MTL has `d 0` (invisible imported materials), so per-floor duplicated meshes get their own `shaders/out_of_bounds_vegetation.gdshader` materials; the imported resources stay untouched.
-- Placement is purely decorative and hash-driven: one tree per ridge block at `out_of_bounds_tree_density`0.3 (both bands), bushes at `out_of_bounds_bush_density`0.45 plus a second at 40% of that (near band only). Items sit on the lower half of each ridge's cached top-surface points (`surface_points()`, 4x4 interior grid), sink `SINK`0.08, and are skipped unless the whole canopy radius clears the map rectangle. Height `out_of_bounds_tree_height`2.6 world units +/-20%, bushes 30% of that, random yaw (non-directional assets). Canopies use per-instance colors (three spring greens, `out_of_bounds_blossom_ratio`0.3 pink); the trunk surface (lowest surface by height) keeps brown. Same fog shade lift as the ridges, shadow casting off, chunked MultiMesh per 16 cells and kind. Toggle `out_of_bounds_vegetation_enabled`.
-- Standard layout: 78 trees, 115 bushes, about 610k triangles (tree 6,172, bush 1,118 each) on top of the ridges' 490k, 22 extra nodes, no measurable floor-build cost. Lower tree density first if frame time suffers. Owner check `validate_out_of_bounds_scenery`.
-
 ## Spring HD-2D background (2026-11-13)
 
 - User accepted the elemental projectile iteration after manual play; no balance/placeholder changes were requested. This iteration starts the Octopath-style background: groupmate ridge models plus a screen-space post-processing preset. Bridge models from the same archive are not imported yet.

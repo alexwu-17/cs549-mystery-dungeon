@@ -65,16 +65,6 @@ var terrain_fill_cells: Dictionary = {}
 @export var out_of_bounds_foreground_clear: bool = true
 ## Far ridges reach at most this many cells beyond the detailed border, whatever the apron size.
 @export_range(0, 48, 1) var out_of_bounds_far_extent: int = 16
-## Groupmate tree and bush models placed on the ridges (not south of the map).
-@export var out_of_bounds_vegetation_enabled: bool = true
-## Chance that a ridge block carries one tree.
-@export_range(0.0, 1.0, 0.05) var out_of_bounds_tree_density: float = 0.3
-## Chance of a bush per near-band ridge block; a second bush appears at 40% of this rate.
-@export_range(0.0, 1.0, 0.05) var out_of_bounds_bush_density: float = 0.45
-## Average tree height in world units (one tile is 1.0); bushes are 30% of it. Varies +/-20%.
-@export_range(0.5, 6.0, 0.1) var out_of_bounds_tree_height: float = 2.6
-## Share of trees with pink blossom canopies instead of green.
-@export_range(0.0, 1.0, 0.05) var out_of_bounds_blossom_ratio: float = 0.3
 @export_group("")
 var cave_background: CaveTerrainBackdrop
 var out_of_bounds_scenery: OutOfBoundsScenery
