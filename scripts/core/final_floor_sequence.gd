@@ -116,6 +116,7 @@ func on_player_moved() -> void:
 			state.remaining_pp[slot] = state.moves[slot].maximum_pp if state.moves[slot] != null else 0
 		state.moves_changed.emit()
 		main.dialogue.append_event(&"fully_restored")
+		main.dialogue.end_round()
 		_play_recovery_bloom()
 	if main.player.grid_position == ENTRANCE_TILE:
 		_seal_arena()

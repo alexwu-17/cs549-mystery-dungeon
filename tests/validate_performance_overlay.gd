@@ -40,6 +40,11 @@ func validate() -> void:
 		assert(overlay.get_index() < main.floor_introduction.get_index())
 		assert(overlay.get_index() < main.hud.get_node("Screen/GameOver").get_index())
 		assert(overlay.offset_top > main.hud.get_node("Screen/MinimapPanel").offset_bottom)
+		var minimap_panel: Control = main.hud.get_node("Screen/MinimapPanel")
+		var original_bottom := minimap_panel.offset_bottom
+		minimap_panel.offset_bottom += 20.0
+		assert(is_equal_approx(overlay.offset_top, minimap_panel.position.y + minimap_panel.size.y + 12.0))
+		minimap_panel.offset_bottom = original_bottom
 		assert(overlay.statistics.text.begins_with("FPS: %d\n" % Engine.get_frames_per_second()))
 		overlay.previous_usec = 0
 		overlay.elapsed_usec = 0

@@ -26,6 +26,7 @@ func validate() -> void:
 			break
 	assert(current_scene != null and current_scene.scene_file_path == "res://scenes/ui/demo_start.tscn")
 	var launched = current_scene
+	launched.show_selection()
 	assert(launched.choosing and launched.gameplay == null)
 	assert(launched.choices.size() == 3 and launched.SPECIES.size() == 3)
 	launched.start_starter(3)
@@ -45,6 +46,7 @@ func validate() -> void:
 		if index == 2:
 			entry.menu_music = null
 		root.add_child(entry)
+		entry.show_selection()
 		assert(entry.choosing and entry.gameplay == null)
 		await process_frame
 		var cards = entry.menu.get_child(0).get_child(1)
@@ -85,7 +87,7 @@ func validate() -> void:
 			assert(entry.get_node("MenuMusic").playing)
 		else:
 			assert(not entry.get_node("MenuMusic").playing)
-		# Launch goes directly to selection; no Start screen or function-key binding.
+		# Confirm the chosen starter from the selection screen.
 		if index == 0:
 			await capture("selection")
 		entry.choices[index].grab_focus()
@@ -184,11 +186,10 @@ func validate() -> void:
 		restart.physical_keycode = KEY_R
 		restart.pressed = true
 		main._unhandled_input(restart)
-		Helper.complete_introduction(main)
-		assert(not main.game_over and player.health.current == species.maximum_hp)
-		assert(visual.profile == entry.PROFILES[index])
+		await process_frame
+		assert(entry.choosing and entry.gameplay == null)
 		entry.start_starter((index + 1) % 3)
-		assert(entry.gameplay == main)
+		assert(entry.gameplay != null and entry.gameplay.player.species_data == entry.SPECIES[(index + 1) % 3])
 		entry.free()
 		await process_frame
 	print("PASS: direct startup selection, three starter buttons, native cardinal frames/timing, species/HUD/names, floor persistence and restart cancellation")

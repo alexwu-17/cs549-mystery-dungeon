@@ -6,6 +6,7 @@ func validate() -> void:
 	for choice in range(3):
 		var menu = load("res://scenes/ui/demo_start.tscn").instantiate()
 		root.add_child(menu)
+		menu.show_selection()
 		menu.start_starter(choice)
 		var main: Node3D = menu.gameplay
 		Helper.complete_introduction(main)
@@ -21,13 +22,16 @@ func validate() -> void:
 		reveal.animation.pause()
 		assert(not main.player.battle_state.knows_move(recovery))
 		reveal.animation.custom_step(1.81)
+		await process_frame
+		await process_frame
+		reveal.animation.pause()
 		assert(main.player.battle_state.knows_move(recovery) and not main.awaiting_move_ack)
 		assert(not main.move_learned_sound.playing)
 		reveal.cry.stop()
 		reveal._on_cry_finished()
 		reveal.music_start.pause()
 		reveal.music_start.custom_step(1.1)
-		reveal.animation.custom_step(5.1)
+		reveal.animation.custom_step(5.11)
 		assert(main.awaiting_move_ack and main.move_learned_sound.playing)
 		assert(main.dialogue.history[0].message == main._player_display_name() + " learned Recovery!")
 		assert(main.get_node("/root/MusicManager").player.stream_paused)

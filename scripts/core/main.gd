@@ -17,6 +17,13 @@ var pending_scratch_impacts: Dictionary = {}
 @onready var floor_introduction: FloorIntroduction = $HUD/Screen/FloorIntroduction
 
 @export var use_elevation_test: bool = false
+@export var tutorial_mode: bool = false
+## Optional tutorial-specific music; null uses the existing dungeon track.
+@export var tutorial_music: AudioStream
+signal tutorial_finished
+signal starter_selection_requested
+var starter_selection_pending := false
+var tutorial_controller: Node
 @export var game_mode: GameModeConfig.Mode = GameModeConfig.Mode.INFINITE
 @export var generation_config: DungeonGenerationConfig
 @export var benchmark_enabled: bool = false
@@ -116,6 +123,9 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	if not awaiting_move_ack: return
+	if event.is_action_pressed("restart") and not event.is_echo() and _request_starter_selection():
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
 		acknowledge_move()
 	get_viewport().set_input_as_handled()
@@ -130,12 +140,31 @@ func acknowledge_move() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("restart"):
-		start_new_run()
+	if event.is_action_pressed("restart") and not event.is_echo():
+		if not _request_starter_selection():
+			start_new_run()
 		get_viewport().set_input_as_handled()
+
+func _request_starter_selection() -> bool:
+	if tutorial_mode or game_mode != GameModeConfig.Mode.DEMO or not starter_selection_requested.has_connections():
+		return false
+	if not starter_selection_pending:
+		starter_selection_pending = true
+		player.transition_locked = true
+		player.gameplay_enabled = false
+		cancel_introduction()
+		cancel_round()
+		starter_selection_requested.emit.call_deferred()
+	return true
 
 
 func start_new_run() -> void:
+	if is_instance_valid(tutorial_controller):
+		tutorial_controller.free()
+		tutorial_controller = null
+	var old_tutorial_dialogue := hud.get_node_or_null("Screen/TutorialDialogue")
+	if old_tutorial_dialogue != null:
+		old_tutorial_dialogue.free()
 	if is_instance_valid(stairs_prompt): stairs_prompt.free()
 	stairs_prompt = null
 	if awaiting_move_ack: acknowledge_move()
@@ -145,6 +174,8 @@ func start_new_run() -> void:
 		benchmark.prepare()
 	MusicManager.claim(self)
 	MusicManager.play_dungeon(self, true)
+	if tutorial_mode and tutorial_music != null:
+		MusicManager.play_custom(self, tutorial_music)
 	player.transition_locked = true
 	floor_introduction.cover_immediately()
 	cancel_round()
@@ -205,7 +236,9 @@ func load_test_floor() -> void:
 	final_approach_music_triggered = false
 	player.acceleration_enabled = not GameModeConfig.is_final_floor(game_mode, floor_number)
 	player.gameplay_enabled = false
-	if use_elevation_test:
+	if tutorial_mode:
+		dungeon = preload("res://scripts/dungeon/tutorial_floor_factory.gd").create_floor()
+	elif use_elevation_test:
 		dungeon = TestDungeonFactory.create_elevation_test_dungeon()
 	elif benchmark != null:
 		dungeon = benchmark.create_floor()
@@ -268,6 +301,8 @@ func _teach_floor_move() -> void:
 func _on_stairs_reached() -> void:
 	if player.transition_locked or game_over or victory or loading_floor or not GameModeConfig.can_advance(game_mode, floor_number):
 		return
+	if tutorial_mode and (not is_instance_valid(tutorial_controller) or not tutorial_controller.can_use_stairs()):
+		return
 	if GameModeConfig.is_arena(game_mode, floor_number) and dungeon.get_tile(dungeon.stairs_position) != DungeonData.TileType.STAIRS:
 		return
 	if benchmark != null:
@@ -284,7 +319,10 @@ func _on_stairs_reached() -> void:
 		stairs_prompt = null
 		if token != transition_generation or game_over or victory or loading_floor: return
 		if proceed:
-			_begin_floor_introduction(true)
+			if tutorial_mode:
+				tutorial_controller.finish_tutorial()
+			else:
+				_begin_floor_introduction(true)
 		else:
 			player.transition_locked = false
 	)
@@ -301,7 +339,10 @@ func spawn_test_enemies() -> void:
 	enemies.clear()
 
 	for spawn_position: Vector2i in dungeon.enemy_spawns:
-		_spawn_regular_enemy(spawn_position)
+		var enemy := _spawn_regular_enemy(spawn_position, preload("res://scenes/enemies/psyduck.tscn") if tutorial_mode else null)
+		if tutorial_mode:
+			enemy.movement_bounds = dungeon.rooms[1]
+			enemy.attack_policy = null
 	if game_mode == GameModeConfig.Mode.DEMO and floor_number == GameModeConfig.DRAPION_FLOOR and not use_elevation_test:
 		boss = BOSS_SCENE.instantiate()
 		entities.add_child(boss)
@@ -315,7 +356,7 @@ func spawn_test_enemies() -> void:
 
 func _spawn_regular_enemy(tile: Vector2i, scene_override: PackedScene = null) -> Skeleton:
 	var scene: PackedScene = scene_override if scene_override != null else TEST_ENEMY_SCENE
-	if scene_override == null and enemy_spawn_table != null and not use_elevation_test and not benchmark_enabled and benchmark == null:
+	if scene_override == null and enemy_spawn_table != null and not tutorial_mode and not use_elevation_test and not benchmark_enabled and benchmark == null:
 		var player_types := player.species_data.types if player.species_data != null else PackedStringArray()
 		var species_id: String = enemy_spawn_table.choose(floor_number, player_types, enemy_spawn_rng)
 		if species_id != "stunky":
@@ -376,6 +417,8 @@ func is_enemy_occupied(tile: Vector2i) -> bool:
 
 
 func _on_player_moved() -> void:
+	if is_instance_valid(tutorial_controller) and tutorial_controller.on_player_moved():
+		return
 	if GameModeConfig.is_final_floor(game_mode, floor_number) and not final_approach_music_triggered and FinalFloorFactory.is_music_row(player.grid_position):
 		final_approach_music_triggered = true
 		if final_approach_track != null:
@@ -599,6 +642,8 @@ func _on_player_attack(target: Vector2i, move: PokemonMoveData = null) -> void:
 
 func _damage_enemy_from_player(enemy: Skeleton, move: PokemonMoveData) -> bool:
 	var damage := _player_attack_damage(enemy.battle_state, move)
+	if is_instance_valid(tutorial_controller):
+		damage = tutorial_controller.enemy_damage(damage, enemy)
 	var target: Vector2i = enemy.grid_position
 	print("PLAYER ATTACK at ", target, ": ", damage)
 	dialogue.append_event(&"damage" if move != null else &"attack", {"actor": _player_display_name(), "target": enemy.character_visual.get_display_name(), "amount": damage})
@@ -617,6 +662,8 @@ func _damage_enemy_from_player(enemy: Skeleton, move: PokemonMoveData) -> bool:
 		if healed > 0:
 			dialogue.append_event(&"heal", {"amount": healed})
 		print("HEALED ", healed, ": PLAYER HP ", player.health.current, "/", player.health.maximum)
+		if is_instance_valid(tutorial_controller):
+			tutorial_controller.on_enemy_defeated()
 		if is_instance_valid(final_floor_sequence) and is_instance_valid(final_floor_sequence.spiritomb_reveal) and final_floor_sequence.spiritomb_reveal.spiritomb == enemy:
 			_finish_spiritomb_battle(enemy)
 			return true
@@ -666,6 +713,8 @@ func _on_boss_defeated() -> void:
 	MusicManager.stop_music(self)
 	cancel_introduction()
 	cancel_round(true) # Let the finishing player attack complete beneath the faint effect.
+	dialogue.append_event(&"defeat", {"target": _boss_display_name()})
+	dialogue.end_round()
 	player.gameplay_enabled = false
 	var defeated_boss: Minotaur = boss
 	var token := round_generation
@@ -757,6 +806,10 @@ func run_enemy_turn(peaceful: bool = false) -> void:
 			order.append(enemy)
 	if is_instance_valid(boss) and boss.health.current > 0:
 		order.append(boss)
+	# One terrain search per round; actor occupancy changes after each action.
+	var flow_distances: Dictionary = {}
+	if not enemies.is_empty():
+		flow_distances = preload("res://scripts/enemies/enemy_flow_map.gd").build(dungeon, player.grid_position)
 	# Fisher-Yates uses independent randomness, not the generator's global RNG.
 	for index in range(order.size() - 1, 0, -1):
 		var other := turn_rng.randi_range(0, index)
@@ -779,7 +832,8 @@ func run_enemy_turn(peaceful: bool = false) -> void:
 			break
 		if actor is Skeleton:
 			var previous: Vector2i = actor.grid_position
-			actor.take_turn(player.grid_position, enemy_occupancy, func(tile: Vector2i): return tile == player.grid_position or is_enemy_occupied(tile))
+			if not is_instance_valid(tutorial_controller) or tutorial_controller.enemy_can_act():
+				actor.take_turn(player.grid_position, enemy_occupancy, func(tile: Vector2i): return tile == player.grid_position or is_enemy_occupied(tile), flow_distances)
 			if token != round_generation:
 				return
 			enemy_occupancy.erase(previous)
@@ -962,6 +1016,12 @@ func _begin_floor_introduction(advancing: bool) -> void:
 		floor_number += 1
 	load_test_floor()
 	if token != transition_generation or loading_floor:
+		return
+	if tutorial_mode:
+		floor_introduction.hide()
+		tutorial_controller = preload("res://scripts/core/tutorial_controller.gd").new()
+		add_child(tutorial_controller)
+		tutorial_controller.start(self)
 		return
 	var hold_override := final_floor_text_hold_duration if GameModeConfig.is_arena(game_mode, floor_number) and not use_elevation_test else -1.0
 	await floor_introduction.reveal(dungeon_name, floor_number, str(floor_subtitles.get(floor_number, "")), hold_override)

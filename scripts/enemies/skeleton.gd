@@ -34,6 +34,8 @@ var damage_tween: Tween
 var grid_position: Vector2i
 var dungeon_data: DungeonData
 var dungeon_renderer: DungeonRenderer
+## Empty means unrestricted; optional authored encounter boundary.
+var movement_bounds: Rect2i = Rect2i()
 
 
 func _ready() -> void:
@@ -55,7 +57,7 @@ func setup(start: Vector2i, data: DungeonData, renderer: DungeonRenderer) -> voi
 	position = dungeon_renderer.get_entity_world_position(grid_position)
 
 
-func take_turn(player_position: Vector2i, occupied: Dictionary, projectile_occupied: Callable = Callable()) -> void:
+func take_turn(player_position: Vector2i, occupied: Dictionary, projectile_occupied: Callable = Callable(), flow_distances: Dictionary = {}) -> void:
 	if health.current == 0:
 		return
 	var difference := player_position - grid_position
@@ -86,8 +88,8 @@ func take_turn(player_position: Vector2i, occupied: Dictionary, projectile_occup
 		attack_leap.play(facing)
 		attack_requested.emit(attack_damage)
 		return
-	var next := next_step_toward(player_position, occupied)
-	if next == grid_position or next == player_position or occupied.has(next):
+	var next := flow_step_toward(player_position, occupied, flow_distances) if not flow_distances.is_empty() else next_step_toward(player_position, occupied)
+	if next == grid_position or next == player_position or occupied.has(next) or (movement_bounds.has_area() and not movement_bounds.has_point(next)):
 		return
 	print("SKELETON MOVE: ", grid_position, " -> ", next)
 	attack_leap.finish()
@@ -176,6 +178,32 @@ func next_step_toward(goal: Vector2i, occupied: Dictionary) -> Vector2i:
 	while step != grid_position and previous[step] != grid_position:
 		step = previous[step]
 	return step
+
+
+func flow_step_toward(goal: Vector2i, occupied: Dictionary, distances: Dictionary) -> Vector2i:
+	if not distances.has(grid_position):
+		return grid_position
+	var current := grid_position
+	var first_step := grid_position
+	# Verify the whole preferred shortest route, not just its first tile. A
+	# blocker farther ahead can otherwise pull an enemy out of its BFS detour.
+	while current != goal:
+		var next := current
+		for direction: Vector2i in DIRECTIONS:
+			var candidate := current + direction
+			if distances.has(candidate) and int(distances[candidate]) == int(distances[current]) - 1 and dungeon_data.can_traverse(current, candidate):
+				next = candidate
+				break
+		if next == current:
+			return next_step_toward(goal, occupied)
+		if occupied.has(next):
+			return next_step_toward(goal, occupied)
+		if first_step == grid_position:
+			first_step = next
+			if movement_bounds.has_area() and not movement_bounds.has_point(first_step):
+				return next_step_toward(goal, occupied)
+		current = next
+	return first_step
 
 
 func complete_action() -> void:

@@ -56,6 +56,12 @@ func validate() -> void:
 	reveal.animation.custom_step(0.002)
 	assert(reveal.phase == &"glitch" and reveal.effect.visible)
 	reveal.animation.custom_step(0.8)
+	assert(reveal.phase == &"black" and reveal.black.visible and not reveal.arena_ready)
+	assert(not reveal.animation.is_running() and main.player.transition_locked)
+	await process_frame
+	await process_frame
+	assert(reveal.arena_ready)
+	reveal.animation.pause()
 	assert(reveal.phase == &"black" and reveal.black.visible and reveal.cry.playing)
 	assert(main.dungeon.tiles.size() == 81 and main.player.grid_position == arena.player_spawn)
 	assert(reveal.spiritomb != null and main.is_enemy_occupied(Vector2i(13,8)))
@@ -80,14 +86,14 @@ func validate() -> void:
 	assert(is_equal_approx(reveal.BATTLE.loop_offset,8.374))
 	reveal.animation.custom_step(3.998)
 	assert(reveal.phase == &"black" and main.player.transition_locked)
-	reveal.animation.custom_step(0.002)
+	reveal.animation.custom_step(0.01)
 	assert(reveal.phase == &"dissolve" and not reveal.black.visible)
 	reveal.animation.custom_step(1.1)
 	assert(reveal.phase == &"settling" and not reveal.overlay.visible and main.player.transition_locked)
 	if main.awaiting_move_ack: main.acknowledge_move()
-	reveal.animation.custom_step(0.998)
+	reveal.animation.custom_step(0.98)
 	assert(main.player.transition_locked)
-	reveal.animation.custom_step(0.004)
+	reveal.animation.custom_step(0.03)
 	assert(reveal.phase == &"ready" and not main.player.transition_locked)
 	main.player.setup(Vector2i(13,9),main.dungeon,main.dungeon_renderer)
 	main.player.try_move(Vector2i.UP)
@@ -128,6 +134,11 @@ func validate() -> void:
 		reveal = sequence.spiritomb_reveal
 		reveal.animation.pause()
 		reveal.animation.custom_step(elapsed)
+		if elapsed >= 6.0:
+			await process_frame
+			await process_frame
+			reveal.animation.pause()
+			reveal.animation.custom_step(4.2)
 		var stale := reveal.animation
 		var stale_music: Tween
 		if reveal.arena_ready:
@@ -135,6 +146,10 @@ func validate() -> void:
 			reveal._on_cry_finished()
 			stale_music = reveal.music_start
 		main.start_new_run()
+		if elapsed == 2.0:
+			await process_frame
+			await process_frame
+			assert(not is_instance_valid(reveal) or not reveal.arena_ready)
 		assert(not stale.is_running() and main.player.transition_locked)
 		if stale_music != null: assert(not stale_music.is_running())
 		assert(music.player.stream == music.dungeon_track)

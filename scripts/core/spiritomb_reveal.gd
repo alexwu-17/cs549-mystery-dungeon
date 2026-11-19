@@ -88,6 +88,13 @@ func _begin_black() -> void:
 	phase = &"black"
 	black.show()
 	effect.hide()
+	# Let the black overlay reach the screen before the synchronous arena rebuild.
+	# Otherwise that work blocks the frame which would complete the wipe.
+	animation.pause()
+	await get_tree().process_frame
+	if not _current(): return
+	await get_tree().process_frame
+	if not _current(): return
 	main._clear_retiring_enemies()
 	main.dungeon = FinalFloorFactory.create_spiritomb_arena()
 	if not main.dungeon_renderer.render_dungeon(main.dungeon, true):
@@ -105,6 +112,7 @@ func _begin_black() -> void:
 	arena_ready = true
 	main.refresh_fog()
 	cry.play()
+	animation.play()
 
 func _on_cry_finished() -> void:
 	if not _current() or not arena_ready or music_start != null: return

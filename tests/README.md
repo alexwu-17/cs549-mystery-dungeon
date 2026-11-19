@@ -48,6 +48,10 @@ appearance, shadows, transparency, GPU readback or frame rates.
 | Floor repopulation, hidden pursuit and spawn safety | `validate_repopulation`, `validate_sequential_rounds`, `validate_visibility_refresh` |
 | Floor/player-type weighted enemy selection, initial spawns and respawns | `validate_enemy_spawn_rates`, `validate_repopulation` |
 | J waiting, visibility interruption and peaceful healing | `validate_recovery`, `validate_sequential_rounds`, `validate_held_movement` |
+| Shared enemy flow map, occupied-route fallback, ramps and topology changes | `validate_enemy_flow_map`, `validate_sequential_rounds` |
+| Pursuit comparison for one through five enemies | `compare_enemy_pathfinding.gd`; methodology and sample results in [pathfinding comparison](../docs/pathfinding_comparison.md) |
+| Paired pursuit timing on standardized maps | `benchmark_enemy_pathfinding.gd`; methodology and results in [pathfinding comparison](../docs/pathfinding_comparison.md) |
+| Paired pursuit timing on a seeded generated floor | `benchmark_generated_pathfinding.gd`; seed and results in [pathfinding comparison](../docs/pathfinding_comparison.md) |
 | Held movement | `validate_held_movement` |
 | Attack rendering priority, rounded3x3 occlusion, fog and doorway diagonals | `validate_visibility_refresh`, `validate_presentation`, `validate_fog`, `validate_continuous_terrain`; normal-render corridor/doorway/attack captures (headless skips the visual light overlay) |
 | Type-effectiveness dialogue after player/enemy/boss move damage | `validate_effectiveness_dialogue` |

@@ -9,8 +9,20 @@ var refresh_count: int = 0
 var average_interval_ms: float = 0.0
 
 func _ready() -> void:
+	var minimap := get_node_or_null("../MinimapPanel") as Control
+	if minimap != null:
+		minimap.item_rect_changed.connect(_position_below_minimap)
+		_position_below_minimap()
 	previous_usec = Time.get_ticks_usec()
 	refresh_statistics()
+
+func _position_below_minimap() -> void:
+	var minimap := get_node_or_null("../MinimapPanel") as Control
+	if minimap == null:
+		return
+	var height := offset_bottom - offset_top
+	offset_top = minimap.position.y + minimap.size.y + 12.0
+	offset_bottom = offset_top + height
 
 func _process(_delta: float) -> void:
 	sample_frame(Time.get_ticks_usec())
