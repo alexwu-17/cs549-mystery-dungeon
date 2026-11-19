@@ -1,0 +1,505 @@
+{
+ "frames": [
+  {
+   "filename": "electro_ball_shock 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 1",
+   "frame": {
+    "x": 108,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 2",
+   "frame": {
+    "x": 216,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 3",
+   "frame": {
+    "x": 324,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 4",
+   "frame": {
+    "x": 0,
+    "y": 92,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 5",
+   "frame": {
+    "x": 108,
+    "y": 92,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 6",
+   "frame": {
+    "x": 216,
+    "y": 92,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 7",
+   "frame": {
+    "x": 324,
+    "y": 92,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 8",
+   "frame": {
+    "x": 0,
+    "y": 184,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 9",
+   "frame": {
+    "x": 108,
+    "y": 184,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 10",
+   "frame": {
+    "x": 216,
+    "y": 184,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball_shock 11",
+   "frame": {
+    "x": 324,
+    "y": 184,
+    "w": 108,
+    "h": 92
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 92
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 92
+   },
+   "duration": 33
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "electro_ball_shock.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 432,
+   "h": 276
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "electro_ball_shock",
+    "from": 0,
+    "to": 11,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "electro_ball_shock",
+   "name": "Electrified",
+   "fps": 30,
+   "loop": true,
+   "frames": 12,
+   "frameSize": [
+    108,
+    92
+   ],
+   "pivot": [
+    54,
+    76
+   ],
+   "columns": 4,
+   "act": {
+    "windup": 0,
+    "recovery": 0,
+    "onBody": true,
+    "targets": [],
+    "hits": [],
+    "poses": [
+     {
+      "t": 0,
+      "how": "smooth",
+      "pose": {
+       "turn": 0.9,
+       "crouch": 3,
+       "fx": -8,
+       "fy": -17,
+       "bx": 9,
+       "by": -17,
+       "ffx": -3,
+       "fbx": 4
+      }
+     },
+     {
+      "t": 0.1,
+      "how": "snap",
+      "pose": {
+       "turn": 1.1,
+       "crouch": 0,
+       "y": -1,
+       "fx": -13,
+       "fy": -36,
+       "bx": 13,
+       "by": -17,
+       "ffx": -4,
+       "fbx": 5
+      }
+     },
+     {
+      "t": 0.17,
+      "how": "snap",
+      "pose": {
+       "turn": 0.7,
+       "crouch": 1,
+       "y": -1,
+       "fx": -13,
+       "fy": -16,
+       "bx": 13,
+       "by": -36,
+       "ffx": -4,
+       "fbx": 5
+      }
+     },
+     {
+      "t": 0.3,
+      "how": "snap",
+      "pose": {
+       "turn": 0.9,
+       "crouch": 3,
+       "fx": -8,
+       "fy": -17,
+       "bx": 9,
+       "by": -17,
+       "ffx": -3,
+       "fbx": 4
+      }
+     },
+     {
+      "t": 0.733,
+      "how": "smooth",
+      "pose": {
+       "turn": 0.9,
+       "crouch": 3,
+       "fx": -8,
+       "fy": -17,
+       "bx": 9,
+       "by": -17,
+       "ffx": -3,
+       "fbx": 4
+      }
+     },
+     {
+      "t": 0.733,
+      "how": "snap",
+      "pose": {
+       "turn": 0.7,
+       "crouch": 1,
+       "y": -1,
+       "fx": -13,
+       "fy": -16,
+       "bx": 13,
+       "by": -36,
+       "ffx": -4,
+       "fbx": 5
+      }
+     },
+     {
+      "t": 0.8,
+      "how": "snap",
+      "pose": {
+       "turn": 1.1,
+       "crouch": 0,
+       "y": -1,
+       "fx": -13,
+       "fy": -36,
+       "bx": 13,
+       "by": -17,
+       "ffx": -4,
+       "fbx": 5
+      }
+     },
+     {
+      "t": 0.93,
+      "how": "snap",
+      "pose": {
+       "turn": 0.9,
+       "crouch": 3,
+       "fx": -8,
+       "fy": -17,
+       "bx": 9,
+       "by": -17,
+       "ffx": -3,
+       "fbx": 4
+      }
+     },
+     {
+      "t": 1.367,
+      "how": "smooth",
+      "pose": {
+       "turn": 0.9,
+       "crouch": 3,
+       "fx": -8,
+       "fy": -17,
+       "bx": 9,
+       "by": -17,
+       "ffx": -3,
+       "fbx": 4
+      }
+     },
+     {
+      "t": 1.367,
+      "how": "snap",
+      "pose": {
+       "turn": 1.1,
+       "crouch": 0,
+       "y": -1,
+       "fx": -13,
+       "fy": -36,
+       "bx": 13,
+       "by": -17,
+       "ffx": -4,
+       "fbx": 5
+      }
+     },
+     {
+      "t": 1.45,
+      "how": "snap",
+      "pose": {
+       "turn": 0.7,
+       "crouch": 1,
+       "y": -1,
+       "fx": -13,
+       "fy": -16,
+       "bx": 13,
+       "by": -36,
+       "ffx": -4,
+       "fbx": 5
+      }
+     },
+     {
+      "t": 1.58,
+      "how": "snap",
+      "pose": {
+       "turn": 0.9,
+       "crouch": 3,
+       "fx": -8,
+       "fy": -17,
+       "bx": 9,
+       "by": -17,
+       "ffx": -3,
+       "fbx": 4
+      }
+     },
+     {
+      "t": 2,
+      "how": "smooth",
+      "pose": {
+       "turn": 0.9,
+       "crouch": 3,
+       "fx": -8,
+       "fy": -17,
+       "bx": 9,
+       "by": -17,
+       "ffx": -3,
+       "fbx": 4
+      }
+     }
+    ]
+   },
+   "runtimePivot": [
+    54,
+    61
+   ],
+   "revision": "5294518ce7c72e48b6100a744596e0acf57f2826"
+  }
+ }
+}

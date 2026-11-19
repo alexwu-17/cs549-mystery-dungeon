@@ -75,7 +75,7 @@ func play(from: Vector3, to: Vector3, move_type: String, speed: float = 1.0, rel
 	sprite.render_priority = 5
 	sprite.texture = _texture_for(move_type)
 	add_child(sprite)
-	if move_id == &"shadow_ball":
+	if move_id in [&"shadow_ball", &"electro_ball"]:
 		_configure_spiritomb(to - from, move_id)
 	elif move_id == &"bullet_seed":
 		_configure_bullet_seed(to - from)
@@ -85,6 +85,7 @@ func play(from: Vector3, to: Vector3, move_type: String, speed: float = 1.0, rel
 		_configure_sheet(to - from, move_id)
 	var tiles := maxf(1.0, from.distance_to(to) / DungeonData.TILE_SIZE)
 	var travel_time := tiles * SECONDS_PER_TILE
+	if move_id == &"electro_ball": travel_time *= 0.5
 	spirit_travel_duration = travel_time
 	animation = create_tween()
 	animation.set_speed_scale(maxf(0.01, speed))
@@ -121,7 +122,7 @@ func _configure_spiritomb(direction: Vector3, move_id: StringName) -> void:
 	var size: Vector2 = info.size
 	var pivot: Vector2 = info.pivot
 	sprite.offset = Vector2(size.x / 2.0 - pivot.x, pivot.y - size.y / 2.0)
-	sprite.pixel_size = 0.0126
+	sprite.pixel_size = 0.022 if move_id == &"electro_ball" else 0.0126
 	sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	sheet_material = ShaderMaterial.new()
 	sheet_material.shader = SHEET_SHADER
@@ -129,13 +130,14 @@ func _configure_spiritomb(direction: Vector3, move_id: StringName) -> void:
 	sheet_material.set_shader_parameter("sheet_texture",sprite.texture)
 	sheet_material.set_shader_parameter("atlas_grid",Vector2(info.columns,info.rows))
 	sheet_material.set_shader_parameter("last_frame",float(spirit_frames-1))
-	sheet_material.set_shader_parameter("camera_facing", true)
+	sheet_material.set_shader_parameter("camera_facing", move_id != &"electro_ball")
 	sheet_material.set_shader_parameter("stable_atlas", true)
 	# Keep one immutable quad; the shader changes frames without Sprite3D mesh
 	# rebuilds. Cover the camera-facing plane rather than its old vertical AABB.
 	sprite.extra_cull_margin = 2.0
 	sprite.ignore_occlusion_culling = true
 	sprite.material_override = sheet_material
+	if move_id == &"electro_ball": _orient_to_lane(direction)
 	_set_sheet_time(0.0)
 
 func _configure_bullet_seed(direction: Vector3) -> void:

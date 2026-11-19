@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=6 format=3 uid="uid://cg2go2xdsloun"]
+
+[ext_resource type="Script" uid="uid://cxlqm507earwp" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+[ext_resource type="Resource" path="res://config/moves/electro_ball.tres" id="ball"]
+[ext_resource type="Resource" uid="uid://j2v0k1gyo01y" path="res://config/moves/growl.tres" id="growl"]
+[ext_resource type="Script" uid="uid://clf585ioq8m6l" path="res://scripts/combat/pokemon_move_data.gd" id="move_script"]
+[ext_resource type="Resource" uid="uid://baxpcmjxgyxx1" path="res://config/moves/tackle.tres" id="tackle"]
+
+[resource]
+script = ExtResource("1")
+species_id = &"pikachu"
+display_name = "Pikachu"
+types = PackedStringArray("Electric")
+starting_moves = Array[ExtResource("move_script")]([ExtResource("tackle"), ExtResource("growl"), ExtResource("ball")])
+level = 10
+maximum_hp = 98
+attack = 21
+special_attack = 21
+defense = 23
+special_defense = 18

@@ -1,0 +1,18 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/enemies/test_enemy.tscn" id="base"]
+[ext_resource type="Resource" path="res://config/species/bidoof.tres" id="species"]
+[ext_resource type="Resource" path="res://config/pokemon_bidoof.tres" id="visual"]
+[ext_resource type="Script" path="res://scripts/combat/enemy_attack_policy.gd" id="policy"]
+
+[sub_resource type="Resource" id="TacklePolicy"]
+script = ExtResource("policy")
+move_probability = 1.0
+
+[node name="Bidoof" instance=ExtResource("base")]
+species_data = ExtResource("species")
+attack_policy = SubResource("TacklePolicy")
+
+[node name="VisualController" parent="." index="1"]
+profile = ExtResource("visual")
+fallback_profile = ExtResource("visual")

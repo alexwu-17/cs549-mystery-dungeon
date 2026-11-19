@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PokemonSpriteProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/effects/pokemon_sprite_profile.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Pikachu"
+directory = "res://assets/sprites/pokemon/Pikachu"
+pixel_size = 0.04
+body_to_ground = 8.0
+animations = {
+"Attack": "Attack",
+"ElectroBall": "Shoot",
+"Growl": "Shoot",
+"Hurt": "Hurt",
+"Idle": "Idle",
+"Walk": "Walk"
+}
+projectile_release_frames = {
+"ElectroBall": 2
+}

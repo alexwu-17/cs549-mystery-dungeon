@@ -1,0 +1,704 @@
+{
+ "frames": [
+  {
+   "filename": "electro_ball 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 1",
+   "frame": {
+    "x": 136,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 2",
+   "frame": {
+    "x": 272,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 3",
+   "frame": {
+    "x": 408,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 4",
+   "frame": {
+    "x": 544,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 5",
+   "frame": {
+    "x": 0,
+    "y": 104,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 6",
+   "frame": {
+    "x": 136,
+    "y": 104,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 7",
+   "frame": {
+    "x": 272,
+    "y": 104,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 8",
+   "frame": {
+    "x": 408,
+    "y": 104,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 9",
+   "frame": {
+    "x": 544,
+    "y": 104,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 10",
+   "frame": {
+    "x": 0,
+    "y": 208,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 11",
+   "frame": {
+    "x": 136,
+    "y": 208,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 12",
+   "frame": {
+    "x": 272,
+    "y": 208,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 13",
+   "frame": {
+    "x": 408,
+    "y": 208,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 14",
+   "frame": {
+    "x": 544,
+    "y": 208,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 15",
+   "frame": {
+    "x": 0,
+    "y": 312,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 16",
+   "frame": {
+    "x": 136,
+    "y": 312,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 17",
+   "frame": {
+    "x": 272,
+    "y": 312,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 18",
+   "frame": {
+    "x": 408,
+    "y": 312,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 19",
+   "frame": {
+    "x": 544,
+    "y": 312,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 20",
+   "frame": {
+    "x": 0,
+    "y": 416,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 21",
+   "frame": {
+    "x": 136,
+    "y": 416,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 22",
+   "frame": {
+    "x": 272,
+    "y": 416,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 23",
+   "frame": {
+    "x": 408,
+    "y": 416,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 24",
+   "frame": {
+    "x": 544,
+    "y": 416,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 25",
+   "frame": {
+    "x": 0,
+    "y": 520,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 26",
+   "frame": {
+    "x": 136,
+    "y": 520,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 27",
+   "frame": {
+    "x": 272,
+    "y": 520,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 28",
+   "frame": {
+    "x": 408,
+    "y": 520,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  },
+  {
+   "filename": "electro_ball 29",
+   "frame": {
+    "x": 544,
+    "y": 520,
+    "w": 136,
+    "h": 104
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 136,
+    "h": 104
+   },
+   "sourceSize": {
+    "w": 136,
+    "h": 104
+   },
+   "duration": 33
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "electro_ball.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 680,
+   "h": 624
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "electro_ball",
+    "from": 0,
+    "to": 29,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "electro_ball",
+   "name": "Ball lightning",
+   "fps": 30,
+   "loop": true,
+   "frames": 30,
+   "frameSize": [
+    136,
+    104
+   ],
+   "pivot": [
+    68,
+    92
+   ],
+   "columns": 5,
+   "runtimePivot": [
+    68,
+    50
+   ],
+   "revision": "5294518ce7c72e48b6100a744596e0acf57f2826"
+  }
+ }
+}

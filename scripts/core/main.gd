@@ -18,8 +18,8 @@ var pending_scratch_impacts: Dictionary = {}
 
 @export var use_elevation_test: bool = false
 @export var tutorial_mode: bool = false
-## Optional tutorial-specific music; null uses the existing dungeon track.
-@export var tutorial_music: AudioStream
+## Tutorial-specific music; null uses the existing dungeon track.
+@export var tutorial_music: AudioStream = preload("res://assets/audio/music/ibuki_tutorial_theme.ogg")
 signal tutorial_finished
 signal starter_selection_requested
 var starter_selection_pending := false
@@ -339,10 +339,9 @@ func spawn_test_enemies() -> void:
 	enemies.clear()
 
 	for spawn_position: Vector2i in dungeon.enemy_spawns:
-		var enemy := _spawn_regular_enemy(spawn_position, preload("res://scenes/enemies/psyduck.tscn") if tutorial_mode else null)
+		var enemy := _spawn_regular_enemy(spawn_position, preload("res://scenes/enemies/bidoof.tscn") if tutorial_mode else null)
 		if tutorial_mode:
 			enemy.movement_bounds = dungeon.rooms[1]
-			enemy.attack_policy = null
 	if game_mode == GameModeConfig.Mode.DEMO and floor_number == GameModeConfig.DRAPION_FLOOR and not use_elevation_test:
 		boss = BOSS_SCENE.instantiate()
 		entities.add_child(boss)
@@ -508,6 +507,8 @@ func _append_effectiveness(move: PokemonMoveData, defender: PokemonBattleState) 
 func _on_player_attack(target: Vector2i, move: PokemonMoveData = null) -> void:
 	if not _can_player_attack():
 		return
+	if is_instance_valid(tutorial_controller):
+		tutorial_controller.on_player_move(move)
 	_reset_recovery()
 	if move != null:
 		dialogue.append_event(&"move_used", {"actor": _player_display_name(), "move": move.display_name})
@@ -687,6 +688,15 @@ func _finish_spiritomb_battle(enemy: Skeleton) -> void:
 
 
 func _on_player_died() -> void:
+	if tutorial_mode:
+		game_over = true
+		player.gameplay_enabled = false
+		player.stop_held_movement()
+		MusicManager.stop_music(self)
+		cancel_introduction()
+		cancel_round()
+		_restart_tutorial_after_defeat.call_deferred(round_generation)
+		return
 	# Finish the player's presentation, but let the lethal skeleton's leap play
 	# beneath the immediate overlay. Floor replacement frees enemy animations.
 	player.stop_held_movement()
@@ -704,6 +714,11 @@ func _on_player_died() -> void:
 	hud.set_game_over(true)
 	player.gameplay_enabled = false
 	print("PLAYER DIED. GAME OVER. Press R to restart.")
+
+
+func _restart_tutorial_after_defeat(token: int) -> void:
+	if tutorial_mode and game_over and token == round_generation:
+		start_new_run()
 
 
 func _on_boss_defeated() -> void:
@@ -975,6 +990,8 @@ func _resolve_enemy_attack(amount: int, actor: Node3D) -> void:
 	_append_effectiveness(move, player.battle_state)
 	if move != null and move.move_id != &"scratch" and move.targeting == PokemonMoveData.Targeting.ADJACENT and amount > 0 and not player.invincible:
 		ProjectileImpactEffect.play_on_actor(player, move.move_id)
+	if is_instance_valid(tutorial_controller) and actor is Skeleton:
+		tutorial_controller.on_enemy_attack(actor, move)
 	player.receive_damage(amount)
 
 

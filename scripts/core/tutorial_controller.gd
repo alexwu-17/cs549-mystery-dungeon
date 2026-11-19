@@ -1,11 +1,13 @@
 extends Node
 
 const TutorialDialogue = preload("res://scripts/ui/tutorial_dialogue.gd")
-const EMBER = preload("res://config/moves/ember.tres")
+const ELECTRO_BALL = preload("res://config/moves/electro_ball.tres")
 
 var main: Node3D
 var stage := &"opening"
 var modal: Control
+var growl_uses: int = 0
+var growl_reminder_pending: bool = false
 
 func _exit_tree() -> void:
 	if is_instance_valid(modal):
@@ -13,10 +15,6 @@ func _exit_tree() -> void:
 
 func start(game: Node3D) -> void:
 	main = game
-	# Install the tutorial-only projectile in O without generating a learning modal.
-	main.player.battle_state.moves.append(EMBER)
-	main.player.battle_state.remaining_pp.append(EMBER.maximum_pp)
-	main.player.battle_state.moves_changed.emit()
 	main.round_finished.connect(_on_round_finished)
 	_show([
 		"Welcome to the Mystery Dungeon Tutorial! Press space/enter to continue reading.",
@@ -32,6 +30,11 @@ func _show(lines: Array[String], next: StringName) -> void:
 	modal.completed.connect(func():
 		modal.queue_free()
 		modal = null
+		if stage == &"projectile" and next == &"combat":
+			# Restore the guided target without heal feedback or a dialogue event.
+			for enemy in main.enemies:
+				enemy.health.current = enemy.health.maximum
+				enemy.health.changed.emit(enemy.health.current, enemy.health.maximum)
 		stage = next
 		if next == &"finished":
 			main.tutorial_finished.emit.call_deferred()
@@ -60,7 +63,15 @@ func on_player_moved() -> bool:
 func enemy_can_act() -> bool:
 	return stage in [&"basic", &"projectile", &"combat"]
 
+func on_enemy_attack(enemy: Skeleton, move: PokemonMoveData) -> void:
+	if move != null and move.move_id == &"tackle":
+		# The scene guarantees the opening Tackle; this actor then uses basics.
+		# A fresh tutorial spawns a new actor with its opening policy restored.
+		enemy.attack_policy = null
+
 func enemy_damage(amount: int, enemy: Node) -> int:
+	if stage == &"projectile":
+		return amount
 	if stage != &"combat":
 		return 0
 	# Ensure the first retaliation can demonstrate healing even on a lethal hit.
@@ -68,12 +79,25 @@ func enemy_damage(amount: int, enemy: Node) -> int:
 		return mini(amount, maxi(0, enemy.health.current - 1))
 	return amount
 
+func on_player_move(move: PokemonMoveData) -> void:
+	if move == null or move.move_id != &"growl": return
+	growl_uses += 1
+	if growl_uses > 5:
+		var state: PokemonBattleState = main.player.battle_state
+		state.remaining_pp[state.moves.find(move)] = 0
+		state.moves_changed.emit()
+		growl_reminder_pending = true
+
 func on_enemy_defeated() -> void:
 	if stage == &"combat":
 		stage = &"defeated"
 
 func _on_round_finished() -> void:
 	match stage:
+		&"combat":
+			if growl_reminder_pending:
+				growl_reminder_pending = false
+				_show(["Use damaging moves to wittle down the enemy's HP!"], &"combat")
 		&"basic":
 			_show([
 				"Basic attacks have no limit to their use. You can use them strategically to consume a turn so the enemy can approach you!",
@@ -129,7 +153,7 @@ func _input(event: InputEvent) -> void:
 				allowed = allowed or event.is_action_pressed("move_up") or event.is_action_pressed("move_down") or event.is_action_pressed("move_left") or event.is_action_pressed("move_right")
 			if event.is_action_pressed("move_slot_3") and main.enemies.size() == 1:
 				var delta: Vector2i = main.enemies[0].grid_position - main.player.grid_position
-				allowed = delta == main.player.facing * (absi(delta.x) + absi(delta.y)) and absi(delta.x) + absi(delta.y) <= EMBER.range_tiles
+				allowed = delta == main.player.facing * (absi(delta.x) + absi(delta.y)) and absi(delta.x) + absi(delta.y) <= ELECTRO_BALL.range_tiles
 		&"healing":
 			allowed = event.is_action_pressed("wait_turn")
 	if not allowed:

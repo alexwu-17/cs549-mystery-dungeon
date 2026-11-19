@@ -12,6 +12,7 @@ const EMBER_BURST: Texture2D = preload("res://assets/effects/pixelfx/ember_body_
 const EMBER_SMOKE: Texture2D = preload("res://assets/effects/pixelfx/ember_smoke.png")
 const SHEET_SHADER: Shader = preload("res://scripts/effects/projectile_impact_sheet.gdshader")
 const TEXTURES := {
+	&"electro_ball": preload("res://assets/effects/pixelfx/electro_ball_hit.png"),
 	&"healing_bloom": preload("res://assets/effects/pixelfx/healing_bloom.png"),
 	&"recovery": preload("res://assets/effects/pixelfx/recovery.png"),
 	&"shadow_ball": preload("res://assets/effects/pixelfx/shadow_ball_hit.png"),
@@ -33,6 +34,9 @@ var grounded_fire: bool = false
 var burst_sprite: Sprite3D
 var burst_material: ShaderMaterial
 var smoke_clouds: Array[Dictionary] = []
+var electric_sprite: Sprite3D
+var electric_material: ShaderMaterial
+var electric_frames: int = 0
 
 
 static func play_on_actor(target: Node3D, move_id: StringName) -> ProjectileImpactEffect:
@@ -109,6 +113,16 @@ func play(target: Node3D, move_id: StringName) -> void:
 		sprite.offset = Vector2(size.x / 2.0 - pivot.x,pivot.y - size.y / 2.0)
 		sprite.pixel_size = 0.009
 		duration = 0.65
+	if move_id == &"electro_ball":
+		var info := SpiritombFx.layout("electro_ball_hit")
+		sprite.hframes = info.columns
+		sprite.vframes = info.rows
+		frame_count = info.frames
+		var size: Vector2 = info.size
+		var pivot: Vector2 = info.pivot
+		sprite.offset = Vector2(size.x * 0.5 - pivot.x, pivot.y - size.y * 0.5)
+		sprite.pixel_size = maxf(body_width, 0.3) / 55.0 * 0.5
+		duration = 0.45
 	if move_id == &"recovery":
 		var info := SpiritombFx.layout("recovery")
 		sprite.hframes = info.columns
@@ -149,6 +163,15 @@ func play(target: Node3D, move_id: StringName) -> void:
 	sprite.material_override = material
 	if grounded_fire:
 		_add_ember_layers(body_center, body_width)
+	if move_id == &"electro_ball":
+		var info := SpiritombFx.layout("electro_ball_shock")
+		electric_frames = info.frames
+		electric_sprite = _layer_sprite(info.texture, info.columns, info.rows, maxf(body_width / 20.0, bounds.size.y * pixel_y / 30.0) * 0.5, 13)
+		var size: Vector2 = info.size
+		var pivot: Vector2 = info.pivot
+		electric_sprite.offset = Vector2(size.x * 0.5 - pivot.x, pivot.y - size.y * 0.5)
+		electric_material = electric_sprite.material_override
+		electric_material.set_shader_parameter("last_frame", float(electric_frames - 1))
 	_sample(0.0)
 	animation = create_tween()
 	animation.tween_method(_sample, 0.0, 1.0, duration)
@@ -204,6 +227,14 @@ func _complete() -> void:
 
 
 func _sample(progress: float) -> void:
+	if electric_sprite != null:
+		# Burst on arrival, then a brief body-sized electric crackle; no status effect.
+		var shock_progress := clampf((progress - 0.35) / 0.65, 0.0, 1.0)
+		electric_sprite.visible = progress >= 0.35
+		var shock_frame := minf(shock_progress * electric_frames, float(electric_frames - 1))
+		electric_sprite.frame = int(shock_frame)
+		electric_material.set_shader_parameter("frame_blend", fposmod(shock_frame, 1.0))
+		electric_material.set_shader_parameter("fade_amount", 1.0 - smoothstep(0.7, 1.0, shock_progress))
 	if bullet_seed:
 		material.set_shader_parameter("progress", progress)
 		return

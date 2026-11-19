@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PokemonSpeciesData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/pokemon_species_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/combat/pokemon_move_data.gd" id="move_script"]
+[ext_resource type="Resource" path="res://config/moves/tackle.tres" id="move"]
+
+[resource]
+script = ExtResource("1")
+species_id = &"bidoof"
+display_name = "Bidoof"
+types = PackedStringArray("Normal")
+starting_moves = Array[ExtResource("move_script")]([ExtResource("move")])
+level = 10
+maximum_hp = 48
+attack = 17
+special_attack = 17
+defense = 17
+special_defense = 17

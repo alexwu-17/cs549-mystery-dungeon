@@ -70,8 +70,8 @@ func show_tutorial() -> void:
 	tutorial = GAMEPLAY.instantiate()
 	tutorial.tutorial_mode = true
 	tutorial.enemy_respawn_enabled = false
-	tutorial.get_node("Player").species_data = SPECIES[0]
-	tutorial.get_node("Player/VisualController").profile = PROFILES[0]
+	tutorial.get_node("Player").species_data = preload("res://config/species/pikachu.tres")
+	tutorial.get_node("Player/VisualController").profile = preload("res://config/pokemon_pikachu.tres")
 	tutorial.tutorial_finished.connect(_finish_tutorial)
 	add_child(tutorial)
 
@@ -111,7 +111,7 @@ func show_selection() -> void:
 		portraits.append(portrait)
 		var species: PokemonSpeciesData = SPECIES[index]
 		var stats := Label.new()
-		stats.text = "Level %d · HP %d\nAtk %d · Sp Atk %d\nDef %d · Sp Def %d" % [species.level, species.maximum_hp, species.attack, species.special_attack, species.defense, species.special_defense]
+		stats.text = "HP %d\nAtk %d · Sp Atk %d\nDef %d · Sp Def %d" % [species.maximum_hp, species.attack, species.special_attack, species.defense, species.special_defense]
 		stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		card.add_child(stats)
 		var select := _button(species.display_name, start_starter.bind(index))

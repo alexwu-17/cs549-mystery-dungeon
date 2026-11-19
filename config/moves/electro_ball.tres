@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PokemonMoveData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/pokemon_move_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+move_id = &"electro_ball"
+display_name = "Electro Ball"
+move_type = "Electric"
+category = 1
+power = 7
+maximum_pp = 20
+range_tiles = 4
+targeting = 1
+animation_action = &"ElectroBall"
+description = "Fires a fast electric ball up to 4 tiles straight ahead, stopping at the first wall or enemy."

@@ -275,3 +275,21 @@ Recovery uses the pinned upstream `src/fx/holy/heal.js`, exported without actor/
 The Recovery adaptation removes Heal's internal `recolor(p, A, ...)` body drawing as well as disabling the stock actor pass, preserving effects around the native Pokémon.
 
 Healing Bloom uses upstream `src/fx/nature/healing-bloom.js` at the pinned revision above, exported via `tools/pixelfx/export_healing_bloom.mjs`. Flower geometry (stem, leaves, bud, petals and central flower heart) is omitted; healing glow/rings/crosses/motes remain. Output: `assets/effects/pixelfx/healing_bloom.png` and `.json`. The upstream effect credits Sprite Fusion's heal by Hugo Duprez (MIT, 2026); accompanying LICENSE/NOTICE apply.
+
+## Tutorial Electro Ball
+
+`tools/pixelfx/export_electro_ball.mjs` exports `electro_ball`,
+`electro_ball_hit` and `electro_ball_shock` PNG/JSON pairs from the same pinned
+revision above. Run from the project root:
+
+```powershell
+node tools/pixelfx/export_electro_ball.mjs <pinned-pixelfx-checkout>
+```
+
+Sources: `lightning/ball-lightning.js` (stationary core, straight rear wake;
+wandering and floor zaps omitted), `lightning/charge-up.js` (release segment
+only, no stock actor silhouette), and `lightning/electrified.js` (short arc/spark
+segment around neutral ellipse endpoints; stock body/outline omitted). Source
+palette and original credits remain. Runtime moves the ball along the grid lane
+and sizes the electric crackle around the native target. Upstream files are
+unchanged; no stock actors are included in the exported sheets.
