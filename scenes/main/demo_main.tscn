@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://wdld06klqson"]
+[gd_scene format=3 uid="uid://wdld06klqson"]
 
 [ext_resource type="PackedScene" uid="uid://b7cqo4g87duu1" path="res://scenes/main/main.tscn" id="1"]
 
-[node name="DemoMain" instance=ExtResource("1")]
+[node name="DemoMain" unique_id=1807869604 instance=ExtResource("1")]
 floor_subtitles = {
 3: "Cavern Depths"
 }
@@ -10,6 +10,10 @@ game_mode = 1
 
 [node name="LightingPresets" parent="." index="3"]
 selected_preset = 3
+
+[node name="DungeonRenderer" parent="." index="4"]
+out_of_bounds_mountain_height = 9.0
+out_of_bounds_rise_distance = 4.0
 
 [node name="Player" parent="." index="5"]
 species_data = null

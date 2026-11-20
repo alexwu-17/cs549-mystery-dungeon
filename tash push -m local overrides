@@ -1,0 +1,41 @@
+[33m249d73d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/spring-hd2d-background[m[33m, [m[1;31morigin/feature/spring-hd2d-background[m[33m)[m Add spring HD-2D background: out-of-bounds ridges and post-processing preset
+[33me652712[m Add elemental projectile moves with Floor 3 unlock
+[33m4bb5ae8[m[33m ([m[1;32mAssignment-5[m[33m)[m Complete Assignment 5 beta build. Fixed occlusion bugs from last time. Still have small occlusion edge cases to fix but common cases work consistently.
+[33mbb069d5[m Added status moves. Refined move info pop up. Attempted fix at occlusion system edge cases. Deleted older legacy assets, including sprites and music, thereby reducing final game file size.
+[33m4531da9[m Added selectable Pokemon menu at start. Added Piplup and Turtwig. Added a basic attack move and status move for all 3 starter Pokemon. Added basic move for Stunky. Added a wait key and in-dungeon healing after removing lifesteal. Added spawn conditions for more enemies.
+[33m92221e4[m cleaned up tests and added support for moves and selectable menu.
+[33m677ab1a[m[33m ([m[1;32mdev-Andrew[m[33m)[m Added framework for Pokemon moves, stats, and new sprites.
+[33m1cd7504[m Updated AGENTS.md to prepare for final assignments.
+[33m605237a[m[33m ([m[1;31morigin/Midterm[m[33m, [m[1;32mMidterm[m[33m)[m Updated music and demo for 5 minute presentation.
+[33mbf62083[m Checkpoint 4. Most systems complete and replaced sprites with Pokemon. Cleared some bugs remaining from checkpoint 3 such as stairs collision.
+[33m4161b79[m Checkpoint 3 completed. Implemented beam lighting and dynamic moving fog to the environemnt.
+[33m2e205cc[m Checkpoint 2. Added lighting, fog, and smoothed out rocky areas.
+[33m60aac1a[m Graphics Checkpoint 1 with major technical issues sorted.
+[33m110abd6[m[33m ([m[1;32mmain[m[33m)[m Updated README for Assignment 3 submission.
+[33m8076a52[m Added basic benchmark to improve limit testing portion of assignment.
+[33m953c946[m Merge branch 'feature/mvp-completion' Because I need to
+[33m33d01a4[m[33m ([m[1;31morigin/feature/mvp-completion[m[33m)[m Performance metrics and playable web demo
+[33mb2c9257[m Demo complete. Added music logic and music, as well as smaller improvements to various aspects of gameplay such as attacking.
+[33m07d4363[m Added sprites, shadows, boss attacks, and various other QOL. Working barebones MVP now.
+[33m25186e3[m Added leap for attack, boss, modes for game testing, limit testing, and demo testing as well as exportability for all, dialogue boxes, and a sequential turn timer instead of the prior player -> enemy free for all.
+[33m65b566a[m Added multiple QOL changes in regards to visibility and fog of war. Also changed how tile generation is done so that more reasonable valid tiles are chosen.
+[33m42acaee[m Fog of War, Battle Systems, Camera, Elevation complete. Need to work on boss fight, sprites, and global lighting.
+[33mad7dbbc[m Implemented pathfinding and turn based occupancy
+[33mb8c4892[m Procedural Generation Works
+[33m1955f2a[m Updated project instructions for MVP completion
+[33m8a5a31b[m[33m ([m[1;31morigin/dev-Andrew[m[33m)[m Making the code closer to the JavaScript version by using an embedded Callable.
+[33m0d2654b[m The corridors are carved, and now the player spawns in the first room that was generated.
+[33m4b8415f[m I think the carving of the corridors is working!
+[33m413fd9a[m Finally a good first render where the rooms are non-overlapping. Now, the next job is to connect the corridors.
+[33m0fff86f[m I think the carve_rooms function is working as expected?
+[33m0a38407[m Finally figured out this relatively simple bug why rectangles would not be detected as overlapping.
+[33m1ec8a21[m added notes to self in folder instead of single file.
+[33m95d129d[m Implemented rooms array, but for some reason the overlaps() function does not act as expected. Investigating this now.
+[33m87be9d6[m Trying to port over the generating of Dungeon logic a little bit at a time.
+[33mb3eb03f[m Making tiny change to ReadME file to ensure Git compatibility.
+[33m8bc8da1[m Updated README with more explanations and correct Godot version (MUST USE THIS VERSION).
+[33md479821[m Added playable 2.5D dungeon baseline foundation
+[33m2f662ec[m Added 3D renderer and dungeon class and attributes
+[33m2f49281[m Added extra folders for bookkeeping
+[33mb32a4d3[m Add standardized project directory structure
+[33maad2d7a[m Initialize Godot project
