@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://bbybi70qynr47"]
 
-[ext_resource type="Script" path="res://scripts/ui/demo_start.gd" id="1"]
-[ext_resource type="AudioStream" path="res://assets/audio/music/character_select_menu.ogg" id="2_music"]
+[ext_resource type="Script" uid="uid://bbxfebqol8a8w" path="res://scripts/ui/demo_start.gd" id="1"]
+[ext_resource type="AudioStream" uid="uid://c5t1xmlucmcfa" path="res://assets/audio/music/character_select_menu.ogg" id="2_music"]
 
-[node name="DemoStart" type="Control"]
+[node name="DemoStart" type="Control" unique_id=839876776]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,10 +13,9 @@ grow_vertical = 2
 script = ExtResource("1")
 menu_music = ExtResource("2_music")
 
-[node name="MenuMusic" type="AudioStreamPlayer" parent="."]
-bus = &"Master"
+[node name="MenuMusic" type="AudioStreamPlayer" parent="." unique_id=1610927402]
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=1718066612]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

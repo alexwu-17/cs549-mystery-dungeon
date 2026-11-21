@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="PokemonSpriteProfile" load_steps=2 format=3 uid="uid://p85qsq1vcpe0"]
+[gd_resource type="Resource" script_class="PokemonSpriteProfile" format=3 uid="uid://p85qsq1vcpe0"]
 
 [ext_resource type="Script" uid="uid://bju87ccdulvfo" path="res://scripts/effects/pokemon_sprite_profile.gd" id="1"]
 
@@ -6,8 +6,6 @@
 script = ExtResource("1")
 display_name = "Chimchar"
 directory = "res://assets/sprites/pokemon/Chimchar"
-pixel_size = 0.04
-body_to_ground = 8.0
 animations = {
 "Attack": "Attack",
 "Charge": "Charge",
@@ -24,11 +22,3 @@ projectile_release_frames = {
 melee_contact_frames = {
 "Scratch": 5
 }
-projectile_offsets = {
-"down": Vector3(0, 0.4, 0.25),
-"left": Vector3(0, 0, 0),
-"right": Vector3(0, 0, 0),
-"up": Vector3(0, 0, 0)
-}
-defeat_minimum_duration = 0.8
-defeat_blink_interval = 0.075

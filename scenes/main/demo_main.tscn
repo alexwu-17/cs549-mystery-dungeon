@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://wdld06klqson"]
+[gd_scene format=3 uid="uid://wdld06klqson"]
 
 [ext_resource type="PackedScene" uid="uid://b7cqo4g87duu1" path="res://scenes/main/main.tscn" id="1"]
 [ext_resource type="AudioStream" uid="uid://cehscmmhssqyt" path="res://assets/audio/music/cynthia_piano.ogg" id="2_piano"]
 
-[node name="DemoMain" instance=ExtResource("1")]
+[node name="DemoMain" unique_id=995718287 instance=ExtResource("1")]
 floor_subtitles = {
 5: "Cavern Depths",
 6: "???"
