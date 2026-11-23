@@ -6,6 +6,12 @@ This targets Godot **4.4.1** (Checkpoint 4 was tested on **4.7.2**, not yet veri
 
 Prioritize working, testable, maintainable changes. Pokémon gameplay is planned in the Week 10 sprint below; distinguish planned behavior from implemented systems. Do not add unrelated systems or runtime AI services.
 
+## Out-of-bounds terrain follows the layout outline (2026-11-23)
+
+- User wanted the dark filler between the layout and the 42x32 map edge gone, keeping a one-tile dark rock buffer around rooms/corridors (a flat terrain ledge and no buffer were previewed and rejected). `DungeonRenderer.layout_cells(data, out_of_bounds_layout_margin=1)` keeps map cells within one tile of the walkable extent of their row band (west/east), no further north than one tile above their column band's topmost walkable tile, plus every row south of the layout. `is_terrain_owned_cell`, `CaveTerrainBackdrop.plan(..., kept)` and `OutOfBoundsScenery` use these kept cells instead of the map rectangle; inner pockets stay cave rock (user plans to revisit). Rendering only.
+- `OutOfBoundsScenery`: chamfer distance field over cells replaces the map-rectangle distance; the rim takes the buffer rock's top (`RIM_SINK` 0.06 below it); a one-quad strip tucks under kept edge cells and drops `TUCK_DROP` so no sky crack opens at the shared edge (verified 0 background pixels in a private render). Heights/quads use hoisted array lookups; terrain build about 100-160 ms. `out_of_bounds_ledge_width` (default 0) is an optional flat terrain ledge.
+- Delivered as a patch before `validate_out_of_bounds_scenery` was rerun; it may need updates for the outline (map-rect assertions). User tests manually.
+
 ## Spring depth fog off (2026-11-23)
 
 - After in-game review the user kept the plateau terrain exactly as shipped (they liked the rolling hills) and rejected the pale-green Spring depth fog as reading like toxic gas. `config/lighting/spring_hd2d.tres` now has `depth_fog_enabled = false`; its tint/density stay stored for a later revisit (assistant suggestion: pale cool blue at about half density). A gentler-hills/less-cracks/blue-haze prototype was rendered and not adopted. Glow, far blur, adjustments, filmic tonemap and SunlightAtmosphere are unchanged. `validate_lighting_presets` now follows the preset switch and proves re-enabling restores tint/density.

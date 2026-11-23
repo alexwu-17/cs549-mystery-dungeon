@@ -78,10 +78,17 @@ var terrain_fill_cells: Dictionary = {}
 @export_range(0.0, 1.0, 0.05) var out_of_bounds_shade_lift: float = 0.45
 ## Terrain shadows define the ridges seen from above.
 @export var out_of_bounds_cast_shadows: bool = true
+## Tiles of cave rock kept beyond the walkable outline before the terrain takes over.
+@export_range(0, 3) var out_of_bounds_layout_margin: int = 1
+## Width in tiles of the flat terrain ledge along the layout before the rim drops.
+@export var out_of_bounds_ledge_width: float = 0.0
 @export_group("")
 var cave_background: CaveTerrainBackdrop
 var out_of_bounds_scenery: OutOfBoundsScenery
 var cave_fill_active: bool = false
+## Map cells the dungeon layout keeps (see layout_cells); the out-of-bounds
+## terrain owns the rest north of the map's southern edge.
+var terrain_kept: Dictionary = {}
 var _occlusion_frame: int = -1
 var _occlusion_context: Array = []
 var _stone_variants: Dictionary = {}
@@ -95,9 +102,51 @@ func out_of_bounds_owns_sides() -> bool:
 	return out_of_bounds_scenery_enabled and cave_scenery_border_width > 0 and cave_fill_active
 
 
-## Cells outside the map, north of its southern edge, belong to the terrain then.
+## Cells the layout does not keep, north of the map's southern edge, belong to the terrain then.
 func is_terrain_owned_cell(data: DungeonData, cell: Vector2i) -> bool:
-	return out_of_bounds_owns_sides() and not data.map_bounds.has_point(cell) and cell.y < data.map_bounds.end.y
+	return out_of_bounds_owns_sides() and cell.y < data.map_bounds.end.y and not kept_cells_for(data).has(cell)
+
+
+## Map cells that stay cave rock: within one tile of the walkable extent of their
+## row band (west/east) and no further north than one tile above the topmost
+## walkable tile of their column band, plus every row south of the layout. Where
+## no walkable tile lies further west, east or north, the cell belongs to the
+## out-of-bounds terrain. Read-only; gameplay data is unchanged.
+static func layout_cells(data: DungeonData, margin: int = 1) -> Dictionary:
+	var row_min: Dictionary = {}
+	var row_max: Dictionary = {}
+	var column_top: Dictionary = {}
+	var bottom := -(1 << 30)
+	for tile: Vector2i in data.tiles:
+		if not data.is_walkable(tile): continue
+		row_min[tile.y] = mini(int(row_min.get(tile.y, tile.x)), tile.x)
+		row_max[tile.y] = maxi(int(row_max.get(tile.y, tile.x)), tile.x)
+		column_top[tile.x] = mini(int(column_top.get(tile.x, tile.y)), tile.y)
+		bottom = maxi(bottom, tile.y)
+	var kept: Dictionary = {}
+	var bounds := data.map_bounds
+	for y in range(bounds.position.y, bounds.end.y):
+		var low := 1 << 30
+		var high := -(1 << 30)
+		for band in range(y - margin, y + margin + 1):
+			if row_min.has(band):
+				low = mini(low, row_min[band])
+				high = maxi(high, row_max[band])
+		for x in range(bounds.position.x, bounds.end.x):
+			if y > bottom + 1 or row_min.is_empty():
+				kept[Vector2i(x, y)] = true
+				continue
+			if x < low - margin or x > high + margin: continue
+			var top := 1 << 30
+			for band in range(x - margin, x + margin + 1):
+				if column_top.has(band): top = mini(top, column_top[band])
+			if y >= top - margin: kept[Vector2i(x, y)] = true
+	return kept
+
+
+func kept_cells_for(data: DungeonData) -> Dictionary:
+	if data == dungeon_data and not terrain_kept.is_empty(): return terrain_kept
+	return layout_cells(data, out_of_bounds_layout_margin)
 
 
 func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure_only: bool = false) -> bool:
@@ -118,6 +167,7 @@ func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure
 	validated_geometry_active = geometry_validation_enabled and terrain_fill_enabled and upper_elevation_open_platforms and upper_terrain_mode != UpperTerrainVisuals.Mode.UNLIMITED and not preserve_terrain and not data.legacy_ramp and data.room_elevations.has(1) and not data.room_elevations.has(-1)
 	var flat_ground := geometry_validation_enabled and terrain_fill_enabled and upper_elevation_open_platforms and upper_terrain_mode != UpperTerrainVisuals.Mode.UNLIMITED and not preserve_terrain and not data.legacy_ramp and not data.room_elevations.has(1) and not data.room_elevations.has(-1)
 	cave_fill_active = cave_fill_enabled and (validated_geometry_active or flat_ground) and data.map_bounds.has_area()
+	terrain_kept = layout_cells(data, out_of_bounds_layout_margin) if out_of_bounds_owns_sides() else {}
 	if validated_geometry_active:
 		var original := TerrainFillVisuals.layout(data, terrain_fill_margin)
 		var options := {"support_height": upper_corridor_support_height, "maximum": upper_filler_max_distance, "width": terrace_band_width,

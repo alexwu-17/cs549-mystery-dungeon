@@ -20,10 +20,12 @@ const SPACING := 0.25
 const CHUNK_SIZE := 16.0
 ## Where the terrain meets the remaining south border rocks it stays this far above them.
 const CLEARANCE := 0.02
-## Vertices deeper than this inside the map only feed edge normals; they skip noise.
-const INTERIOR_MARGIN := 1.0
 ## How much the ridged layer shapes the mountains versus the rolling layer.
 const RIDGE_BLEND := 0.6
+## How far the strip tucked under the edge rock drops below the rim.
+const TUCK_DROP := 1.5
+## The terrain edge sits this far below the edge-rock tops.
+const RIM_SINK := 0.06
 const PEAK_SHARPNESS := 1.4
 
 var material: ShaderMaterial
@@ -32,6 +34,11 @@ var diagnostics := {"vertices": 0, "triangles": 0, "mesh_nodes": 0, "max_height"
 var shade_lift: float = 0.0
 var region: Rect2 # World-space XZ extent of the terrain grid.
 var map_rect: Rect2 # World-space XZ edge of the logical map.
+var kept: Dictionary = {} # Map cells the layout keeps as cave rock; no terrain over them.
+var _distance := PackedFloat32Array() # Per cell: distance from its centre to the nearest kept cell centre.
+var _distance_origin := Vector2i.ZERO
+var _distance_size := Vector2i.ZERO
+var _quad_drawn := PackedByteArray() # Per grid quad: 1 when it is part of the terrain surface.
 var south_cut: float = 0.0 # No terrain beyond this Z (south of the map).
 var ground_level: float = 0.0
 var _shade := Color.WHITE
@@ -59,6 +66,7 @@ func setup(data: DungeonData, backdrop: CaveTerrainBackdrop, renderer: DungeonRe
 		"mountain": maxf(0.0, renderer.out_of_bounds_mountain_height),
 		"rise": maxf(0.1, renderer.out_of_bounds_rise_distance),
 		"south_fade": maxf(0.5, renderer.out_of_bounds_south_fade),
+		"ledge": maxf(0.0, renderer.out_of_bounds_ledge_width),
 	}
 	_configure_noise(renderer, layout_key(data))
 	ground_level = TerrainFillVisuals.wall_top_offset(0.1, 0.5)
@@ -67,26 +75,26 @@ func setup(data: DungeonData, backdrop: CaveTerrainBackdrop, renderer: DungeonRe
 	material.set_shader_parameter("height_high", ground_level + 0.1)
 	shadows = renderer.out_of_bounds_cast_shadows
 	map_rect = Rect2(Vector2(data.map_bounds.position) - Vector2.ONE * 0.5, Vector2(data.map_bounds.size))
+	kept = renderer.kept_cells_for(data)
 	south_cut = map_rect.end.y
 	var extent := float(renderer.out_of_bounds_extent)
 	region = Rect2(map_rect.position - Vector2.ONE * extent, Vector2(map_rect.size.x + 2.0 * extent, south_cut - (map_rect.position.y - extent)))
 	# Only the south border rocks remain; where the terrain fades back to map
 	# level near the southern edge it must sit on or above them. Each cell corner
 	# takes the highest top of its neighboring external cells.
+	# Kept layout rocks also give the rim its height, so the terrain edge meets
+	# the top of the one-tile rock buffer instead of leaving a step open to the sky.
 	for record in backdrop.records:
-		if not record.external: continue
+		if not record.external and not kept.has(record.cell): continue
 		var cell: Vector2i = record.cell
 		for corner in [cell, cell + Vector2i.RIGHT, cell + Vector2i.DOWN, cell + Vector2i.ONE]:
 			_floor_corners[corner] = maxf(float(_floor_corners.get(corner, ground_level)), float(record.top))
+	_build_distance()
 	_columns = roundi(region.size.x / SPACING) + 1
 	_rows = roundi(region.size.y / SPACING) + 1
 	_heights.resize(_columns * _rows)
-	# Deep map-interior vertices only shape edge normals; skip the noise there.
-	var interior := map_rect.grow(-INTERIOR_MARGIN)
-	for row in range(_rows):
-		for column in range(_columns):
-			var point := _grid_point(column, row)
-			_heights[row * _columns + column] = ground_level if interior.has_point(point) else height_at(point.x, point.y)
+	_fill_heights()
+	_mark_quads()
 	_build_chunks()
 	set_meta("geometry_bounds", Rect2i(Vector2i(region.position.ceil()), Vector2i(region.size.floor())))
 
@@ -120,11 +128,58 @@ func _grid_point(column: int, row: int) -> Vector2:
 	return region.position + Vector2(column, row) * SPACING
 
 
-## Distance in world units from a point to the logical map rectangle (0 inside).
+## Two-pass chamfer distance between cell centres over the region (kept cells 0).
+func _build_distance() -> void:
+	_distance_origin = Vector2i(floori(region.position.x), floori(region.position.y)) - Vector2i.ONE
+	_distance_size = Vector2i(ceili(region.size.x), ceili(region.size.y)) + Vector2i.ONE * 3
+	var w := _distance_size.x
+	_distance.resize(w * _distance_size.y)
+	var far := 1e6 if not kept.is_empty() else 0.0
+	for y in range(_distance_size.y):
+		for x in range(w):
+			_distance[y * w + x] = 0.0 if kept.has(_distance_origin + Vector2i(x, y)) else far
+	if kept.is_empty(): return
+	var forward := [[-1, 0, 1.0], [0, -1, 1.0], [-1, -1, 1.41421356], [1, -1, 1.41421356]]
+	for y in range(_distance_size.y):
+		for x in range(w):
+			_relax(x, y, forward)
+	var backward := [[1, 0, 1.0], [0, 1, 1.0], [1, 1, 1.41421356], [-1, 1, 1.41421356]]
+	for y in range(_distance_size.y - 1, -1, -1):
+		for x in range(w - 1, -1, -1):
+			_relax(x, y, backward)
+
+
+func _relax(x: int, y: int, steps: Array) -> void:
+	var w := _distance_size.x
+	var best := _distance[y * w + x]
+	for step in steps:
+		var nx: int = x + step[0]
+		var ny: int = y + step[1]
+		if nx < 0 or ny < 0 or nx >= w or ny >= _distance_size.y: continue
+		best = minf(best, _distance[ny * w + nx] + step[2])
+	_distance[y * w + x] = best
+
+
+func _cell_distance(cell: Vector2i) -> float:
+	var local := (cell - _distance_origin).clamp(Vector2i.ZERO, _distance_size - Vector2i.ONE)
+	return _distance[local.y * _distance_size.x + local.x]
+
+
+## Distance from a world XZ point to the edge of the kept layout cells.
 func map_distance(x: float, z: float) -> float:
-	var dx := maxf(maxf(map_rect.position.x - x, x - map_rect.end.x), 0.0)
-	var dz := maxf(maxf(map_rect.position.y - z, z - map_rect.end.y), 0.0)
-	return Vector2(dx, dz).length()
+	var cx := floori(x)
+	var cz := floori(z)
+	var tx := x - cx
+	var tz := z - cz
+	var a := _cell_distance(Vector2i(cx, cz))
+	var b := _cell_distance(Vector2i(cx + 1, cz))
+	var c := _cell_distance(Vector2i(cx, cz + 1))
+	var d := _cell_distance(Vector2i(cx + 1, cz + 1))
+	return maxf(0.0, lerpf(lerpf(a, b, tx), lerpf(c, d, tx), tz) - 0.5)
+
+
+func is_kept_point(x: float, z: float) -> bool:
+	return kept.has(Vector2i(floori(x + 0.5), floori(z + 0.5)))
 
 
 ## Bilinear floor from cell-corner rock tops; the apron height elsewhere.
@@ -142,6 +197,85 @@ func floor_at(x: float, z: float) -> float:
 	return lerpf(lerpf(a, b, tx), lerpf(c, d, tx), tz)
 
 
+## Local distance-grid index of a cell coordinate, clamped to the grid.
+func _local_x(cell_x: int) -> int:
+	return clampi(cell_x - _distance_origin.x, 0, _distance_size.x - 1)
+
+
+func _local_z(cell_z: int) -> int:
+	return clampi(cell_z - _distance_origin.y, 0, _distance_size.y - 1) * _distance_size.x
+
+
+## Heights for every grid vertex. Same result as height_at() plus the tuck drop,
+## with the per-axis cell lookups hoisted out of the inner loop.
+func _fill_heights() -> void:
+	var ledge := float(_settings.ledge)
+	var tucking := not kept.is_empty()
+	var cx0 := PackedInt32Array(); var cx1 := PackedInt32Array(); var tx := PackedFloat32Array()
+	var ux0 := PackedInt32Array(); var ux1 := PackedInt32Array()
+	for column in range(_columns):
+		var x := region.position.x + column * SPACING
+		var cell := floori(x)
+		cx0.append(_local_x(cell)); cx1.append(_local_x(cell + 1)); tx.append(x - cell)
+		# Cells touching the vertex: one, or two when it lies on a cell edge.
+		var edge := x + 0.5
+		var on_edge := absf(edge - roundf(edge)) < 0.001
+		ux0.append(_local_x(roundi(edge) - 1 if on_edge else floori(edge)))
+		ux1.append(_local_x(roundi(edge) if on_edge else floori(edge)))
+	for row in range(_rows):
+		var z := region.position.y + row * SPACING
+		var cell_z := floori(z)
+		var z0 := _local_z(cell_z)
+		var z1 := _local_z(cell_z + 1)
+		var tz := z - cell_z
+		var edge_z := z + 0.5
+		var on_edge_z := absf(edge_z - roundf(edge_z)) < 0.001
+		var uz0 := _local_z(roundi(edge_z) - 1 if on_edge_z else floori(edge_z))
+		var uz1 := _local_z(roundi(edge_z) if on_edge_z else floori(edge_z))
+		for column in range(_columns):
+			var a := _distance[z0 + cx0[column]]
+			var b := _distance[z0 + cx1[column]]
+			var c := _distance[z1 + cx0[column]]
+			var d := _distance[z1 + cx1[column]]
+			var t := tx[column]
+			var distance := maxf(0.0, lerpf(lerpf(a, b, t), lerpf(c, d, t), tz) - 0.5)
+			var x := region.position.x + column * SPACING
+			var height := _surface(x, z, maxf(0.0, distance - ledge))
+			# Vertices with only kept cells around them sit under the edge rock:
+			# the tucked strip slopes down there so it never shows above the rock.
+			if tucking and _distance[uz0 + ux0[column]] == 0.0 and _distance[uz0 + ux1[column]] == 0.0 and _distance[uz1 + ux0[column]] == 0.0 and _distance[uz1 + ux1[column]] == 0.0:
+				height -= TUCK_DROP
+			_heights[row * _columns + column] = height
+
+
+## Which grid quads the terrain draws: those outside kept cells, plus a strip one
+## quad wide just inside kept cells along a terrain-owned neighbor, tucked under
+## the edge rock so no crack opens along the shared edge.
+func _mark_quads() -> void:
+	var quad_columns := _columns - 1
+	_quad_drawn.resize(quad_columns * (_rows - 1))
+	_quad_drawn.fill(1)
+	if kept.is_empty(): return
+	var own := PackedInt32Array(); var left := PackedInt32Array(); var right := PackedInt32Array(); var fx := PackedFloat32Array()
+	for column in range(quad_columns):
+		var x := region.position.x + (column + 0.5) * SPACING + 0.5
+		var cell := floori(x)
+		own.append(_local_x(cell)); left.append(_local_x(cell - 1)); right.append(_local_x(cell + 1)); fx.append(x - cell)
+	for row in range(_rows - 1):
+		var z := region.position.y + (row + 0.5) * SPACING + 0.5
+		var cell_z := floori(z)
+		var own_z := _local_z(cell_z)
+		var up_z := _local_z(cell_z - 1)
+		var down_z := _local_z(cell_z + 1)
+		var fz := z - cell_z
+		for column in range(quad_columns):
+			if _distance[own_z + own[column]] != 0.0: continue
+			var f := fx[column]
+			var tuck := (f < SPACING and _distance[own_z + left[column]] != 0.0) or (f > 1.0 - SPACING and _distance[own_z + right[column]] != 0.0) \
+				or (fz < SPACING and _distance[up_z + own[column]] != 0.0) or (fz > 1.0 - SPACING and _distance[down_z + own[column]] != 0.0)
+			if not tuck: _quad_drawn[row * quad_columns + column] = 0
+
+
 ## World height of the lowland floor, below the map rim.
 func lowland_level() -> float:
 	return ground_level - float(_settings.depth)
@@ -152,13 +286,25 @@ func lowland_level() -> float:
 ## and small ridged mountains rise from the lowland toward map level. Near the
 ## southern edge everything blends back up to the remaining border ground.
 func height_at(x: float, z: float) -> float:
-	var distance := map_distance(x, z)
+	# A flat ledge at map level runs along the layout before the rim drops.
+	return _surface(x, z, maxf(0.0, map_distance(x, z) - float(_settings.ledge)))
+
+
+func _surface(x: float, z: float, distance: float) -> float:
+	var south := smoothstep(south_cut - _settings.south_fade, south_cut, z)
+	# Over and at the edge of kept cells: the rock buffer's height, no noise needed.
+	# Just under the rock tops, so the terrain edge never shows as a lip above them.
+	if distance <= 0.0:
+		var edge := floor_at(x, z) - RIM_SINK
+		return lerpf(edge, maxf(edge + CLEARANCE, ground_level), south)
 	var rolling := clampf((_rolling.get_noise_2d(x, z) + 1.0) * 0.5, 0.0, 1.0)
 	var ridged := clampf((_ridged.get_noise_2d(x, z) + 1.0) * 0.5, 0.0, 1.0)
 	var shape := pow(lerpf(rolling, ridged, RIDGE_BLEND), PEAK_SHARPNESS)
 	var mountains: float = _settings.mountain * smoothstep(0.0, _settings.rise, distance) * shape
-	var height := lerpf(ground_level, lowland_level() + mountains, smoothstep(0.0, _settings.rim, distance))
-	var south := smoothstep(south_cut - _settings.south_fade, south_cut, z)
+	var drop := smoothstep(0.0, _settings.rim, distance)
+	# The rim height only matters until the drop completes.
+	var rim := floor_at(x, z) - RIM_SINK if drop < 1.0 else 0.0
+	var height := lerpf(rim, lowland_level() + mountains, drop)
 	if south <= 0.0: return height # Floor lookups only matter near the southern edge.
 	return lerpf(height, maxf(floor_at(x, z) + CLEARANCE, ground_level), south)
 
@@ -208,8 +354,7 @@ func _build_chunks() -> void:
 			grid_normals[row * _columns + column] = Vector3(-dx, 1.0, -dz).normalized()
 	var column_ranges := _chunk_ranges(region.position.x, _columns - 1)
 	var row_ranges := _chunk_ranges(region.position.y, _rows - 1)
-	# Quad centres never lie on the map edge (the grid is aligned to it), so this
-	# excludes exactly the quads inside the map.
+	# Quads over kept layout cells are skipped (see _mark_quads).
 	for rows in row_ranges:
 		for columns in column_ranges:
 			# Every grid vertex of the block, row by row; quads inside the map are
@@ -231,10 +376,8 @@ func _build_chunks() -> void:
 			indices.resize((width - 1) * (height - 1) * 6)
 			var count := 0
 			for r in range(height - 1):
-				var center_z := region.position.y + (rows.x + r + 0.5) * SPACING
 				for c in range(width - 1):
-					var center_x := region.position.x + (columns.x + c + 0.5) * SPACING
-					if map_rect.has_point(Vector2(center_x, center_z)): continue
+					if _quad_drawn[(rows.x + r) * (_columns - 1) + columns.x + c] == 0: continue
 					var a := r * width + c
 					# Godot front faces are clockwise seen from the normal side.
 					indices[count] = a

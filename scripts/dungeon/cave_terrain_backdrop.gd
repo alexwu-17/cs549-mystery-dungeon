@@ -78,9 +78,9 @@ static func refine_boundaries(data: DungeonData, elements: Array, visual_seed: i
 		record.bounds.size.y = top - GROUND_BASE
 		record["ground_variation"] = true
 
-## external_from_y: external border cells are kept only at or below this row
-## (the out-of-bounds terrain owns the others). The default keeps all of them.
-static func plan(data: DungeonData, covered: Dictionary, visual_seed: int = 0, blending: bool = true, variation: bool = true, border_width: int = 0, external_from_y: int = -(1 << 30)) -> Dictionary:
+## external_from_y: cells outside `kept` (default: the map) are kept only at or
+## below this row (the out-of-bounds terrain owns the others). The default keeps all of them.
+static func plan(data: DungeonData, covered: Dictionary, visual_seed: int = 0, blending: bool = true, variation: bool = true, border_width: int = 0, external_from_y: int = -(1 << 30), kept: Dictionary = {}) -> Dictionary:
 	var records: Array[Dictionary] = []
 	var visual_bounds := data.map_bounds.grow(maxi(0,border_width))
 	var rules := ground_rules(data, covered, visual_bounds)
@@ -90,7 +90,7 @@ static func plan(data: DungeonData, covered: Dictionary, visual_seed: int = 0, b
 		for x in range(visual_bounds.position.x, visual_bounds.end.x):
 			var tile := Vector2i(x, y)
 			var external := not data.map_bounds.has_point(tile)
-			if external and tile.y < external_from_y: continue
+			if tile.y < external_from_y and not (kept.has(tile) if not kept.is_empty() else not external): continue
 			var walkable := data.is_walkable(tile)
 			var underlay := walkable and (data.get_tile(tile) == DungeonData.TileType.RAMP or (data.get_tile(tile) == DungeonData.TileType.CORRIDOR and data.get_elevation(tile) == 1))
 			if walkable and not underlay: continue
@@ -146,7 +146,7 @@ func batch(mesh: Mesh, material: StandardMaterial3D, count: int) -> MultiMeshIns
 	return result
 
 func setup(data: DungeonData, covered: Dictionary, renderer: DungeonRenderer) -> void:
-	var planned := plan(data, covered, renderer.floor_visual_seed, renderer.cave_ground_blending_enabled, renderer.cave_ground_height_variation_enabled, renderer.cave_scenery_border_width, data.map_bounds.end.y if renderer.out_of_bounds_owns_sides() else -(1 << 30))
+	var planned := plan(data, covered, renderer.floor_visual_seed, renderer.cave_ground_blending_enabled, renderer.cave_ground_height_variation_enabled, renderer.cave_scenery_border_width, data.map_bounds.end.y if renderer.out_of_bounds_owns_sides() else -(1 << 30), renderer.kept_cells_for(data))
 	records = planned.records
 	diagnostics = planned.diagnostics
 	set_meta("geometry_purpose", "bounded_cave_background")
