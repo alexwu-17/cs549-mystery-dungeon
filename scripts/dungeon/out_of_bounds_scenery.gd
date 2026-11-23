@@ -38,6 +38,7 @@ var kept: Dictionary = {} # Map cells the layout keeps as cave rock; no terrain 
 var _distance := PackedFloat32Array() # Per cell: distance from its centre to the nearest kept cell centre.
 var _distance_origin := Vector2i.ZERO
 var _distance_size := Vector2i.ZERO
+var _edge := PackedFloat32Array() # Per grid vertex: 1 at the rock buffer edge, fading to 0.
 var _quad_drawn := PackedByteArray() # Per grid quad: 1 when it is part of the terrain surface.
 var south_cut: float = 0.0 # No terrain beyond this Z (south of the map).
 var ground_level: float = 0.0
@@ -45,6 +46,7 @@ var _shade := Color.WHITE
 var _columns: int = 0
 var _rows: int = 0
 var _heights := PackedFloat32Array()
+var _surface_heights := PackedFloat32Array() # Before the tuck drop; normals use these.
 var _floor_corners: Dictionary = {}
 var _rolling := FastNoiseLite.new()
 var _ridged := FastNoiseLite.new()
@@ -67,7 +69,9 @@ func setup(data: DungeonData, backdrop: CaveTerrainBackdrop, renderer: DungeonRe
 		"rise": maxf(0.1, renderer.out_of_bounds_rise_distance),
 		"south_fade": maxf(0.5, renderer.out_of_bounds_south_fade),
 		"ledge": maxf(0.0, renderer.out_of_bounds_ledge_width),
+		"edge_width": maxf(0.0, renderer.out_of_bounds_edge_shade_width),
 	}
+	material.set_shader_parameter("edge_strength", clampf(renderer.out_of_bounds_edge_shade_strength, 0.0, 1.0))
 	_configure_noise(renderer, layout_key(data))
 	ground_level = TerrainFillVisuals.wall_top_offset(0.1, 0.5)
 	# Valley floors darken toward the lowland; crests lighten toward the map rim.
@@ -93,6 +97,8 @@ func setup(data: DungeonData, backdrop: CaveTerrainBackdrop, renderer: DungeonRe
 	_columns = roundi(region.size.x / SPACING) + 1
 	_rows = roundi(region.size.y / SPACING) + 1
 	_heights.resize(_columns * _rows)
+	_surface_heights.resize(_columns * _rows)
+	_edge.resize(_columns * _rows)
 	_fill_heights()
 	_mark_quads()
 	_build_chunks()
@@ -210,6 +216,7 @@ func _local_z(cell_z: int) -> int:
 ## with the per-axis cell lookups hoisted out of the inner loop.
 func _fill_heights() -> void:
 	var ledge := float(_settings.ledge)
+	var edge_width := float(_settings.edge_width)
 	var tucking := not kept.is_empty()
 	var cx0 := PackedInt32Array(); var cx1 := PackedInt32Array(); var tx := PackedFloat32Array()
 	var ux0 := PackedInt32Array(); var ux1 := PackedInt32Array()
@@ -241,11 +248,13 @@ func _fill_heights() -> void:
 			var distance := maxf(0.0, lerpf(lerpf(a, b, t), lerpf(c, d, t), tz) - 0.5)
 			var x := region.position.x + column * SPACING
 			var height := _surface(x, z, maxf(0.0, distance - ledge))
+			_surface_heights[row * _columns + column] = height
 			# Vertices with only kept cells around them sit under the edge rock:
 			# the tucked strip slopes down there so it never shows above the rock.
 			if tucking and _distance[uz0 + ux0[column]] == 0.0 and _distance[uz0 + ux1[column]] == 0.0 and _distance[uz1 + ux0[column]] == 0.0 and _distance[uz1 + ux1[column]] == 0.0:
 				height -= TUCK_DROP
 			_heights[row * _columns + column] = height
+			_edge[row * _columns + column] = 0.0 if not tucking or edge_width <= 0.0 else 1.0 - smoothstep(0.0, edge_width, distance)
 
 
 ## Which grid quads the terrain draws: those outside kept cells, plus a strip one
@@ -296,7 +305,8 @@ func _surface(x: float, z: float, distance: float) -> float:
 	# Just under the rock tops, so the terrain edge never shows as a lip above them.
 	if distance <= 0.0:
 		var edge := floor_at(x, z) - RIM_SINK
-		return lerpf(edge, maxf(edge + CLEARANCE, ground_level), south)
+		if south <= 0.0: return edge
+		return lerpf(edge, maxf(floor_at(x, z) + CLEARANCE, ground_level), south)
 	var rolling := clampf((_rolling.get_noise_2d(x, z) + 1.0) * 0.5, 0.0, 1.0)
 	var ridged := clampf((_ridged.get_noise_2d(x, z) + 1.0) * 0.5, 0.0, 1.0)
 	var shape := pow(lerpf(rolling, ridged, RIDGE_BLEND), PEAK_SHARPNESS)
@@ -339,7 +349,8 @@ func _chunk_ranges(origin: float, count: int) -> Array[Vector2i]:
 
 
 func _build_chunks() -> void:
-	# Normals once for the whole grid (central differences, clamped at the edges).
+	# Normals once for the whole grid (central differences, clamped at the edges),
+	# from the undropped surface so the tucked strip does not bend edge lighting.
 	var grid_normals := PackedVector3Array()
 	grid_normals.resize(_columns * _rows)
 	for row in range(_rows):
@@ -349,8 +360,8 @@ func _build_chunks() -> void:
 		for column in range(_columns):
 			var left := maxi(column - 1, 0)
 			var right := mini(column + 1, _columns - 1)
-			var dx := (_heights[row * _columns + right] - _heights[row * _columns + left]) / (float(right - left) * SPACING)
-			var dz := (_heights[down + column] - _heights[up + column]) / row_span
+			var dx := (_surface_heights[row * _columns + right] - _surface_heights[row * _columns + left]) / (float(right - left) * SPACING)
+			var dz := (_surface_heights[down + column] - _surface_heights[up + column]) / row_span
 			grid_normals[row * _columns + column] = Vector3(-dx, 1.0, -dz).normalized()
 	var column_ranges := _chunk_ranges(region.position.x, _columns - 1)
 	var row_ranges := _chunk_ranges(region.position.y, _rows - 1)
@@ -363,8 +374,10 @@ func _build_chunks() -> void:
 			var height: int = rows.y - rows.x + 1
 			var vertices := PackedVector3Array()
 			var normals := PackedVector3Array()
+			var colors := PackedColorArray()
 			vertices.resize(width * height)
 			normals.resize(width * height)
+			colors.resize(width * height)
 			for r in range(height):
 				var row: int = rows.x + r
 				var z := region.position.y + row * SPACING
@@ -372,6 +385,7 @@ func _build_chunks() -> void:
 					var column: int = columns.x + c
 					vertices[r * width + c] = Vector3(region.position.x + column * SPACING, _heights[row * _columns + column], z)
 					normals[r * width + c] = grid_normals[row * _columns + column]
+					colors[r * width + c] = Color(_edge[row * _columns + column], 0.0, 0.0, 1.0)
 			var indices := PackedInt32Array()
 			indices.resize((width - 1) * (height - 1) * 6)
 			var count := 0
@@ -390,10 +404,13 @@ func _build_chunks() -> void:
 			if count == 0: continue
 			indices.resize(count)
 			_add_skirts(columns, rows, vertices, normals, indices)
+			# Skirts close the far region edges; no buffer shading there.
+			while colors.size() < vertices.size(): colors.append(Color(0.0, 0.0, 0.0, 1.0))
 			var arrays := []
 			arrays.resize(Mesh.ARRAY_MAX)
 			arrays[Mesh.ARRAY_VERTEX] = vertices
 			arrays[Mesh.ARRAY_NORMAL] = normals
+			arrays[Mesh.ARRAY_COLOR] = colors
 			arrays[Mesh.ARRAY_INDEX] = indices
 			var mesh := ArrayMesh.new()
 			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
@@ -445,6 +462,9 @@ func apply_shade(shade: Color) -> void:
 	_shade = shade.lerp(Color.WHITE, shade_lift)
 	_shade.a = 1.0
 	material.set_shader_parameter("fog_shade", Vector3(_shade.r, _shade.g, _shade.b))
+	# The rock buffer's own albedo (fill color under the unlifted fog shade).
+	var buffer := ModularDungeonVisuals.FILL_COLOR * shade
+	material.set_shader_parameter("edge_shade", Vector3(buffer.r, buffer.g, buffer.b))
 
 
 func current_shade() -> Color:

@@ -25,10 +25,22 @@ func check_ownership(renderer: DungeonRenderer, data: DungeonData) -> void:
 			assert(record.cell.y >= data.map_bounds.end.y)
 			south_records += 1
 	assert(south_records > 0)
+	# Filler stays only on cells the layout keeps (its outline plus a one-tile buffer).
+	var kept := renderer.terrain_kept
+	assert(not kept.is_empty())
 	for element in renderer.geometry_plan.get("elements", []):
-		assert(data.map_bounds.has_point(element.cell) or element.cell.y >= data.map_bounds.end.y)
+		assert(kept.has(element.cell) or element.cell.y >= data.map_bounds.end.y)
 	for cell in renderer.terrain_fill_cells:
-		assert(data.map_bounds.has_point(cell) or cell.y >= data.map_bounds.end.y)
+		assert(kept.has(cell) or cell.y >= data.map_bounds.end.y)
+	for record in renderer.cave_background.records:
+		assert(record.external or kept.has(record.cell))
+	# Every walkable tile and its eight neighbours stay rock or floor, never terrain.
+	for tile in data.tiles:
+		if not data.is_walkable(tile): continue
+		for dy in range(-1, 2):
+			for dx in range(-1, 2):
+				var cell: Vector2i = tile + Vector2i(dx, dy)
+				assert(kept.has(cell) or not data.map_bounds.has_point(cell))
 	var apron := renderer.cave_background.scenery_apron
 	assert(apron.terrain_owned_until == data.map_bounds.end.y - 0.5)
 	assert(apron.mesh.get_faces().size() == 18) # South strip plus two side strips.
@@ -63,12 +75,15 @@ func check_geometry(scenery: OutOfBoundsScenery, renderer: DungeonRenderer) -> v
 			# Godot front faces are clockwise from the normal side: front normal = -(b-a)x(c-a).
 			var front := -(b - a).cross(c - a)
 			var shading := normals[indices[triangle]] + normals[indices[triangle + 1]] + normals[indices[triangle + 2]]
-			assert(front.dot(shading) > 0.0)
 			var centroid := (a + b + c) / 3.0
+			# Triangles of the strip tucked under the edge rock are hidden; their
+			# normals follow the visible surface instead of the hidden drop.
+			assert(front.dot(shading) > 0.0 or scenery.is_kept_point(centroid.x, centroid.z))
 			if absf(front.normalized().y) > 0.2:
-				# Surface triangles face up and never cover the logical map.
+				# Surface triangles face up and stay off kept layout cells, except the
+				# strip tucked under the buffer edge rock.
 				assert(front.y > 0.0 and normals[indices[triangle]].y > 0.0)
-				assert(not scenery.map_rect.grow(-0.0001).has_point(Vector2(centroid.x, centroid.z)))
+				assert(not scenery.is_kept_point(centroid.x, centroid.z) or tucked(scenery, centroid.x, centroid.z))
 	# Plateau profile: rim at map level, lowland below it, mountains staying near map level.
 	var low_sum := 0.0
 	var low_count := 0
@@ -81,7 +96,8 @@ func check_geometry(scenery: OutOfBoundsScenery, renderer: DungeonRenderer) -> v
 		var height: float = tops[key]
 		var south_blend := z > scenery.south_cut - renderer.out_of_bounds_south_fade
 		if distance <= 0.0001 and not south_blend:
-			assert(is_equal_approx(height, scenery.ground_level))
+			# At the buffer edge the terrain sits just under the rock tops.
+			assert(height <= scenery.floor_at(x, z) - OutOfBoundsScenery.RIM_SINK + 0.0001)
 		elif distance > renderer.out_of_bounds_rim_width and not south_blend:
 			assert(height >= lowland - 0.0001 and height <= peak_ceiling)
 			low_sum += height
@@ -94,14 +110,35 @@ func check_geometry(scenery: OutOfBoundsScenery, renderer: DungeonRenderer) -> v
 	assert(scenery.diagnostics.max_height <= maxf(peak_ceiling, scenery.ground_level + OutOfBoundsScenery.CLEARANCE + 1.0))
 
 
+## Within one quad of a kept cell's edge that borders a terrain-owned cell.
+func tucked(scenery: OutOfBoundsScenery, x: float, z: float) -> bool:
+	var cell := Vector2i(floori(x + 0.5), floori(z + 0.5))
+	var fx := x + 0.5 - cell.x
+	var fz := z + 0.5 - cell.y
+	var reach := OutOfBoundsScenery.SPACING + 0.0001
+	return (fx < reach and not scenery.kept.has(cell + Vector2i.LEFT)) or (fx > 1.0 - reach and not scenery.kept.has(cell + Vector2i.RIGHT)) \
+		or (fz < reach and not scenery.kept.has(cell + Vector2i.UP)) or (fz > 1.0 - reach and not scenery.kept.has(cell + Vector2i.DOWN))
+
+
+## Vertices hidden under the edge rock (dropped by TUCK_DROP below the surface).
+func under_rock(scenery: OutOfBoundsScenery, column: int, row: int) -> bool:
+	var point := scenery._grid_point(column, row)
+	return scenery._grid_height(column, row) < scenery.height_at(point.x, point.y) - 0.5
+
+
 func check_smoothness(scenery: OutOfBoundsScenery) -> void:
-	# Steepest step between neighbouring vertices stays below ~80 degrees: no spikes.
+	# Steepest step between neighbouring visible vertices stays below ~80 degrees: no spikes.
 	var steepest := 0.0
+	var dropped := 0
 	for row in range(scenery._rows):
 		for column in range(scenery._columns):
+			if under_rock(scenery, column, row):
+				dropped += 1
+				continue
 			var height := scenery._grid_height(column, row)
-			if column + 1 < scenery._columns: steepest = maxf(steepest, absf(scenery._grid_height(column + 1, row) - height))
-			if row + 1 < scenery._rows: steepest = maxf(steepest, absf(scenery._grid_height(column, row + 1) - height))
+			if column + 1 < scenery._columns and not under_rock(scenery, column + 1, row): steepest = maxf(steepest, absf(scenery._grid_height(column + 1, row) - height))
+			if row + 1 < scenery._rows and not under_rock(scenery, column, row + 1): steepest = maxf(steepest, absf(scenery._grid_height(column, row + 1) - height))
+	assert(dropped > 0)
 	assert(steepest / OutOfBoundsScenery.SPACING <= tan(deg_to_rad(80.0)))
 
 
@@ -111,6 +148,17 @@ func check_textures(scenery: OutOfBoundsScenery) -> void:
 	assert(layers == RockTextureSet.layers and macro == RockTextureSet.macro)
 	assert(layers.get_layers() == RockTextureSet.LAYERS and layers.get_width() == RockTextureSet.SIZE and layers.has_mipmaps())
 	assert(is_equal_approx(scenery.material.get_shader_parameter("height_low"), scenery.lowland_level()))
+	# Buffer edge shading: full at the rock buffer, none far out in the lowland.
+	assert(is_equal_approx(scenery.material.get_shader_parameter("edge_strength"), 0.85))
+	var strongest := 0.0
+	var weakest := 1.0
+	for chunk in scenery.chunks:
+		var colors: PackedColorArray = chunk.mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+		assert(colors.size() == chunk.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX].size())
+		for color in colors:
+			strongest = maxf(strongest, color.r)
+			weakest = minf(weakest, color.r)
+	assert(is_equal_approx(strongest, 1.0) and weakest == 0.0)
 
 
 func validate() -> void:
@@ -173,9 +221,11 @@ func validate() -> void:
 			var flat := renderer.out_of_bounds_scenery
 			for row in range(flat._rows):
 				for column in range(flat._columns):
+					if under_rock(flat, column, row): continue
 					var point := flat._grid_point(column, row)
 					var height := flat._grid_height(column, row)
-					assert(height >= flat.ground_level - 0.0001 and height <= maxf(flat.floor_at(point.x, point.y) + OutOfBoundsScenery.CLEARANCE, flat.ground_level) + 0.0001)
+					var lowest := minf(flat.floor_at(point.x, point.y) - OutOfBoundsScenery.RIM_SINK, flat.ground_level)
+					assert(height >= lowest - 0.0001 and height <= maxf(flat.floor_at(point.x, point.y) + OutOfBoundsScenery.CLEARANCE, flat.ground_level) + 0.0001)
 			renderer.out_of_bounds_lowland_depth = 2.4
 			renderer.out_of_bounds_mountain_height = 2.8
 			renderer.out_of_bounds_cast_shadows = false
@@ -205,5 +255,5 @@ func validate() -> void:
 		assert(renderer.render_dungeon(data, true) and renderer.out_of_bounds_scenery == null and not renderer.out_of_bounds_owns_sides())
 	renderer.free()
 	camera.free()
-	print("PASS: plateau out-of-bounds terrain owns west/north/east (no border ground, north apron or filler there), rim at map level over a lowland of small mountains, crack-free shadowed chunks, smooth slopes, rock texture array, per-floor determinism, shade lift, settings, toggles and fixture exemptions")
+	print("PASS: plateau out-of-bounds terrain owns west/north/east beyond the layout outline and its one-tile rock buffer (no border ground, north apron or filler there), rim under the buffer rock with a tucked edge and buffer shading over a lowland of small mountains, crack-free shadowed chunks, smooth slopes, rock texture array, per-floor determinism, shade lift, settings, toggles and fixture exemptions")
 	quit()

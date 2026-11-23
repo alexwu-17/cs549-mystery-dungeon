@@ -12,6 +12,9 @@ render_mode diffuse_burley;
 uniform sampler2DArray rock_layers : filter_linear_mipmap, repeat_enable;
 uniform sampler2D macro_noise : filter_linear_mipmap, repeat_enable;
 uniform vec3 fog_shade : source_color = vec3(1.0);
+// Albedo of the one-tile rock buffer; terrain near it fades toward this (vertex COLOR.r).
+uniform vec3 edge_shade : source_color = vec3(0.2);
+uniform float edge_strength = 0.85;
 uniform vec3 rock_warm : source_color = vec3(0.50, 0.47, 0.43);
 uniform vec3 rock_cool : source_color = vec3(0.46, 0.47, 0.48);
 uniform vec3 rock_dark : source_color = vec3(0.24, 0.23, 0.22);
@@ -26,10 +29,12 @@ uniform float height_low = -1.9;
 uniform float height_high = 0.6;
 varying vec3 world_position;
 varying vec3 world_normal;
+varying float buffer_edge;
 
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize(MODEL_NORMAL_MATRIX * NORMAL);
+	buffer_edge = COLOR.r;
 }
 
 vec2 hash22(vec2 p) {
@@ -123,7 +128,7 @@ void fragment() {
 	color *= mix(0.68, 1.08, elevation);
 	color = mix(color, dust, (1.0 - steep) * elevation * 0.35 * macro.y);
 	color *= mix(0.9, 1.1, macro_fine.y);
-	ALBEDO = color * fog_shade;
+	ALBEDO = mix(color * fog_shade, edge_shade, buffer_edge * edge_strength);
 	ROUGHNESS = mix(0.82, 0.97, height);
 	SPECULAR = 0.25;
 	NORMAL = normalize((VIEW_MATRIX * vec4(detailed, 0.0)).xyz);

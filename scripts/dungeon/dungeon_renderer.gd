@@ -82,6 +82,11 @@ var terrain_fill_cells: Dictionary = {}
 @export_range(0, 3) var out_of_bounds_layout_margin: int = 1
 ## Width in tiles of the flat terrain ledge along the layout before the rim drops.
 @export var out_of_bounds_ledge_width: float = 0.0
+## Tiles over which the terrain darkens toward the rock buffer's shade, so the
+## buffer fades into the terrain instead of ending at a hard line.
+@export var out_of_bounds_edge_shade_width: float = 1.5
+## How far the terrain at the buffer edge moves toward the buffer's shade (0 = off).
+@export_range(0.0, 1.0) var out_of_bounds_edge_shade_strength: float = 0.85
 @export_group("")
 var cave_background: CaveTerrainBackdrop
 var out_of_bounds_scenery: OutOfBoundsScenery
