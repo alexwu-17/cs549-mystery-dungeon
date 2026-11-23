@@ -29,7 +29,8 @@ func validate() -> void:
 		assert(lighting.selected_preset == (3 if path == "demo_main" else 0))
 		var original_scene = load("res://scenes/main/main.tscn").instantiate()
 		if path == "demo_main":
-			assert(lighting.world.environment.glow_enabled and lighting.world.environment.fog_enabled and lighting.world.camera_attributes is CameraAttributesPractical)
+			# Spring keeps its depth fog switched off for now (user review 2026-11-23).
+			assert(lighting.world.environment.glow_enabled and not lighting.world.environment.fog_enabled and lighting.world.camera_attributes is CameraAttributesPractical)
 			lighting.apply_preset(0)
 		assert(light.transform == original_scene.get_node("DirectionalLight3D").transform)
 		assert(environment_values(lighting.world.environment) == environment_values(original_scene.get_node("WorldEnvironment").environment))
@@ -49,15 +50,18 @@ func validate() -> void:
 			var settings := lighting.world.environment
 			assert(settings.ssao_enabled == (index >= 2))
 			assert(not settings.sdfgi_enabled and not settings.ssil_enabled and not settings.volumetric_fog_enabled and not settings.ssr_enabled)
-			# Only D enables the screen-space HD-2D stack: glow, depth fog, adjustments, filmic, far blur.
-			assert(settings.glow_enabled == (index == 3) and settings.fog_enabled == (index == 3) and settings.adjustment_enabled == (index == 3))
+			# Only D enables the screen-space HD-2D stack: glow, adjustments, filmic, far blur.
+			# Its depth fog follows the preset switch, which is currently off.
+			assert(settings.glow_enabled == (index == 3) and settings.adjustment_enabled == (index == 3))
+			assert(settings.fog_enabled == (index == 3 and lighting.preset_d.depth_fog_enabled))
 			assert(settings.tonemap_mode == (Environment.TONE_MAPPER_FILMIC if index == 3 else Environment.TONE_MAPPER_LINEAR))
 			if index == 3:
 				var attributes := lighting.world.camera_attributes as CameraAttributesPractical
 				assert(attributes != null and attributes.dof_blur_far_enabled and not attributes.dof_blur_near_enabled)
 				# Engine properties store 32-bit floats; exported preset values are doubles.
 				assert(is_equal_approx(attributes.dof_blur_far_distance, lighting.preset_d.far_blur_distance) and is_equal_approx(attributes.dof_blur_amount, lighting.preset_d.far_blur_amount))
-				assert(is_equal_approx(settings.fog_density, lighting.preset_d.fog_density) and is_equal_approx(settings.glow_intensity, lighting.preset_d.glow_intensity))
+				assert(is_equal_approx(settings.glow_intensity, lighting.preset_d.glow_intensity))
+				assert(not lighting.preset_d.depth_fog_enabled or is_equal_approx(settings.fog_density, lighting.preset_d.fog_density))
 			else:
 				assert(lighting.world.camera_attributes == lighting.baseline_camera_attributes)
 			assert(settings.reflected_light_source == lighting.baseline_environment.reflected_light_source)
@@ -66,6 +70,14 @@ func validate() -> void:
 			if index == 0:
 				assert(environment_values(settings) == environment)
 				for property in lighting.baseline_light: assert(light.get(property) == lighting.baseline_light[property])
+		# Re-enabling the Spring fog applies its stored tint and density.
+		var spring: DungeonLightingPreset = lighting.preset_d
+		lighting.preset_d = spring.duplicate()
+		lighting.preset_d.depth_fog_enabled = true
+		lighting.apply_preset(3)
+		assert(lighting.world.environment.fog_enabled and is_equal_approx(lighting.world.environment.fog_density, spring.fog_density))
+		lighting.preset_d = spring
+		lighting.apply_preset(0)
 		var event := InputEventKey.new()
 		event.keycode = KEY_F4
 		event.pressed = true

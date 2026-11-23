@@ -1,5 +1,9 @@
 # Codex project handoff
 
+### Spring depth fog off (2026-11-23)
+
+User ran the plateau build (59-60 FPS at 1920x1080 with shadows and the rock shader) and found the hills too steep and cracked from some edges. A throwaway prototype (scratch worktree, private Xvfb/opengl3 renders) compared the shipped terrain with gentler hills (height 1.9, feature 8, rim 2.5, depth 3.0), weaker cracks/normals and a blue-grey depth haze; a first heavier haze dissolved the hills and was discarded. The user preferred the shipped terrain ("before" frames: hills visible, rolling into each other) and identified the overall green cast as the Spring preset's depth fog, which read as toxic gas. A no-fog render was approved. Change: `depth_fog_enabled = false` in `config/lighting/spring_hd2d.tres` only; tint (0.80, 0.88, 0.76), density 0.008 and aerial perspective 0.6 remain stored. Terrain, shader and other post-processing are untouched. Fog tint is to be revisited later; suggested direction is a pale cool blue at roughly half density.
+
 ### Plateau out-of-bounds terrain and anti-tiling rock (2026-11-18)
 
 Sequence after the cliff commit (`23ce271`, never delivered): the user wanted the ridge tops from a high overview to be visible in gameplay. Analysis showed a downward shift alone fails because the 6-tile flat border ground plus apron cover exactly the window the camera sees, so a plateau design was prototyped in a scratch git worktree with quick hacks and rendered privately (Xvfb, `--rendering-driver opengl3`): p1 still showed out-of-map filler; p2 removed it; p3 added terrain shadows and lower shade lift; p4 compared moss vs grey (user chose grey); p5 added the anti-tiling texture-array shader (user liked its texture); p6 shrank the landscape 2.5x with a 0.25 grid so whole mountains fit the gameplay view (user approved).

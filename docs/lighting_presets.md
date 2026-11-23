@@ -104,7 +104,7 @@ Godot references: [Environment / SSAO](https://docs.godotengine.org/en/4.4/class
 | Ambient | RGB (0.80, 0.90, 0.80), energy 0.38 |
 | SSAO | On, same values as C |
 | Glow | On, intensity 0.35, bloom 0.1, HDR threshold 1.0, soft-light blend |
-| Depth fog | On, exponential, light RGB (0.80, 0.88, 0.76), density 0.008, aerial perspective 0.6, no sky/height fog |
+| Depth fog | Off since 2026-11-23 (the pale green read as toxic gas). Stored for a later revisit: exponential, light RGB (0.80, 0.88, 0.76), density 0.008, aerial perspective 0.6, no sky/height fog |
 | Far blur | `CameraAttributesPractical` on the WorldEnvironment: far distance 19, transition 14, amount 0.06, near blur off |
 | Adjustments | Brightness 1.02, contrast 1.04, saturation 1.12 |
 | Tonemap | Filmic, exposure 1.0 |

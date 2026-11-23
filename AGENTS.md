@@ -6,6 +6,10 @@ This targets Godot **4.4.1** (Checkpoint 4 was tested on **4.7.2**, not yet veri
 
 Prioritize working, testable, maintainable changes. Pokémon gameplay is planned in the Week 10 sprint below; distinguish planned behavior from implemented systems. Do not add unrelated systems or runtime AI services.
 
+## Spring depth fog off (2026-11-23)
+
+- After in-game review the user kept the plateau terrain exactly as shipped (they liked the rolling hills) and rejected the pale-green Spring depth fog as reading like toxic gas. `config/lighting/spring_hd2d.tres` now has `depth_fog_enabled = false`; its tint/density stay stored for a later revisit (assistant suggestion: pale cool blue at about half density). A gentler-hills/less-cracks/blue-haze prototype was rendered and not adopted. Glow, far blur, adjustments, filmic tonemap and SunlightAtmosphere are unchanged. `validate_lighting_presets` now follows the preset switch and proves re-enabling restores tint/density.
+
 ## Plateau out-of-bounds terrain and anti-tiling rock (2026-11-18)
 
 - Supersedes the cliff profile below. Chosen from private prototype renders (scratch worktree, Xvfb + `--rendering-driver opengl3`; no repo capture tests): the user wanted whole ridged mountains visible from the gameplay camera, grey realistic rock and no visible tiling. The map is now a plateau: at the west/north/east edges the ground drops (`out_of_bounds_rim_width`0.6 tiles) to a lowland `out_of_bounds_lowland_depth`2.4 below the map floor, with small ridged mountains (`out_of_bounds_mountain_height`2.8, `out_of_bounds_feature_size`5.6, `out_of_bounds_rise_distance`1.6) whose tops stay near map level. Grid spacing 0.25 (~107k triangles, ~0.5 s per floor build; deep map-interior vertices skip noise). Terrain chunks cast shadows (`out_of_bounds_cast_shadows`). Shade lift 0.45.
