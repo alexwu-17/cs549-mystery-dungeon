@@ -11,9 +11,6 @@ game_mode = 1
 [node name="LightingPresets" parent="." index="3"]
 selected_preset = 3
 
-[node name="DungeonRenderer" parent="." index="4"]
-out_of_bounds_mountain_height = 9.0
-out_of_bounds_rise_distance = 4.0
 
 [node name="Player" parent="." index="5"]
 species_data = null
