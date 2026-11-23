@@ -6,6 +6,8 @@ const FLOOR_WALL: Mesh = preload("res://assets/environment/modular_dungeon/floor
 const CORNER: Mesh = preload("res://assets/environment/modular_dungeon/floor_corner.obj")
 const WALL: Mesh = preload("res://assets/environment/modular_dungeon/wall.obj")
 const RAMP: Mesh = preload("res://assets/environment/modular_dungeon/up_stairs.obj")
+## Wooden bridge tile (deck plus four railing posts and two rails), same 2-unit source grid.
+const BRIDGE: Mesh = preload("res://assets/environment/bridge/bridge.obj")
 const SOURCE_SCALE: float = 0.5
 const FLOOR_TOP: float = 0.217668
 const FLOOR_COLOR: Color = Color("#C5BA9C")
@@ -115,3 +117,28 @@ static func ramp_clearance_height(tile_count: int) -> float:
 			var height := (vertex.y-bounds.position.y)/bounds.size.y
 			_ramp_clearance_fraction = maxf(_ramp_clearance_fraction,height-along)
 	return _ramp_clearance_fraction * DungeonData.ELEVATION_HEIGHT / tile_count
+
+
+## Surface index of the bridge deck: the only part reaching below the deck top.
+static var _bridge_deck := -1
+static func bridge_deck_surface() -> int:
+	if _bridge_deck >= 0: return _bridge_deck
+	var lowest := 0
+	for index in range(BRIDGE.get_surface_count()):
+		if surface_bounds(BRIDGE, index).position.y < surface_bounds(BRIDGE, lowest).position.y: lowest = index
+	_bridge_deck = lowest
+	return lowest
+
+
+## Source-space height of the bridge deck's walking surface.
+static var _bridge_deck_top := NAN
+static func bridge_deck_top() -> float:
+	if is_nan(_bridge_deck_top): _bridge_deck_top = surface_bounds(BRIDGE, bridge_deck_surface()).end.y
+	return _bridge_deck_top
+
+
+static func surface_bounds(mesh: Mesh, index: int) -> AABB:
+	var vertices: PackedVector3Array = mesh.surface_get_arrays(index)[Mesh.ARRAY_VERTEX]
+	var bounds := AABB(vertices[0], Vector3.ZERO)
+	for vertex in vertices: bounds = bounds.expand(vertex)
+	return bounds

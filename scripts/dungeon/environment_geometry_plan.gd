@@ -5,6 +5,7 @@ const FOUNDATION = "room_foundation"
 const WALKWAY = "walkway_support"
 const TERRACE = "terrace"
 const BOUNDARY = "boundary_filler"
+const BRIDGE_RAIL = "bridge_rail"
 
 static func floor_bottom() -> float:
 	return DungeonData.ELEVATION_HEIGHT + 0.1 + (ModularDungeonVisuals.FLOOR.get_aabb().position.y - ModularDungeonVisuals.FLOOR_TOP) * ModularDungeonVisuals.SOURCE_SCALE * DungeonData.TILE_SIZE
@@ -19,7 +20,17 @@ static func box_record(purpose: String, cell: Vector2i, owner: Vector2i, bottom:
 	return {"id": identifier(purpose, cell, layer), "purpose": purpose, "cell": cell, "owner": owner, "layer": layer,
 		"bounds": AABB(Vector3(cell.x - 0.5, bottom, cell.y - 0.5), Vector3(DungeonData.TILE_SIZE, top - bottom, DungeonData.TILE_SIZE))}
 
-static func required(data: DungeonData, support_height: float) -> Array[Dictionary]:
+## Straight elevated corridor tile drawn as a wooden bridge (no stone support
+## below): walkable on both ends of one axis and on neither side of the other.
+static func bridge_tile(data: DungeonData, tile: Vector2i) -> bool:
+	if data.get_tile(tile) != DungeonData.TileType.CORRIDOR or data.get_elevation(tile) != 1 or data.reserved_transitions.has(tile): return false
+	var north := data.is_walkable(tile + Vector2i.UP)
+	var south := data.is_walkable(tile + Vector2i.DOWN)
+	var west := data.is_walkable(tile + Vector2i.LEFT)
+	var east := data.is_walkable(tile + Vector2i.RIGHT)
+	return (north and south and not west and not east) or (west and east and not north and not south)
+
+static func required(data: DungeonData, support_height: float, bridges: bool = false) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var top := floor_bottom()
 	var layer_height := DungeonData.ELEVATION_HEIGHT / 3.0
@@ -30,7 +41,7 @@ static func required(data: DungeonData, support_height: float) -> Array[Dictiona
 			for layer in range(3):
 				var bottom := top - DungeonData.ELEVATION_HEIGHT + layer * layer_height
 				result.append(box_record(FOUNDATION, tile, tile, bottom, bottom + layer_height, layer))
-		elif data.get_tile(tile) == DungeonData.TileType.CORRIDOR and data.get_elevation(tile) == 1:
+		elif data.get_tile(tile) == DungeonData.TileType.CORRIDOR and data.get_elevation(tile) == 1 and not (bridges and bridge_tile(data, tile)):
 			result.append(box_record(WALKWAY, tile, tile, top - walkway_height, top))
 	return result
 
@@ -63,7 +74,7 @@ static func protection(data: DungeonData, clearance: int) -> Dictionary:
 	return protected
 
 static func build(data: DungeonData, original: Dictionary, options: Dictionary, structure_only: bool = false) -> Dictionary:
-	var elements := required(data, options.support_height)
+	var elements := required(data, options.support_height, bool(options.get("bridges", false)))
 	var protected := protection(data, options.clearance)
 	var lower: Array[Vector2i] = []
 	var upper: Dictionary = {}
@@ -128,7 +139,7 @@ static func validate(plan: Dictionary, data: DungeonData) -> Array[Dictionary]:
 	var problems: Array[Dictionary] = []
 	if plan.get("surfaces", []) != base_contract(data): problems.append(issue("invalid_surface_contract", {}))
 	var expected: Dictionary = {}
-	for record in required(data, plan.options.support_height): expected[record.id] = record
+	for record in required(data, plan.options.support_height, bool(plan.options.get("bridges", false))): expected[record.id] = record
 	var seen: Dictionary = {}
 	var terraces: Dictionary = {}
 	var protected := protection(data, plan.options.clearance)
@@ -201,6 +212,12 @@ static func inspect_instances(plan: Dictionary, data: DungeonData, visuals: Arra
 			var wrong_type: bool = not mesh.mesh is BoxMesh and record.purpose != BOUNDARY and not cap_mesh
 			if cap_mesh and (not mesh.mesh is ArrayMesh or mesh.mesh.get_surface_count() != 2): wrong_type = true
 			if not same_bounds(actual, record.bounds) or visual.owner != record.owner or visual.purpose != record.purpose or wrong_type: problems.append(issue("misplaced_instance", record))
+		elif visual.get("purpose", "") == BRIDGE_RAIL:
+			# Railing posts of a bridge deck: decorative, on their own bridge tile only.
+			if not bool(plan.options.get("bridges", false)) or not bridge_tile(data, visual.tiles[0]):
+				var invalid := issue("orphan_unplanned_instance", {"cell": visual.tiles[0], "owner": visual.get("owner", Vector2i.ZERO)})
+				invalid["instance"] = mesh.get_instance_id()
+				problems.append(invalid)
 		elif visual.get("purpose", "") in ["floor", "ramp", "stairs_marker", "wall"]:
 			for tile: Vector2i in visual.tiles:
 				if not data.is_walkable(tile) or visual.owner != visual.tiles[0] or (visual.purpose == "wall" and data.get_elevation(tile) == 1):

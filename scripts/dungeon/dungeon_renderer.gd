@@ -31,6 +31,9 @@ var other_elevation_material: StandardMaterial3D
 @export_range(0, 8) var terrain_fill_margin: int = 3
 @export var upper_elevation_open_platforms: bool = true
 @export_range(0.0, 3.0, 0.05) var upper_corridor_support_height: float = 1.0
+## Straight elevated corridor tiles become wooden bridge tiles with railings and
+## no stone support below (validated geometry only).
+@export var upper_corridor_bridges_enabled: bool = true
 @export var upper_terrain_mode: UpperTerrainVisuals.Mode = UpperTerrainVisuals.Mode.TERRACES
 @export_range(0, 8) var upper_filler_max_distance: int = 3
 @export_range(1, 3) var terrace_band_width: int = 1
@@ -171,7 +174,7 @@ func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure
 	if validated_geometry_active:
 		var original := TerrainFillVisuals.layout(data, terrain_fill_margin)
 		var options := {"support_height": upper_corridor_support_height, "maximum": upper_filler_max_distance, "width": terrace_band_width,
-			"irregular": terrace_irregular_edges, "clearance": terrace_protected_clearance, "pitch": 35.0, "mode": upper_terrain_mode, "wall_scale": conventional_wall_height_scale, "cave_caps": cave_fill_active}
+			"irregular": terrace_irregular_edges, "clearance": terrace_protected_clearance, "pitch": 35.0, "mode": upper_terrain_mode, "wall_scale": conventional_wall_height_scale, "cave_caps": cave_fill_active, "bridges": upper_corridor_bridges_enabled}
 		var camera := get_viewport().get_camera_3d()
 		if camera != null and camera.get("pitch_degrees") != null: options.pitch = float(camera.get("pitch_degrees"))
 		geometry_plan = EnvironmentGeometryPlan.build(data, original, options, structure_only)
@@ -452,6 +455,9 @@ func create_platform_skirt(entry: Dictionary) -> void:
 
 
 func create_floor_tile(grid_position: Vector2i) -> void:
+	if validated_geometry_active and upper_corridor_bridges_enabled and EnvironmentGeometryPlan.bridge_tile(dungeon_data, grid_position):
+		create_bridge_tile(grid_position)
+		return
 	if is_open_upper_tile(grid_position):
 		var angle := 0.0
 		if upper_floor_quarter_turns_enabled and floor_variation_enabled and floor_quarter_turns_enabled and dungeon_data.get_tile(grid_position) in [DungeonData.TileType.FLOOR, DungeonData.TileType.CORRIDOR] and not dungeon_data.reserved_transitions.has(grid_position):
@@ -487,6 +493,36 @@ func create_floor_tile(grid_position: Vector2i) -> void:
 	if source == ModularDungeonVisuals.FLOOR:
 		for direction in edges:
 			create_asset_surface(grid_position, ModularDungeonVisuals.WALL, atan2(float(direction.x), float(direction.y)), true)
+
+
+## Wooden bridge deck plus railing posts. The deck is the tile's floor surface
+## (its top sits exactly on the floor plane); railings run along the open sides.
+func create_bridge_tile(tile: Vector2i) -> void:
+	var along_z := dungeon_data.is_walkable(tile + Vector2i.UP)
+	var scale := ModularDungeonVisuals.SOURCE_SCALE * TILE_SIZE
+	var floor_top := dungeon_data.get_elevation(tile) * ELEVATION_HEIGHT + FLOOR_THICKNESS / 2.0
+	var deck_top := ModularDungeonVisuals.bridge_deck_top()
+	for index in range(ModularDungeonVisuals.BRIDGE.get_surface_count()):
+		var mesh := ModularDungeonVisuals.surface_mesh(ModularDungeonVisuals.BRIDGE, index)
+		var deck := index == ModularDungeonVisuals.bridge_deck_surface()
+		var visual := MeshInstance3D.new()
+		visual.mesh = mesh
+		visual.scale = Vector3.ONE * scale
+		# The model's railings run along its Z axis; turn it for east-west bridges.
+		visual.rotation.y = 0.0 if along_z else PI / 2.0
+		visual.position = grid_to_world(tile, dungeon_data.get_elevation(tile))
+		visual.position.y = floor_top - deck_top * scale
+		add_child(visual)
+		register_fog_visual(visual, [tile], false, true)
+		var registered: Dictionary = fog_visuals.back()
+		var source := mesh.surface_get_material(0)
+		# The OBJ's Kd is Blender's linear color; Godot reads it as sRGB, which
+		# renders the wood near black. Convert so it matches the authored look.
+		var wood: Color = (source.albedo_color if source is StandardMaterial3D else Color(0.21, 0.12, 0.08)).linear_to_srgb()
+		registered.materials[0] = ModularDungeonVisuals.materials(source, dim_material.albedo_color, other_elevation_material.albedo_color, wood)
+		if not deck:
+			registered.purpose = EnvironmentGeometryPlan.BRIDGE_RAIL
+			visual.set_meta("geometry_purpose", EnvironmentGeometryPlan.BRIDGE_RAIL)
 
 
 func is_open_upper_tile(tile: Vector2i) -> bool:
