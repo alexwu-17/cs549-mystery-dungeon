@@ -7,4 +7,4 @@ regular_enemies_enabled = false
 enemy_respawn_enabled = false
 
 [node name="DungeonRenderer" parent="." index="4"]
-upper_corridor_broken_bridge_ratio = 1.0
+upper_corridor_broken_bridge_ratio = 0.3
