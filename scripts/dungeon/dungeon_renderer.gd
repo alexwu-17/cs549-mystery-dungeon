@@ -37,6 +37,12 @@ var other_elevation_material: StandardMaterial3D
 ## Share of bridge tiles drawn with the broken model (sagging rail, loose plank).
 ## Chosen per tile from coordinates and the floor's visual seed, not gameplay RNG.
 @export_range(0.0, 1.0, 0.01) var upper_corridor_broken_bridge_ratio: float = 0.09
+## Bridge decks are built from individual planks instead of the model's flat slab.
+@export var bridge_planks_enabled: bool = true
+@export_range(3, 12) var bridge_plank_count: int = 7
+## Share of planks drawn old (greyer, slightly sunk) and broken (snapped, with a gap).
+@export_range(0.0, 1.0, 0.01) var bridge_old_plank_ratio: float = 0.2
+@export_range(0.0, 1.0, 0.01) var bridge_broken_plank_ratio: float = 0.1
 @export var upper_terrain_mode: UpperTerrainVisuals.Mode = UpperTerrainVisuals.Mode.TERRACES
 @export_range(0, 8) var upper_filler_max_distance: int = 3
 @export_range(1, 3) var terrace_band_width: int = 1
@@ -509,8 +515,11 @@ func create_bridge_tile(tile: Vector2i) -> void:
 	var deck_top := ModularDungeonVisuals.bridge_deck_top(model)
 	var deck_index := ModularDungeonVisuals.bridge_deck_surface(model)
 	for index in range(model.get_surface_count()):
-		var mesh := ModularDungeonVisuals.surface_mesh(model, index)
 		var deck := index == deck_index
+		var mesh: Mesh = ModularDungeonVisuals.surface_mesh(model, index)
+		if deck and bridge_planks_enabled:
+			# Per-tile planks from a coordinate hash; the middle plank keeps the floor plane.
+			mesh = BridgePlanks.deck(floor_hash(tile), bridge_plank_count, bridge_old_plank_ratio, bridge_broken_plank_ratio)
 		var visual := MeshInstance3D.new()
 		visual.mesh = mesh
 		visual.scale = Vector3.ONE * scale
@@ -523,10 +532,13 @@ func create_bridge_tile(tile: Vector2i) -> void:
 		add_child(visual)
 		register_fog_visual(visual, [tile], false, true)
 		var registered: Dictionary = fog_visuals.back()
-		var source := mesh.surface_get_material(0)
+		var source: Material = mesh.surface_get_material(0)
 		# The OBJ's Kd is Blender's linear color; Godot reads it as sRGB, which
 		# renders the wood near black. Convert so it matches the authored look.
-		var wood: Color = (source.albedo_color if source is StandardMaterial3D else Color(0.21, 0.12, 0.08)).linear_to_srgb()
+		# Plank decks are vertex-colored; their wood tone comes from the model's own deck.
+		var authored_source: Material = model.surface_get_material(deck_index) if deck else source
+		var authored: Color = authored_source.albedo_color if authored_source is StandardMaterial3D else Color(0.212231, 0.124772, 0.082283)
+		var wood: Color = authored.linear_to_srgb()
 		registered.materials[0] = ModularDungeonVisuals.materials(source, dim_material.albedo_color, other_elevation_material.albedo_color, wood)
 		if not deck:
 			registered.purpose = EnvironmentGeometryPlan.BRIDGE_RAIL

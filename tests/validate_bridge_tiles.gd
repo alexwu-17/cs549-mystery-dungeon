@@ -69,6 +69,16 @@ func validate() -> void:
 	assert(absf(float(flipped) / counted - 0.5) < 0.1)
 	# Rendering only: topology and generation RNG untouched.
 	assert(data.tiles == tiles_before and TestDungeonFactory.rng.state == rng_state)
+	# Plank decks: vertex-colored boards; the flat model deck returns when turned off.
+	renderer.upper_corridor_broken_bridge_ratio = 0.5
+	for planks in [true, false]:
+		renderer.bridge_planks_enabled = planks
+		assert(renderer.render_dungeon(data) and renderer.geometry_diagnostics.validated)
+		for visual in renderer.fog_visuals:
+			if visual.purpose != "floor" or not bridges.has(visual.owner): continue
+			var mesh: Mesh = visual.mesh.mesh
+			assert(mesh.surface_get_material(0).vertex_color_use_as_albedo == planks)
+			assert(is_equal_approx((visual.mesh.transform * visual.mesh.get_aabb()).end.y, DungeonData.ELEVATION_HEIGHT + 0.1))
 	renderer.upper_corridor_bridges_enabled = false
 	assert(renderer.render_dungeon(data) and rails_per_tile(renderer).is_empty())
 	print("PASS: straight elevated corridors draw bridge decks on the floor plane without walkway supports; broken share none/all/default " + str(snappedf(hits / 10000.0, 0.001)) + " matches the ratio, flipped " + str(snappedf(float(flipped) / counted, 0.01)) + " of broken, deterministic, rendering only")
