@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" uid="uid://wdld06klqson" path="res://scenes/main/demo_main.tscn" id="1"]
+
+[node name="NoStunkySpawn" instance=ExtResource("1")]
+regular_enemies_enabled = false
+enemy_respawn_enabled = false

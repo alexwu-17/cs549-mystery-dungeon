@@ -120,7 +120,11 @@ func start_starter(index: int) -> void:
 		portrait.set_walking(false)
 	$MenuMusic.stop()
 	$MenuMusic.stream = null
-	gameplay = GAMEPLAY.instantiate()
+	# A Demo variant run directly from the editor (e.g. no_stunky_spawn.tscn) names
+	# itself before redirecting here; otherwise the standard Demo starts.
+	var requested := str(Engine.get_meta(&"demo_gameplay_scene", ""))
+	var scene: PackedScene = load(requested) if requested != "" else GAMEPLAY
+	gameplay = scene.instantiate()
 	gameplay.get_node("Player").species_data = SPECIES[index]
 	gameplay.get_node("Player/VisualController").profile = PROFILES[index]
 	menu.hide()

@@ -44,6 +44,11 @@ var floor_number: int = 1
 var peaceful_turns: int = 0
 var recovery_started: bool = false
 var recovery_damage_serial: int = 0
+## Engine meta key the starter menu reads for the gameplay scene to start.
+const DEMO_GAMEPLAY_META := &"demo_gameplay_scene"
+## Testing switch: false skips the floor's regular enemies (Stunky). Spawn tiles
+## are still generated, so layouts and generation RNG stay identical.
+@export var regular_enemies_enabled: bool = true
 @export var enemy_respawn_enabled: bool = true
 @export_range(1, 100) var enemy_respawn_delay: int = 100
 var repopulation := EnemyRepopulation.new()
@@ -60,6 +65,8 @@ func _ready() -> void:
 		set_process_unhandled_input(false)
 		player.gameplay_enabled = false
 		hud.hide()
+		# Variants inheriting the Demo scene (e.g. no_stunky_spawn.tscn) run as the selected gameplay.
+		Engine.set_meta(DEMO_GAMEPLAY_META, scene_file_path)
 		get_tree().change_scene_to_file.call_deferred("res://scenes/ui/demo_start.tscn")
 		return
 	dialogue.character_name_provider = _player_display_name
@@ -225,8 +232,9 @@ func spawn_test_enemies() -> void:
 		enemy.free()
 	enemies.clear()
 
-	for spawn_position: Vector2i in dungeon.enemy_spawns:
-		_spawn_regular_enemy(spawn_position)
+	if regular_enemies_enabled:
+		for spawn_position: Vector2i in dungeon.enemy_spawns:
+			_spawn_regular_enemy(spawn_position)
 	if game_mode == GameModeConfig.Mode.DEMO and floor_number == GameModeConfig.DEMO_FINAL_FLOOR and not use_elevation_test:
 		boss = BOSS_SCENE.instantiate()
 		entities.add_child(boss)

@@ -6,6 +6,10 @@ This targets Godot **4.4.1** (Checkpoint 4 was tested on **4.7.2**, not yet veri
 
 Prioritize working, testable, maintainable changes. Pokémon gameplay is planned in the Week 10 sprint below; distinguish planned behavior from implemented systems. Do not add unrelated systems or runtime AI services.
 
+## Testing scene without Stunky (2026-11-23)
+
+- `scenes/main/no_stunky_spawn.tscn` inherits `demo_main.tscn` with `Main.regular_enemies_enabled = false` and `enemy_respawn_enabled = false`: no regular enemies on any floor, the Floor 3 boss stays. Spawn tiles are still generated, so layouts and generation RNG match the Demo. Running it directly redirects to the starter menu like the Demo; Main stores its `scene_file_path` in Engine meta `demo_gameplay_scene`, which `demo_start.gd` instantiates instead of `demo_main.tscn`. Checked headlessly (variant 0 enemies, default Demo 3); starter_selection, repopulation, modes, music PASS. The edge-shading commit was reverted by the user; `validate_out_of_bounds_scenery` still asserts the old map-edge rule and fails until its test update is restored.
+
 ## Out-of-bounds terrain follows the layout outline (2026-11-23)
 
 - User wanted the dark filler between the layout and the 42x32 map edge gone, keeping a one-tile dark rock buffer around rooms/corridors (a flat terrain ledge and no buffer were previewed and rejected). `DungeonRenderer.layout_cells(data, out_of_bounds_layout_margin=1)` keeps map cells within one tile of the walkable extent of their row band (west/east), no further north than one tile above their column band's topmost walkable tile, plus every row south of the layout. `is_terrain_owned_cell`, `CaveTerrainBackdrop.plan(..., kept)` and `OutOfBoundsScenery` use these kept cells instead of the map rectangle; inner pockets stay cave rock (user plans to revisit). Rendering only.
