@@ -504,7 +504,8 @@ func create_bridge_tile(tile: Vector2i) -> void:
 	var along_z := dungeon_data.is_walkable(tile + Vector2i.UP)
 	var scale := ModularDungeonVisuals.SOURCE_SCALE * TILE_SIZE
 	var floor_top := dungeon_data.get_elevation(tile) * ELEVATION_HEIGHT + FLOOR_THICKNESS / 2.0
-	var model := ModularDungeonVisuals.BRIDGE_BROKEN if is_broken_bridge(tile) else ModularDungeonVisuals.BRIDGE
+	var broken := is_broken_bridge(tile)
+	var model := ModularDungeonVisuals.BRIDGE_BROKEN if broken else ModularDungeonVisuals.BRIDGE
 	var deck_top := ModularDungeonVisuals.bridge_deck_top(model)
 	var deck_index := ModularDungeonVisuals.bridge_deck_surface(model)
 	for index in range(model.get_surface_count()):
@@ -515,6 +516,8 @@ func create_bridge_tile(tile: Vector2i) -> void:
 		visual.scale = Vector3.ONE * scale
 		# The model's railings run along its Z axis; turn it for east-west bridges.
 		visual.rotation.y = 0.0 if along_z else PI / 2.0
+		# Half the broken tiles turn around so the damaged rail lands on either side.
+		if broken and is_flipped_bridge(tile): visual.rotation.y += PI
 		visual.position = grid_to_world(tile, dungeon_data.get_elevation(tile))
 		visual.position.y = floor_top - deck_top * scale
 		add_child(visual)
@@ -535,6 +538,11 @@ func is_broken_bridge(tile: Vector2i) -> bool:
 	if upper_corridor_broken_bridge_ratio <= 0.0: return false
 	var value := posmod(floor_hash(tile + Vector2i(7919, 104729)) * 2654435761, 2147483647)
 	return float(posmod(value >> 7, 10000)) / 10000.0 < upper_corridor_broken_bridge_ratio
+
+
+## Even split between the two sides for broken tiles (independent hash bit).
+func is_flipped_bridge(tile: Vector2i) -> bool:
+	return posmod(floor_hash(tile + Vector2i(-31337, 271)) >> 5, 2) == 1
 
 
 func is_open_upper_tile(tile: Vector2i) -> bool:

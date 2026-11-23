@@ -58,9 +58,18 @@ func validate() -> void:
 			if renderer.is_broken_bridge(Vector2i(x, y)): hits += 1
 			assert(renderer.is_broken_bridge(Vector2i(x, y)) == renderer.is_broken_bridge(Vector2i(x, y)))
 	assert(absf(hits / 10000.0 - renderer.upper_corridor_broken_bridge_ratio) < 0.02)
+	# Broken tiles face either way about half the time each.
+	var flipped := 0
+	var counted := 0
+	for x in range(100):
+		for y in range(100):
+			if not renderer.is_broken_bridge(Vector2i(x, y)): continue
+			counted += 1
+			if renderer.is_flipped_bridge(Vector2i(x, y)): flipped += 1
+	assert(absf(float(flipped) / counted - 0.5) < 0.1)
 	# Rendering only: topology and generation RNG untouched.
 	assert(data.tiles == tiles_before and TestDungeonFactory.rng.state == rng_state)
 	renderer.upper_corridor_bridges_enabled = false
 	assert(renderer.render_dungeon(data) and rails_per_tile(renderer).is_empty())
-	print("PASS: straight elevated corridors draw bridge decks on the floor plane without walkway supports; broken share none/all/default " + str(snappedf(hits / 10000.0, 0.001)) + " matches the ratio, deterministic, rendering only")
+	print("PASS: straight elevated corridors draw bridge decks on the floor plane without walkway supports; broken share none/all/default " + str(snappedf(hits / 10000.0, 0.001)) + " matches the ratio, flipped " + str(snappedf(float(flipped) / counted, 0.01)) + " of broken, deterministic, rendering only")
 	quit()
