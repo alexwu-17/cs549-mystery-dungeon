@@ -45,6 +45,7 @@ var _shade := Color.WHITE
 var _columns: int = 0
 var _rows: int = 0
 var _heights := PackedFloat32Array()
+var _surface_heights := PackedFloat32Array() # Before the tuck drop; normals use these.
 var _floor_corners: Dictionary = {}
 var _rolling := FastNoiseLite.new()
 var _ridged := FastNoiseLite.new()
@@ -93,6 +94,7 @@ func setup(data: DungeonData, backdrop: CaveTerrainBackdrop, renderer: DungeonRe
 	_columns = roundi(region.size.x / SPACING) + 1
 	_rows = roundi(region.size.y / SPACING) + 1
 	_heights.resize(_columns * _rows)
+	_surface_heights.resize(_columns * _rows)
 	_fill_heights()
 	_mark_quads()
 	_build_chunks()
@@ -241,6 +243,7 @@ func _fill_heights() -> void:
 			var distance := maxf(0.0, lerpf(lerpf(a, b, t), lerpf(c, d, t), tz) - 0.5)
 			var x := region.position.x + column * SPACING
 			var height := _surface(x, z, maxf(0.0, distance - ledge))
+			_surface_heights[row * _columns + column] = height
 			# Vertices with only kept cells around them sit under the edge rock:
 			# the tucked strip slopes down there so it never shows above the rock.
 			if tucking and _distance[uz0 + ux0[column]] == 0.0 and _distance[uz0 + ux1[column]] == 0.0 and _distance[uz1 + ux0[column]] == 0.0 and _distance[uz1 + ux1[column]] == 0.0:
@@ -296,7 +299,9 @@ func _surface(x: float, z: float, distance: float) -> float:
 	# Just under the rock tops, so the terrain edge never shows as a lip above them.
 	if distance <= 0.0:
 		var edge := floor_at(x, z) - RIM_SINK
-		return lerpf(edge, maxf(edge + CLEARANCE, ground_level), south)
+		# Near the southern edge the terrain still rests on the south border rocks.
+		if south <= 0.0: return edge
+		return lerpf(edge, maxf(floor_at(x, z) + CLEARANCE, ground_level), south)
 	var rolling := clampf((_rolling.get_noise_2d(x, z) + 1.0) * 0.5, 0.0, 1.0)
 	var ridged := clampf((_ridged.get_noise_2d(x, z) + 1.0) * 0.5, 0.0, 1.0)
 	var shape := pow(lerpf(rolling, ridged, RIDGE_BLEND), PEAK_SHARPNESS)
@@ -339,7 +344,8 @@ func _chunk_ranges(origin: float, count: int) -> Array[Vector2i]:
 
 
 func _build_chunks() -> void:
-	# Normals once for the whole grid (central differences, clamped at the edges).
+	# Normals once for the whole grid (central differences, clamped at the edges),
+	# from the undropped surface so the tucked strip does not bend edge lighting.
 	var grid_normals := PackedVector3Array()
 	grid_normals.resize(_columns * _rows)
 	for row in range(_rows):
@@ -349,8 +355,8 @@ func _build_chunks() -> void:
 		for column in range(_columns):
 			var left := maxi(column - 1, 0)
 			var right := mini(column + 1, _columns - 1)
-			var dx := (_heights[row * _columns + right] - _heights[row * _columns + left]) / (float(right - left) * SPACING)
-			var dz := (_heights[down + column] - _heights[up + column]) / row_span
+			var dx := (_surface_heights[row * _columns + right] - _surface_heights[row * _columns + left]) / (float(right - left) * SPACING)
+			var dz := (_surface_heights[down + column] - _surface_heights[up + column]) / row_span
 			grid_normals[row * _columns + column] = Vector3(-dx, 1.0, -dz).normalized()
 	var column_ranges := _chunk_ranges(region.position.x, _columns - 1)
 	var row_ranges := _chunk_ranges(region.position.y, _rows - 1)

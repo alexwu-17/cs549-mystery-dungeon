@@ -53,7 +53,8 @@ func validate() -> void:
 					index += 1
 				elif visual.purpose == "floor":
 					assert(is_equal_approx(bounds.end.y, data.get_elevation(tile) * DungeonData.ELEVATION_HEIGHT + 0.1))
-					assert(is_equal_approx(bounds.size.x, 1.0) and is_equal_approx(bounds.size.z, 1.0))
+					# Bridge plank decks are deliberately ragged; validate_bridge_tiles owns them.
+					if not EnvironmentGeometryPlan.bridge_tile(data, tile): assert(is_equal_approx(bounds.size.x, 1.0) and is_equal_approx(bounds.size.z, 1.0))
 					if renderer.can_vary_floor(tile):
 						tints[visual.materials[0][0].albedo_color] = true
 						rotations[posmod(renderer.floor_hash(tile), 4)] = true
