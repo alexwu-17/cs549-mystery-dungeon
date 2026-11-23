@@ -1,7 +1,10 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://dur701bbflusj"]
 
 [ext_resource type="PackedScene" uid="uid://wdld06klqson" path="res://scenes/main/demo_main.tscn" id="1"]
 
-[node name="NoStunkySpawn" instance=ExtResource("1")]
+[node name="NoStunkySpawn" unique_id=975895470 instance=ExtResource("1")]
 regular_enemies_enabled = false
 enemy_respawn_enabled = false
+
+[node name="DungeonRenderer" parent="." index="4"]
+upper_corridor_broken_bridge_ratio = 1.0
