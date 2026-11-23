@@ -34,6 +34,9 @@ var other_elevation_material: StandardMaterial3D
 ## Straight elevated corridor tiles become wooden bridge tiles with railings and
 ## no stone support below (validated geometry only).
 @export var upper_corridor_bridges_enabled: bool = true
+## Share of bridge tiles drawn with the broken model (sagging rail, loose plank).
+## Chosen per tile from coordinates and the floor's visual seed, not gameplay RNG.
+@export_range(0.0, 1.0, 0.01) var upper_corridor_broken_bridge_ratio: float = 0.09
 @export var upper_terrain_mode: UpperTerrainVisuals.Mode = UpperTerrainVisuals.Mode.TERRACES
 @export_range(0, 8) var upper_filler_max_distance: int = 3
 @export_range(1, 3) var terrace_band_width: int = 1
@@ -501,10 +504,12 @@ func create_bridge_tile(tile: Vector2i) -> void:
 	var along_z := dungeon_data.is_walkable(tile + Vector2i.UP)
 	var scale := ModularDungeonVisuals.SOURCE_SCALE * TILE_SIZE
 	var floor_top := dungeon_data.get_elevation(tile) * ELEVATION_HEIGHT + FLOOR_THICKNESS / 2.0
-	var deck_top := ModularDungeonVisuals.bridge_deck_top()
-	for index in range(ModularDungeonVisuals.BRIDGE.get_surface_count()):
-		var mesh := ModularDungeonVisuals.surface_mesh(ModularDungeonVisuals.BRIDGE, index)
-		var deck := index == ModularDungeonVisuals.bridge_deck_surface()
+	var model := ModularDungeonVisuals.BRIDGE_BROKEN if is_broken_bridge(tile) else ModularDungeonVisuals.BRIDGE
+	var deck_top := ModularDungeonVisuals.bridge_deck_top(model)
+	var deck_index := ModularDungeonVisuals.bridge_deck_surface(model)
+	for index in range(model.get_surface_count()):
+		var mesh := ModularDungeonVisuals.surface_mesh(model, index)
+		var deck := index == deck_index
 		var visual := MeshInstance3D.new()
 		visual.mesh = mesh
 		visual.scale = Vector3.ONE * scale
@@ -523,6 +528,13 @@ func create_bridge_tile(tile: Vector2i) -> void:
 		if not deck:
 			registered.purpose = EnvironmentGeometryPlan.BRIDGE_RAIL
 			visual.set_meta("geometry_purpose", EnvironmentGeometryPlan.BRIDGE_RAIL)
+
+
+## Deterministic per tile: a hash separate from the floor-variation buckets.
+func is_broken_bridge(tile: Vector2i) -> bool:
+	if upper_corridor_broken_bridge_ratio <= 0.0: return false
+	var value := posmod(floor_hash(tile + Vector2i(7919, 104729)) * 2654435761, 2147483647)
+	return float(posmod(value >> 7, 10000)) / 10000.0 < upper_corridor_broken_bridge_ratio
 
 
 func is_open_upper_tile(tile: Vector2i) -> bool:

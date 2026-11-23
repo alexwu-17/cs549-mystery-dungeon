@@ -8,6 +8,8 @@ const WALL: Mesh = preload("res://assets/environment/modular_dungeon/wall.obj")
 const RAMP: Mesh = preload("res://assets/environment/modular_dungeon/up_stairs.obj")
 ## Wooden bridge tile (deck plus four railing posts and two rails), same 2-unit source grid.
 const BRIDGE: Mesh = preload("res://assets/environment/bridge/bridge.obj")
+## Same deck with a sagging rail and a loose plank; walks exactly like BRIDGE.
+const BRIDGE_BROKEN: Mesh = preload("res://assets/environment/bridge/bridge_broken.obj")
 const SOURCE_SCALE: float = 0.5
 const FLOOR_TOP: float = 0.217668
 const FLOOR_COLOR: Color = Color("#C5BA9C")
@@ -119,22 +121,25 @@ static func ramp_clearance_height(tile_count: int) -> float:
 	return _ramp_clearance_fraction * DungeonData.ELEVATION_HEIGHT / tile_count
 
 
-## Surface index of the bridge deck: the only part reaching below the deck top.
-static var _bridge_deck := -1
-static func bridge_deck_surface() -> int:
-	if _bridge_deck >= 0: return _bridge_deck
-	var lowest := 0
-	for index in range(BRIDGE.get_surface_count()):
-		if surface_bounds(BRIDGE, index).position.y < surface_bounds(BRIDGE, lowest).position.y: lowest = index
-	_bridge_deck = lowest
-	return lowest
+static var _bridge_decks: Dictionary = {}
+## Surface index of a bridge model's deck: the only part reaching below the deck top.
+static func bridge_deck_surface(mesh: Mesh = BRIDGE) -> int:
+	return int(_bridge_deck(mesh).x)
 
 
-## Source-space height of the bridge deck's walking surface.
-static var _bridge_deck_top := NAN
-static func bridge_deck_top() -> float:
-	if is_nan(_bridge_deck_top): _bridge_deck_top = surface_bounds(BRIDGE, bridge_deck_surface()).end.y
-	return _bridge_deck_top
+## Source-space height of a bridge model's walking surface.
+static func bridge_deck_top(mesh: Mesh = BRIDGE) -> float:
+	return _bridge_deck(mesh).y
+
+
+static func _bridge_deck(mesh: Mesh) -> Vector2:
+	var key := mesh.get_instance_id()
+	if not _bridge_decks.has(key):
+		var lowest := 0
+		for index in range(mesh.get_surface_count()):
+			if surface_bounds(mesh, index).position.y < surface_bounds(mesh, lowest).position.y: lowest = index
+		_bridge_decks[key] = Vector2(lowest, surface_bounds(mesh, lowest).end.y)
+	return _bridge_decks[key]
 
 
 static func surface_bounds(mesh: Mesh, index: int) -> AABB:
