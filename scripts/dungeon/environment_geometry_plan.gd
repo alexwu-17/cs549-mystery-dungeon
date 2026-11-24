@@ -23,17 +23,29 @@ static func box_record(purpose: String, cell: Vector2i, owner: Vector2i, bottom:
 ## Straight elevated corridor tile drawn as a wooden bridge (no stone support
 ## below): walkable on both ends of one axis and on neither side of the other.
 static func bridge_tile(data: DungeonData, tile: Vector2i) -> bool:
-	if data.get_tile(tile) != DungeonData.TileType.CORRIDOR or data.get_elevation(tile) != 1 or data.reserved_transitions.has(tile): return false
+	if data.get_tile(tile) != DungeonData.TileType.CORRIDOR or data.get_elevation(tile) != 1 or not_bridgeable_transition(data, tile): return false
 	var north := data.is_walkable(tile + Vector2i.UP)
 	var south := data.is_walkable(tile + Vector2i.DOWN)
 	var west := data.is_walkable(tile + Vector2i.LEFT)
 	var east := data.is_walkable(tile + Vector2i.RIGHT)
 	return (north and south and not west and not east) or (west and east and not north and not south)
 
+## Ramp transitions stay stone, except a ramp's upper landing: the raised flat
+## tile at the top of the stairs may be drawn as a bridge like any corridor tile.
+static func not_bridgeable_transition(data: DungeonData, tile: Vector2i) -> bool:
+	return data.reserved_transitions.has(tile) and not upper_landing(data, tile)
+
+
+static func upper_landing(data: DungeonData, tile: Vector2i) -> bool:
+	if not data.reserved_transitions.has(tile): return false
+	var segment: Dictionary = data.ramp_segments[data.reserved_transitions[tile]]
+	return tile == segment.lower_buffer + segment.direction * 4 and data.get_elevation(tile) == 1
+
+
 ## Elevated corridor corner joining two other elevated corridor tiles at a right
 ## angle: drawn as a curved bridge tile. Ramps and room entrances keep stone.
 static func bridge_corner_tile(data: DungeonData, tile: Vector2i) -> bool:
-	if data.get_tile(tile) != DungeonData.TileType.CORRIDOR or data.get_elevation(tile) != 1 or data.reserved_transitions.has(tile): return false
+	if data.get_tile(tile) != DungeonData.TileType.CORRIDOR or data.get_elevation(tile) != 1 or not_bridgeable_transition(data, tile): return false
 	var open := bridge_corner_sides(data, tile)
 	return open.size() == 2 and open[0] != -open[1]
 
@@ -45,7 +57,9 @@ static func bridge_corner_sides(data: DungeonData, tile: Vector2i) -> Array[Vect
 		var next := tile + direction
 		if not data.is_walkable(next): continue
 		# Only corridor-to-corridor turns; anything else disqualifies the corner.
-		if data.get_tile(next) != DungeonData.TileType.CORRIDOR or data.get_elevation(next) != 1: return [] as Array[Vector2i]
+		# A landing's own stairs count as a connection (the bridge meets the top step).
+		var own_stairs: bool = data.get_tile(next) == DungeonData.TileType.RAMP and upper_landing(data, tile) and data.reserved_transitions.get(next, -1) == data.reserved_transitions[tile]
+		if not own_stairs and (data.get_tile(next) != DungeonData.TileType.CORRIDOR or data.get_elevation(next) != 1): return [] as Array[Vector2i]
 		open.append(direction)
 	return open
 
@@ -53,7 +67,7 @@ static func bridge_corner_sides(data: DungeonData, tile: Vector2i) -> Array[Vect
 ## Elevated corridor junction (T or crossing) whose walkable neighbors are all
 ## elevation-1 corridor tiles: drawn as a square plank platform.
 static func bridge_platform_tile(data: DungeonData, tile: Vector2i) -> bool:
-	if data.get_tile(tile) != DungeonData.TileType.CORRIDOR or data.get_elevation(tile) != 1 or data.reserved_transitions.has(tile): return false
+	if data.get_tile(tile) != DungeonData.TileType.CORRIDOR or data.get_elevation(tile) != 1 or not_bridgeable_transition(data, tile): return false
 	return bridge_corner_sides(data, tile).size() >= 3
 
 
