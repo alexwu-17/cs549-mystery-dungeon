@@ -16,6 +16,10 @@ Prioritize working, testable, maintainable changes. Pokémon gameplay is planned
 - Junction platforms (follow-up): `bridge_platform_tile()` is an elevation-1 CORRIDOR (not reserved) whose 3 or 4 walkable neighbors are all elevation-1 CORRIDOR. `create_bridge_platform_tile()` draws the plank deck plus the bridge model's -X railing (two posts and a rail) turned to face the one closed side of a T; crossings get no railing. Ramp landings (the top/bottom buffer tiles of a ramp, reserved in `reserved_transitions`) are deliberately excluded from all bridge kinds and stay stone; the user noticed the upper landing next to stairs and deferred it. Checked: bridge_tiles, environment_geometry, wall_styles PASS; platforms validated on 10 of 29 seeds.
 - Checked on Godot 4.4.1: default gameplay runner 23/23, environment_geometry, upper_platforms, cave_background, sunlight_atmosphere, rock_slopes, fog, lighting, terrain_visibility, visibility_refresh, continuous_terrain, terrain_fill PASS. Appearance from private software renders only; user judges in Forward+.
 
+## T-junction test scene (2026-11-24)
+
+- `scenes/main/T-junction.tscn` inherits `no_stunky_spawn.tscn` with `Main.test_start_on_bridge_junction = true`: exploration floors regenerate (up to 60 layouts, generator RNG only) until one has a bridge T-junction, and the player starts on it (`Main._bridge_junction()`; warning and normal start if none). Runs through the starter menu like the other Demo variants. Testing only; production defaults false.
+
 ## Testing scene without Stunky (2026-11-23)
 
 - `scenes/main/no_stunky_spawn.tscn` inherits `demo_main.tscn` with `Main.regular_enemies_enabled = false` and `enemy_respawn_enabled = false`: no regular enemies on any floor, the Floor 3 boss stays. Spawn tiles are still generated, so layouts and generation RNG match the Demo. Running it directly redirects to the starter menu like the Demo; Main stores its `scene_file_path` in Engine meta `demo_gameplay_scene`, which `demo_start.gd` instantiates instead of `demo_main.tscn`. Checked headlessly (variant 0 enemies, default Demo 3); starter_selection, repopulation, modes, music PASS.

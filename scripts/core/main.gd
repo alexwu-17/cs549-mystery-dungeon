@@ -50,6 +50,9 @@ const DEMO_GAMEPLAY_META := &"demo_gameplay_scene"
 ## are still generated, so layouts and generation RNG stay identical.
 @export var regular_enemies_enabled: bool = true
 @export var enemy_respawn_enabled: bool = true
+## Testing switch (T-junction.tscn): regenerate exploration floors until one has a
+## bridge T-junction, then start the player on it. Uses the generator's own RNG.
+@export var test_start_on_bridge_junction: bool = false
 @export_range(1, 100) var enemy_respawn_delay: int = 100
 var repopulation := EnemyRepopulation.new()
 ## First floor on which the starter learns its species' floor_unlock_move, once per run.
@@ -152,6 +155,16 @@ func update_presentation() -> void:
 		dungeon_renderer.update_occlusion(presentation_camera, player.grid_position, points, true)
 
 
+## First bridge T-junction (three elevated corridor neighbors) of a layout, or (-1, -1).
+func _bridge_junction(data: DungeonData) -> Vector2i:
+	var found := Vector2i(-1, -1)
+	for tile: Vector2i in data.tiles:
+		if tile == data.stairs_position or not EnvironmentGeometryPlan.bridge_platform_tile(data, tile): continue
+		if EnvironmentGeometryPlan.bridge_corner_sides(data, tile).size() != 3: continue
+		if found == Vector2i(-1, -1) or tile < found: found = tile
+	return found
+
+
 func load_test_floor() -> void:
 	player.battle_state.reset_stages()
 	for child in player.get_children():
@@ -180,6 +193,14 @@ func load_test_floor() -> void:
 		# Infinite/Demo, e.g. the optional legacy three-elevation configuration.
 		dungeon = TestDungeonFactory.create_test_dungeon() if generation_config == null else TestDungeonFactory.create_configured_dungeon(generation_config)
 		if dungeon == null: return
+		if test_start_on_bridge_junction:
+			for attempt in range(60):
+				if _bridge_junction(dungeon) != Vector2i(-1, -1): break
+				var retry := TestDungeonFactory.create_test_dungeon() if generation_config == null else TestDungeonFactory.create_configured_dungeon(generation_config)
+				if retry != null: dungeon = retry
+			var junction := _bridge_junction(dungeon)
+			if junction != Vector2i(-1, -1): dungeon.player_spawn = junction
+			else: push_warning("No bridge T-junction found in 60 layouts; using the normal start.")
 		print("ELEVATION FLOOR: ", TestDungeonFactory.last_statistics, " | room heights=", dungeon.room_elevations, " | ramps=", dungeon.ramp_segments)
 
 	if not dungeon_renderer.render_dungeon(dungeon, use_elevation_test or benchmark != null or GameModeConfig.is_arena(game_mode, floor_number)):
