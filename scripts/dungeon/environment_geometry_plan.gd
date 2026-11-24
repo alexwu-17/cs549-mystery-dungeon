@@ -50,9 +50,16 @@ static func bridge_corner_sides(data: DungeonData, tile: Vector2i) -> Array[Vect
 	return open
 
 
-## Any elevated corridor tile drawn as a bridge (straight run or curved corner).
+## Elevated corridor junction (T or crossing) whose walkable neighbors are all
+## elevation-1 corridor tiles: drawn as a square plank platform.
+static func bridge_platform_tile(data: DungeonData, tile: Vector2i) -> bool:
+	if data.get_tile(tile) != DungeonData.TileType.CORRIDOR or data.get_elevation(tile) != 1 or data.reserved_transitions.has(tile): return false
+	return bridge_corner_sides(data, tile).size() >= 3
+
+
+## Any elevated corridor tile drawn as a bridge (straight run, curved corner or junction platform).
 static func any_bridge_tile(data: DungeonData, tile: Vector2i) -> bool:
-	return bridge_tile(data, tile) or bridge_corner_tile(data, tile)
+	return bridge_tile(data, tile) or bridge_corner_tile(data, tile) or bridge_platform_tile(data, tile)
 
 static func required(data: DungeonData, support_height: float, bridges: bool = false) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
