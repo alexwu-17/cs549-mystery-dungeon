@@ -94,6 +94,18 @@ var terrain_fill_cells: Dictionary = {}
 @export_range(0, 3) var out_of_bounds_layout_margin: int = 1
 ## Width in tiles of the flat terrain ledge along the layout before the rim drops.
 @export var out_of_bounds_ledge_width: float = 0.0
+## Boulders and rubble on the out-of-bounds terrain (rendering only).
+@export var out_of_bounds_stones_enabled: bool = true
+## Multiplies how many boulders appear (rubble follows the boulders).
+@export_range(0.0, 3.0, 0.05) var out_of_bounds_stone_density: float = 1.0
+## Multiplies boulder and rubble size.
+@export_range(0.25, 3.0, 0.05) var out_of_bounds_stone_size: float = 1.0
+## How much lighter than the ground stones are on average (0 = same shade).
+@export_range(-0.3, 0.5, 0.01) var out_of_bounds_stone_lift: float = 0.06
+## Range of per-stone brightness around that average.
+@export_range(0.0, 0.8, 0.01) var out_of_bounds_stone_shade_spread: float = 0.28
+## Range of per-stone warm (brownish) to cool (bluish) shift.
+@export_range(0.0, 0.3, 0.01) var out_of_bounds_stone_warmth_spread: float = 0.07
 @export_group("")
 var cave_background: CaveTerrainBackdrop
 var out_of_bounds_scenery: OutOfBoundsScenery
@@ -278,6 +290,13 @@ func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure
 			out_of_bounds_scenery.name = "OutOfBoundsScenery"
 			add_child(out_of_bounds_scenery)
 			out_of_bounds_scenery.setup(data, cave_background, self)
+			if out_of_bounds_stones_enabled:
+				var stones := OutOfBoundsStones.new()
+				out_of_bounds_scenery.add_child(stones)
+				stones.populate(out_of_bounds_scenery, floor_visual_seed * 31 + OutOfBoundsScenery.layout_key(data), {
+					"density": out_of_bounds_stone_density, "size": out_of_bounds_stone_size, "lift": out_of_bounds_stone_lift,
+					"shade_spread": out_of_bounds_stone_shade_spread, "warmth_spread": out_of_bounds_stone_warmth_spread})
+				out_of_bounds_scenery.diagnostics["stones"] = stones.counts
 			out_of_bounds_scenery.apply_shade(dim_material.albedo_color)
 			geometry_diagnostics["out_of_bounds"] = out_of_bounds_scenery.diagnostics
 	_terrain_occlusion.setup(fog_visuals)

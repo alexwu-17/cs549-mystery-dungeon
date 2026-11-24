@@ -26,10 +26,13 @@ uniform float height_low = -1.9;
 uniform float height_high = 0.6;
 varying vec3 world_position;
 varying vec3 world_normal;
+// Per-instance tint from MultiMesh colors (stones); white for the terrain itself.
+varying vec3 instance_tint;
 
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize(MODEL_NORMAL_MATRIX * NORMAL);
+	instance_tint = COLOR.rgb;
 }
 
 vec2 hash22(vec2 p) {
@@ -123,7 +126,7 @@ void fragment() {
 	color *= mix(0.68, 1.08, elevation);
 	color = mix(color, dust, (1.0 - steep) * elevation * 0.35 * macro.y);
 	color *= mix(0.9, 1.1, macro_fine.y);
-	ALBEDO = color * fog_shade;
+	ALBEDO = color * fog_shade * instance_tint;
 	ROUGHNESS = mix(0.82, 0.97, height);
 	SPECULAR = 0.25;
 	NORMAL = normalize((VIEW_MATRIX * vec4(detailed, 0.0)).xyz);
