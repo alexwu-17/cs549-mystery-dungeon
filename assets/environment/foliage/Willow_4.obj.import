@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://ds82vglxx4hnb"
+path="res://.godot/imported/Willow_4.obj-6af821a97c1279e4d7534a1419b6dfc7.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Willow_4.obj-6af821a97c1279e4d7534a1419b6dfc7.mesh"]
+
+source_file="res://assets/environment/foliage/Willow_4.obj"
+dest_files=["res://.godot/imported/Willow_4.obj-6af821a97c1279e4d7534a1419b6dfc7.mesh", "res://.godot/imported/Willow_4.obj-6af821a97c1279e4d7534a1419b6dfc7.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

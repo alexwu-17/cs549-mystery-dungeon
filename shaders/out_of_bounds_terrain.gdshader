@@ -18,6 +18,7 @@ uniform vec3 fog_shade : source_color = vec3(1.0);
 // stone tops.
 uniform float grass_amount = 0.0;
 uniform float grass_scale = 0.11;
+uniform float meadow_low = 0.22;
 uniform vec3 grass_color : source_color = vec3(0.34, 0.44, 0.21);
 uniform vec3 grass_dry : source_color = vec3(0.47, 0.47, 0.28);
 uniform float snow_amount = 0.0;
@@ -136,8 +137,13 @@ void fragment() {
 	color *= mix(0.68, 1.08, elevation);
 	color = mix(color, dust, (1.0 - steep) * elevation * 0.35 * macro.y);
 	color *= mix(0.9, 1.1, macro_fine.y);
-	float meadow = smoothstep(0.38, 0.62, texture(macro_noise, world_position.xz * grass_scale + vec2(0.61, 0.13)).r);
-	float grass = grass_amount * meadow * smoothstep(0.72, 0.9, world_normal.y) * instance_tint.a;
+	// Meadow: broad patches cut back to rock on steep faces, with a ragged,
+	// noise-jittered slope edge and rock bumps poking through the grass.
+	float meadow = smoothstep(meadow_low, meadow_low + 0.22, texture(macro_noise, world_position.xz * grass_scale + vec2(0.61, 0.13)).r);
+	float jitter = (macro_fine.x - 0.5) * 0.2 + (macro.y - 0.5) * 0.12;
+	float flat_ground = smoothstep(0.58 + jitter, 0.76 + jitter, world_normal.y);
+	float grass = grass_amount * meadow * flat_ground * instance_tint.a;
+	grass *= 1.0 - 0.7 * smoothstep(0.6, 0.9, height);
 	color = mix(color, mix(grass_dry, grass_color, macro_fine.y) * mix(0.85, 1.1, height), grass);
 	float snow = snow_amount * smoothstep(0.62, 0.9, detailed.y) * smoothstep(0.15, 0.55, macro_fine.x + 0.25 * macro.y);
 	color = mix(color, snow_color, snow);
