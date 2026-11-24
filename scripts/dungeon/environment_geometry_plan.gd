@@ -30,6 +30,30 @@ static func bridge_tile(data: DungeonData, tile: Vector2i) -> bool:
 	var east := data.is_walkable(tile + Vector2i.RIGHT)
 	return (north and south and not west and not east) or (west and east and not north and not south)
 
+## Elevated corridor corner joining two other elevated corridor tiles at a right
+## angle: drawn as a curved bridge tile. Ramps and room entrances keep stone.
+static func bridge_corner_tile(data: DungeonData, tile: Vector2i) -> bool:
+	if data.get_tile(tile) != DungeonData.TileType.CORRIDOR or data.get_elevation(tile) != 1 or data.reserved_transitions.has(tile): return false
+	var open := bridge_corner_sides(data, tile)
+	return open.size() == 2 and open[0] != -open[1]
+
+
+## Walkable cardinal sides of a tile (only meaningful for bridge corners).
+static func bridge_corner_sides(data: DungeonData, tile: Vector2i) -> Array[Vector2i]:
+	var open: Array[Vector2i] = []
+	for direction: Vector2i in DungeonData.CARDINALS:
+		var next := tile + direction
+		if not data.is_walkable(next): continue
+		# Only corridor-to-corridor turns; anything else disqualifies the corner.
+		if data.get_tile(next) != DungeonData.TileType.CORRIDOR or data.get_elevation(next) != 1: return [] as Array[Vector2i]
+		open.append(direction)
+	return open
+
+
+## Any elevated corridor tile drawn as a bridge (straight run or curved corner).
+static func any_bridge_tile(data: DungeonData, tile: Vector2i) -> bool:
+	return bridge_tile(data, tile) or bridge_corner_tile(data, tile)
+
 static func required(data: DungeonData, support_height: float, bridges: bool = false) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var top := floor_bottom()
@@ -41,7 +65,7 @@ static func required(data: DungeonData, support_height: float, bridges: bool = f
 			for layer in range(3):
 				var bottom := top - DungeonData.ELEVATION_HEIGHT + layer * layer_height
 				result.append(box_record(FOUNDATION, tile, tile, bottom, bottom + layer_height, layer))
-		elif data.get_tile(tile) == DungeonData.TileType.CORRIDOR and data.get_elevation(tile) == 1 and not (bridges and bridge_tile(data, tile)):
+		elif data.get_tile(tile) == DungeonData.TileType.CORRIDOR and data.get_elevation(tile) == 1 and not (bridges and any_bridge_tile(data, tile)):
 			result.append(box_record(WALKWAY, tile, tile, top - walkway_height, top))
 	return result
 
@@ -214,7 +238,7 @@ static func inspect_instances(plan: Dictionary, data: DungeonData, visuals: Arra
 			if not same_bounds(actual, record.bounds) or visual.owner != record.owner or visual.purpose != record.purpose or wrong_type: problems.append(issue("misplaced_instance", record))
 		elif visual.get("purpose", "") == BRIDGE_RAIL:
 			# Railing posts of a bridge deck: decorative, on their own bridge tile only.
-			if not bool(plan.options.get("bridges", false)) or not bridge_tile(data, visual.tiles[0]):
+			if not bool(plan.options.get("bridges", false)) or not any_bridge_tile(data, visual.tiles[0]):
 				var invalid := issue("orphan_unplanned_instance", {"cell": visual.tiles[0], "owner": visual.get("owner", Vector2i.ZERO)})
 				invalid["instance"] = mesh.get_instance_id()
 				problems.append(invalid)

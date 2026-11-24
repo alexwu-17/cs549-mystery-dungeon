@@ -467,6 +467,9 @@ func create_floor_tile(grid_position: Vector2i) -> void:
 	if validated_geometry_active and upper_corridor_bridges_enabled and EnvironmentGeometryPlan.bridge_tile(dungeon_data, grid_position):
 		create_bridge_tile(grid_position)
 		return
+	if validated_geometry_active and upper_corridor_bridges_enabled and EnvironmentGeometryPlan.bridge_corner_tile(dungeon_data, grid_position):
+		create_bridge_corner_tile(grid_position)
+		return
 	if is_open_upper_tile(grid_position):
 		var angle := 0.0
 		if upper_floor_quarter_turns_enabled and floor_variation_enabled and floor_quarter_turns_enabled and dungeon_data.get_tile(grid_position) in [DungeonData.TileType.FLOOR, DungeonData.TileType.CORRIDOR] and not dungeon_data.reserved_transitions.has(grid_position):
@@ -541,6 +544,46 @@ func create_bridge_tile(tile: Vector2i) -> void:
 		var wood: Color = authored.linear_to_srgb()
 		registered.materials[0] = ModularDungeonVisuals.materials(source, dim_material.albedo_color, other_elevation_material.albedo_color, wood)
 		if not deck:
+			registered.purpose = EnvironmentGeometryPlan.BRIDGE_RAIL
+			visual.set_meta("geometry_purpose", EnvironmentGeometryPlan.BRIDGE_RAIL)
+
+
+## Curved 90-degree bridge tile: plank deck (the tile's floor surface, top on the
+## floor plane) plus the model's posts and rails along the turn.
+func create_bridge_corner_tile(tile: Vector2i) -> void:
+	var sides := EnvironmentGeometryPlan.bridge_corner_sides(dungeon_data, tile)
+	# The canonical piece opens to +X and +Z; find the quarter turn that matches.
+	var angle := 0.0
+	for turn in range(4):
+		var basis := Basis(Vector3.UP, turn * PI / 2.0)
+		var a := basis * Vector3.RIGHT
+		var b := basis * Vector3.BACK
+		var want := [Vector3(sides[0].x, 0, sides[0].y), Vector3(sides[1].x, 0, sides[1].y)]
+		if (a.is_equal_approx(want[0]) and b.is_equal_approx(want[1])) or (a.is_equal_approx(want[1]) and b.is_equal_approx(want[0])):
+			angle = turn * PI / 2.0
+			break
+	var scale := ModularDungeonVisuals.SOURCE_SCALE * TILE_SIZE
+	var floor_top := dungeon_data.get_elevation(tile) * ELEVATION_HEIGHT + FLOOR_THICKNESS / 2.0
+	var model := ModularDungeonVisuals.BRIDGE
+	var deck_index := ModularDungeonVisuals.bridge_deck_surface(model)
+	var post := ModularDungeonVisuals.bridge_post_surface(model)
+	var authored: Material = model.surface_get_material(deck_index)
+	var wood: Color = (authored.albedo_color if authored is StandardMaterial3D else Color(0.212231, 0.124772, 0.082283)).linear_to_srgb()
+	var parts := [[BridgeCorner.deck(floor_hash(tile), bridge_old_plank_ratio, bridge_broken_plank_ratio), true], [BridgeCorner.rails(model, post), false]]
+	for part in parts:
+		var mesh: Mesh = part[0]
+		var visual := MeshInstance3D.new()
+		visual.mesh = mesh
+		visual.scale = Vector3.ONE * scale
+		visual.rotation.y = angle
+		visual.position = grid_to_world(tile, dungeon_data.get_elevation(tile))
+		visual.position.y = floor_top - BridgePlanks.TOP * scale
+		add_child(visual)
+		register_fog_visual(visual, [tile], false, true)
+		var registered: Dictionary = fog_visuals.back()
+		for surface in range(mesh.get_surface_count()):
+			registered.materials[surface] = ModularDungeonVisuals.materials(mesh.surface_get_material(surface), dim_material.albedo_color, other_elevation_material.albedo_color, wood)
+		if not part[1]:
 			registered.purpose = EnvironmentGeometryPlan.BRIDGE_RAIL
 			visual.set_meta("geometry_purpose", EnvironmentGeometryPlan.BRIDGE_RAIL)
 

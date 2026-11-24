@@ -142,6 +142,14 @@ static func _bridge_deck(mesh: Mesh) -> Vector2:
 	return _bridge_decks[key]
 
 
+## A railing post surface of the bridge model (tall and narrow).
+static func bridge_post_surface(mesh: Mesh = BRIDGE) -> int:
+	for index in range(mesh.get_surface_count()):
+		var bounds := surface_bounds(mesh, index)
+		if bounds.size.y > 0.9 and bounds.size.x < 0.3 and bounds.size.z < 0.3: return index
+	return 0
+
+
 static func surface_bounds(mesh: Mesh, index: int) -> AABB:
 	var vertices: PackedVector3Array = mesh.surface_get_arrays(index)[Mesh.ARRAY_VERTEX]
 	var bounds := AABB(vertices[0], Vector3.ZERO)
