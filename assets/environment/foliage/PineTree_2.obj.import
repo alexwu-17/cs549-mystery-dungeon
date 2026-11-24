@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://defdbfkebmfl3"
+path="res://.godot/imported/PineTree_2.obj-a5f4dc3d6f037f039772270b7e05684a.mesh"
+
+[deps]
+
+files=["res://.godot/imported/PineTree_2.obj-a5f4dc3d6f037f039772270b7e05684a.mesh"]
+
+source_file="res://assets/environment/foliage/PineTree_2.obj"
+dest_files=["res://.godot/imported/PineTree_2.obj-a5f4dc3d6f037f039772270b7e05684a.mesh", "res://.godot/imported/PineTree_2.obj-a5f4dc3d6f037f039772270b7e05684a.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -203,6 +203,7 @@ func load_test_floor() -> void:
 			else: push_warning("No bridge T-junction found in 60 layouts; using the normal start.")
 		print("ELEVATION FLOOR: ", TestDungeonFactory.last_statistics, " | room heights=", dungeon.room_elevations, " | ramps=", dungeon.ramp_segments)
 
+	dungeon_renderer.floor_number = floor_number
 	if not dungeon_renderer.render_dungeon(dungeon, use_elevation_test or benchmark != null or GameModeConfig.is_arena(game_mode, floor_number)):
 		# Keep the existing introduction/input lock authoritative if visual structure
 		# cannot be validated even after the structure-only fallback.

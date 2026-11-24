@@ -165,7 +165,8 @@ func _place(scenery: OutOfBoundsScenery, buckets: Array, x: float, z: float, siz
 	# Each stone: its own shade around a slight lift, plus a small warm/cool shift.
 	var shade := 1.0 + float(_settings.lift) + (_rand(h, 7) - 0.5) * float(_settings.shade_spread)
 	var warmth := (_rand(h, 8) - 0.5) * float(_settings.warmth_spread)
-	var tint := Color(shade * (1.0 + warmth), shade, shade * (1.0 - warmth), 1.0)
+	# Alpha 0: the terrain shader never paints meadow grass on stones.
+	var tint := Color(shade * (1.0 + warmth), shade, shade * (1.0 - warmth), 0.0)
 	var placed := Transform3D(basis, Vector3(x, y - size * 0.3, z))
 	buckets[variant].append([placed, tint])
 	placements.append([placed, tint, variant])

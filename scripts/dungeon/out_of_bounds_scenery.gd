@@ -451,6 +451,8 @@ func apply_shade(shade: Color) -> void:
 	_shade = shade.lerp(Color.WHITE, shade_lift)
 	_shade.a = 1.0
 	material.set_shader_parameter("fog_shade", Vector3(_shade.r, _shade.g, _shade.b))
+	for child in get_children():
+		if child is OutOfBoundsFoliage: child.apply_shade(_shade)
 
 
 func current_shade() -> Color:
