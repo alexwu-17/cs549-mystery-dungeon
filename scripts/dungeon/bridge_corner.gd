@@ -6,12 +6,27 @@ extends RefCounted
 const INNER := Vector2(1.0, 1.0)
 const PLANKS := 8
 const OUTER_RAIL := 1.8
+## The outer rail bulges toward the open corner by this much at 45 degrees, so it
+## keeps about the straight bridges' distance (0.8) from the tile centre where
+## actors stand, instead of cutting across their sprites.
+const RAIL_BULGE := 0.45
 const INNER_RAIL := 0.2
 
 
 static func _point(r: float, angle: float) -> Vector2:
 	# angle 0 runs along the +X edge (x = 1), PI/2 along the +Z edge (z = 1).
 	return INNER + Vector2(-sin(angle), -cos(angle)) * r
+
+
+## Outer rail radius from the inner corner at an angle along the turn.
+static func rail_radius(angle: float) -> float:
+	return OUTER_RAIL + RAIL_BULGE * sin(2.0 * angle)
+
+
+## Deck reach at an angle: a little past the rail, never beyond the tile square.
+static func deck_radius(angle: float) -> float:
+	var inside := minf(2.0 / maxf(sin(angle), 0.001), 2.0 / maxf(cos(angle), 0.001)) - 0.03
+	return minf(rail_radius(angle) + 0.17, inside)
 
 
 static func deck(seed_value: int, old_ratio: float, broken_ratio: float) -> ArrayMesh:
@@ -24,7 +39,8 @@ static func deck(seed_value: int, old_ratio: float, broken_ratio: float) -> Arra
 		var a0 := index * step + gap * 0.5
 		var a1 := (index + 1) * step - gap * 0.5
 		var r0 := 0.03 + (BridgePlanks._rand(seed_value, index * 7 + 1) - 0.5) * 0.06 + 0.03
-		var r1 := 1.97 + (BridgePlanks._rand(seed_value, index * 7 + 2) - 0.5) * 0.06
+		var jitter := (BridgePlanks._rand(seed_value, index * 7 + 2) - 0.5) * 0.06
+		var r1 := minf(deck_radius(a0), deck_radius(a1)) + jitter
 		var shade := 0.88 + 0.22 * BridgePlanks._rand(seed_value, index * 7 + 3)
 		var tint := Color(shade, shade * (0.97 + 0.06 * BridgePlanks._rand(seed_value, index * 7 + 4)), shade * 0.97)
 		var top := top_y
@@ -46,7 +62,8 @@ static func deck(seed_value: int, old_ratio: float, broken_ratio: float) -> Arra
 				_wedge(tool, r1 - length, r1, a0, mid, top, top - BridgePlanks.THICKNESS, tint)
 				_wedge(tool, r1 - length - jag, r1, mid, a1, top, top - BridgePlanks.THICKNESS, tint)
 		else:
-			_wedge(tool, r0, r1, a0, a1, top, top - BridgePlanks.THICKNESS, tint)
+			# Whole boards reach the deck edge at both of their sides.
+			_prism(tool, [_point(r0, a0), _point(deck_radius(a0) + jitter, a0), _point(deck_radius(a1) + jitter, a1), _point(r0, a1)], top, top - BridgePlanks.THICKNESS, tint)
 	# Two curved stringers under the boards, in short straight pieces.
 	var beam := Color(0.72, 0.7, 0.68)
 	var under := top_y - BridgePlanks.THICKNESS
@@ -61,15 +78,19 @@ static func deck(seed_value: int, old_ratio: float, broken_ratio: float) -> Arra
 static func rails(post_source: Mesh, post_surface: int) -> ArrayMesh:
 	var bounds := ModularDungeonVisuals.surface_bounds(post_source, post_surface)
 	var post_center := Vector3(bounds.get_center().x, 0.0, bounds.get_center().z)
-	var outer: Array[Vector2] = [_point(OUTER_RAIL, 0.0), _point(OUTER_RAIL, PI / 4.0), _point(OUTER_RAIL, PI / 2.0)]
+	var outer: Array[Vector2] = [_point(rail_radius(0.0), 0.0), _point(rail_radius(PI / 4.0), PI / 4.0), _point(rail_radius(PI / 2.0), PI / 2.0)]
 	var inner := _point(INNER_RAIL, PI / 4.0)
 	var material := post_source.surface_get_material(post_surface)
 	# Rails first as their own surface: posts copied from the model carry a
 	# different vertex format, so they get a second surface.
 	var rail_tool := SurfaceTool.new()
 	rail_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for index in range(outer.size() - 1):
-		_beam(rail_tool, outer[index], outer[index + 1], 0.42, 0.67, 0.04, Color.WHITE)
+	# Four rail sections along the bulged curve; posts stand at its ends and middle.
+	var sections := 4
+	for index in range(sections):
+		var a0 := index * (PI / 2.0) / sections
+		var a1 := (index + 1) * (PI / 2.0) / sections
+		_beam(rail_tool, _point(rail_radius(a0), a0), _point(rail_radius(a1), a1), 0.42, 0.67, 0.04, Color.WHITE)
 	rail_tool.set_material(material)
 	var mesh := rail_tool.commit()
 	var post_tool := SurfaceTool.new()
