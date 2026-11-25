@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dqijwu1872huw"
+path="res://.godot/imported/Rock_Moss_6.obj-b509c59758b14c8bfec3bd7861d66eb6.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Rock_Moss_6.obj-b509c59758b14c8bfec3bd7861d66eb6.mesh"]
+
+source_file="res://assets/environment/foliage/Rock_Moss_6.obj"
+dest_files=["res://.godot/imported/Rock_Moss_6.obj-b509c59758b14c8bfec3bd7861d66eb6.mesh", "res://.godot/imported/Rock_Moss_6.obj-b509c59758b14c8bfec3bd7861d66eb6.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

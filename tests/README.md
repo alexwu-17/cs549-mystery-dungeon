@@ -42,6 +42,8 @@ appearance, shadows, transparency, GPU readback or frame rates.
 | Floors, modes, reset or input locks | `validate_battle_state`, `validate_modes`, `validate_floor_introduction`, full regression for shared lifecycle changes |
 | Character animation | `validate_attack_leap`, `validate_character_sprites`, `validate_pokemon_sprites`, relevant ramp tests and normal-render inspection |
 | Bridge tiles on straight elevated corridors, broken-bridge ratio, walkway support omission | `validate_bridge_tiles`, `validate_environment_geometry`; normal-render inspection by the user |
+| Out-of-bounds stones (placement band, rim height, shared shading, tints, settings) | `validate_out_of_bounds_stones`; normal-render inspection by the user |
+| Out-of-bounds foliage (seasons per floor, meadow/snow paint, band, rim height, shade, determinism, settings) | `validate_out_of_bounds_foliage`; normal-render inspection by the user |
 | Out-of-bounds plateau terrain, rock texture array, border/apron/filler ownership, lighting presets or HD-2D post-processing | `validate_out_of_bounds_scenery`, `validate_lighting_presets`, `validate_cave_scenery`, `validate_sunlight_atmosphere`; normal-render inspection by the user |
 | Terrain, generation, atmosphere or rendering | Relevant subsystem checks; full regression when shared data/rendering contracts change |
 

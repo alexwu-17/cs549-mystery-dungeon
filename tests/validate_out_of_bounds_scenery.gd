@@ -173,7 +173,9 @@ func validate() -> void:
 			var children := renderer.get_child_count()
 			var scenery := renderer.out_of_bounds_scenery
 			assert(scenery != null and scenery.get_parent() == renderer and renderer.out_of_bounds_owns_sides())
-			assert(scenery.get_child_count() == scenery.diagnostics.mesh_nodes and scenery.chunks.size() == scenery.diagnostics.mesh_nodes)
+			# Stones and foliage are separate children with their own checks.
+			var terrain_nodes := scenery.get_children().filter(func(child: Node) -> bool: return not (child is OutOfBoundsStones or child is OutOfBoundsFoliage))
+			assert(terrain_nodes.size() == scenery.diagnostics.mesh_nodes and scenery.chunks.size() == scenery.diagnostics.mesh_nodes)
 			assert(scenery.diagnostics.mesh_nodes > 4 and scenery.diagnostics.mesh_nodes <= 40)
 			assert(scenery.diagnostics.triangles > 40000 and scenery.diagnostics.triangles < 140000)
 			assert(before == Snapshots.snapshot(data) and rng_state == TestDungeonFactory.rng.state)

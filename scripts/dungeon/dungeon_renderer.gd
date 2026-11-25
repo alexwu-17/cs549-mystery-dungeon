@@ -94,7 +94,39 @@ var terrain_fill_cells: Dictionary = {}
 @export_range(0, 3) var out_of_bounds_layout_margin: int = 1
 ## Width in tiles of the flat terrain ledge along the layout before the rim drops.
 @export var out_of_bounds_ledge_width: float = 0.0
+## Boulders and rubble on the out-of-bounds terrain (rendering only).
+@export var out_of_bounds_stones_enabled: bool = true
+## Multiplies how many boulders appear (rubble follows the boulders).
+@export_range(0.0, 3.0, 0.05) var out_of_bounds_stone_density: float = 1.0
+## Multiplies boulder and rubble size.
+@export_range(0.25, 3.0, 0.05) var out_of_bounds_stone_size: float = 1.0
+## How much lighter than the ground stones are on average (0 = same shade).
+@export_range(-0.3, 0.5, 0.01) var out_of_bounds_stone_lift: float = 0.06
+## Range of per-stone brightness around that average.
+@export_range(0.0, 0.8, 0.01) var out_of_bounds_stone_shade_spread: float = 0.28
+## Range of per-stone warm (brownish) to cool (bluish) shift.
+@export_range(0.0, 0.3, 0.01) var out_of_bounds_stone_warmth_spread: float = 0.07
+## Trees, bushes, plants, flowers, grass tufts and logs on the out-of-bounds
+## terrain, by season (rendering only).
+@export var out_of_bounds_foliage_enabled: bool = true
+## Season per floor: "summer", "winter" or "none" (no foliage, bare rock).
+## Floors past the end of the list repeat it from the start.
+@export var out_of_bounds_floor_seasons: PackedStringArray = PackedStringArray(["summer", "winter", "none"])
+## Density multipliers per kind of foliage (0 removes that kind).
+@export_range(0.0, 3.0, 0.05) var out_of_bounds_tree_density: float = 1.0
+@export_range(0.0, 3.0, 0.05) var out_of_bounds_bush_density: float = 1.0
+@export_range(0.0, 3.0, 0.05) var out_of_bounds_plant_density: float = 1.0
+@export_range(0.0, 3.0, 0.05) var out_of_bounds_flower_density: float = 1.0
+@export_range(0.0, 1.25, 0.05) var out_of_bounds_grass_density: float = 1.0
+## Stumps and fallen logs.
+@export_range(0.0, 3.0, 0.05) var out_of_bounds_wood_density: float = 1.0
+## Strength of the green meadow paint on summer ground (0 = bare rock).
+@export_range(0.0, 1.0, 0.05) var out_of_bounds_meadow_amount: float = 1.0
+## Strength of the snow on winter ground and stone tops.
+@export_range(0.0, 1.0, 0.05) var out_of_bounds_snow_amount: float = 0.85
 @export_group("")
+## Floor being rendered (set by Main before render_dungeon); picks the season.
+var floor_number: int = 1
 var cave_background: CaveTerrainBackdrop
 var out_of_bounds_scenery: OutOfBoundsScenery
 var cave_fill_active: bool = false
@@ -159,6 +191,12 @@ static func layout_cells(data: DungeonData, margin: int = 1) -> Dictionary:
 func kept_cells_for(data: DungeonData) -> Dictionary:
 	if data == dungeon_data and not terrain_kept.is_empty(): return terrain_kept
 	return layout_cells(data, out_of_bounds_layout_margin)
+
+
+## Out-of-bounds season for floor_number (out_of_bounds_floor_seasons, repeating).
+func floor_season() -> OutOfBoundsFoliage.Season:
+	if out_of_bounds_floor_seasons.is_empty(): return OutOfBoundsFoliage.Season.NONE
+	return OutOfBoundsFoliage.season_named(out_of_bounds_floor_seasons[posmod(floor_number - 1, out_of_bounds_floor_seasons.size())])
 
 
 func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure_only: bool = false) -> bool:
@@ -278,6 +316,22 @@ func render_dungeon(data: DungeonData, preserve_terrain: bool = false, structure
 			out_of_bounds_scenery.name = "OutOfBoundsScenery"
 			add_child(out_of_bounds_scenery)
 			out_of_bounds_scenery.setup(data, cave_background, self)
+			if out_of_bounds_stones_enabled:
+				var stones := OutOfBoundsStones.new()
+				out_of_bounds_scenery.add_child(stones)
+				stones.populate(out_of_bounds_scenery, floor_visual_seed * 31 + OutOfBoundsScenery.layout_key(data), {
+					"density": out_of_bounds_stone_density, "size": out_of_bounds_stone_size, "lift": out_of_bounds_stone_lift,
+					"shade_spread": out_of_bounds_stone_shade_spread, "warmth_spread": out_of_bounds_stone_warmth_spread})
+				out_of_bounds_scenery.diagnostics["stones"] = stones.counts
+			var season := floor_season()
+			if out_of_bounds_foliage_enabled and season != OutOfBoundsFoliage.Season.NONE:
+				var foliage := OutOfBoundsFoliage.new()
+				out_of_bounds_scenery.add_child(foliage)
+				foliage.populate(out_of_bounds_scenery, floor_visual_seed * 31 + OutOfBoundsScenery.layout_key(data) + 77, season, {
+					"trees": out_of_bounds_tree_density, "bushes": out_of_bounds_bush_density, "plants": out_of_bounds_plant_density,
+					"flowers": out_of_bounds_flower_density, "grass": out_of_bounds_grass_density, "wood": out_of_bounds_wood_density,
+					"meadow": out_of_bounds_meadow_amount, "snow": out_of_bounds_snow_amount})
+				out_of_bounds_scenery.diagnostics["foliage"] = foliage.counts
 			out_of_bounds_scenery.apply_shade(dim_material.albedo_color)
 			geometry_diagnostics["out_of_bounds"] = out_of_bounds_scenery.diagnostics
 	_terrain_occlusion.setup(fog_visuals)
