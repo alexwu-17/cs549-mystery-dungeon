@@ -95,7 +95,11 @@ static func rails(post_source: Mesh, post_surface: int) -> ArrayMesh:
 	var mesh := rail_tool.commit()
 	var post_tool := SurfaceTool.new()
 	post_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for spot in outer + [inner]:
+	# Posts at the two ends of the outer curve and one inner post. The curve has
+	# no middle post: it stands closest behind the tile centre, and billboard
+	# sprites lean back with the camera pitch, so even a shortened post cut
+	# through their arms on corners whose curve faces away from the camera.
+	for spot: Vector2 in [outer[0], outer[2], inner]:
 		post_tool.append_from(ModularDungeonVisuals.surface_mesh(post_source, post_surface), 0, Transform3D(Basis(), Vector3(spot.x, 0.0, spot.y) - post_center))
 	post_tool.set_material(material)
 	return post_tool.commit(mesh)
